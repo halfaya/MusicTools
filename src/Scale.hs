@@ -1,4 +1,6 @@
-{-# LANGUAGE UnicodeSyntax, GADTs #-}
+{-# LANGUAGE UnicodeSyntax #-}
+
+module Scale where
 
 -- Number of steps in the scale (in this case chromatic)
 scaleSize ∷ Int

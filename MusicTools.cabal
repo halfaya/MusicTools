@@ -12,8 +12,8 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     
-  build-depends:       base >= 4.7 && < 5
+  exposed-modules:     Scale, Event, Midi
+  build-depends:       base >= 4.7 && < 5, HCodecs
   default-language:    Haskell2010
 
 executable MusicTools

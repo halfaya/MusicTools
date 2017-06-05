@@ -1,6 +1,6 @@
 {-# LANGUAGE UnicodeSyntax #-}
 
-module Scale where
+module Note where
 
 -- Number of steps in the scale (in this case chromatic)
 scaleSize ∷ Int
@@ -26,3 +26,7 @@ absoluteToRelative n = (n `div` scaleSize, n `mod` scaleSize)
 
 diatonicScale ∷ [RelativeNote]
 diatonicScale = [0, 2, 4, 5, 7, 9, 11]
+
+transpose ∷ Int → [AbsoluteNote] → [AbsoluteNote]
+transpose k = map (+ k)
+

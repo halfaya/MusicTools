@@ -2,8 +2,7 @@
 
 module Main where
 
-import Note
-import Event
+import TimedChord
 import Midi
 import Montuno
 import Codec.Midi
@@ -13,7 +12,7 @@ main = do
   let channel      = 0
   let ticksPerBeat = 2
   let baseNote     = middleC - 12
-  let song         = transposeTimedEvents baseNote ex8
+  let song         = transposeTimedChords baseNote ex10
   let midi         = toMidi channel ticksPerBeat song
-  putStrLn $ show midi
+  --putStrLn $ show midi
   exportFile "test.mid" midi

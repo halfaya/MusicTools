@@ -34,8 +34,8 @@ majorTriad = makeChord [0, 4, 7]
 minorTriad ∷ Note → Chord
 minorTriad = makeChord [0, 3, 7]
 
-merge ∷ [Chord] → Chord
-merge = Chord . concat . (map unChord)
+flatten ∷ [Chord] → Chord
+flatten = Chord . concat . (map unChord)
 
 prependNote ∷ Note → Chord → Chord
 prependNote n (Chord ns) = Chord (n : ns)
@@ -43,10 +43,10 @@ prependNote n (Chord ns) = Chord (n : ns)
 appendNote ∷ Note → Chord → Chord
 appendNote n (Chord ns) = Chord (ns ++ [n])
 
-diatonicTriad ∷ ScaleDegreeOctave → RelativeChord
-diatonicTriad sdo =
-  let scaleChord = map ((flip addToDiatonicNote) sdo) [0, 2, 4]
-  in RelativeChord $ map (first scaleDegreeToRelativeNote) scaleChord
+triad ∷ Scale → ScaleDegreeOctave → RelativeChord
+triad scale sdo =
+  let scaleChord = map ((flip $ addToScaleNote (scaleSize scale)) sdo) [0, 2, 4]
+  in RelativeChord $ map (first $ scaleDegreeToRelativeNote scale) scaleChord
 
 relativeChordToChord ∷ RelativeChord → Chord
 relativeChordToChord (RelativeChord c) = Chord (map relativeToAbsolute c)

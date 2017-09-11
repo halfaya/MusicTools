@@ -7,33 +7,33 @@ import Chord
 import TimedChord
 
 double ∷ [Chord] → [Chord]
-double = map (\c → merge [c, (transposeChord scaleSize c)])
+double = map (\c → flatten [c, (transposeChord chromaticScaleSize c)])
 
 -- add the base note of the first chord to the first chord, transposed up 2 octaves
 add2octave ∷ [Chord] → [Chord]
-add2octave (c@(Chord (n : ns)) : cs) = (appendNote (transpose (scaleSize * 2) n) c) : cs
+add2octave (c@(Chord (n : ns)) : cs) = (appendNote (transpose (chromaticScaleSize * 2) n) c) : cs
 add2octave cs                        = cs
 
 baseOctave ∷ Chord
-baseOctave = Chord $ map (Note . (* scaleSize)) [0, 1, 2]
+baseOctave = Chord $ map (Note . (* chromaticScaleSize)) [0, 1, 2]
 
-makeUnit ∷ (Chord → [Chord]) → ScaleDegree → [Chord]
-makeUnit f = add2octave . double . f . relativeChordToChord . diatonicTriad . (\d → (d, Octave 0))
+makeUnit ∷ Scale → (Chord → [Chord]) → ScaleDegree → [Chord]
+makeUnit scale f = add2octave . double . f . relativeChordToChord . triad scale . (\d → (d, Octave 0))
 
-make2 ∷ (Chord → [Chord]) → ScaleDegree → [Chord]
-make2 f secondScaleDegree =
+make2 ∷ Scale → (Chord → [Chord]) → ScaleDegree → [Chord]
+make2 scale f secondScaleDegree =
   let scaleDegrees = secondScaleDegree : map ScaleDegree [4, 3]
-  in makeUnit f (ScaleDegree 0) ++ (scaleDegrees >>= makeUnit oompah) ++ [baseOctave]
+  in makeUnit scale f (ScaleDegree 0) ++ (scaleDegrees >>= makeUnit scale oompah) ++ [baseOctave]
 
 rhythm, rhythma ∷ [Duration]
 rhythm  = map Duration $ [2, 1]    ++ replicate 6 2 ++ [1]
 rhythma = map Duration $ [1, 1, 1] ++ replicate 6 2 ++ [1]
 
-ex8 ∷ [TimedChord]
-ex8 = zip (make2 oompah (ScaleDegree 3)) rhythm
+ex8 ∷ Scale → [TimedChord]
+ex8 scale = zip (make2 scale oompah (ScaleDegree 3)) rhythm
 
-ex9 ∷ [TimedChord]
-ex9 = zip (make2 arpegiate (ScaleDegree 3)) rhythma
+ex9 ∷ Scale → [TimedChord]
+ex9 scale = zip (make2 scale arpegiate (ScaleDegree 3)) rhythma
 
-ex10 ∷ [TimedChord]
-ex10 = zip (make2 arpegiate (ScaleDegree 1)) rhythma ++ ex8
+ex10 ∷ Scale → [TimedChord]
+ex10 scale = zip (make2 scale arpegiate (ScaleDegree 1)) rhythma ++ ex8 scale

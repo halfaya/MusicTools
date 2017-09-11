@@ -11,12 +11,14 @@ unNote (Note n) = n
 
 -- Number of steps in the scale (in this case chromatic).
 -- Currently this must be 12.
-scaleSize ∷ Int
-scaleSize = 12
+chromaticScaleSize ∷ Int
+chromaticScaleSize = 12
 
 -- Position of a note within an octave, in the range [0..scalesize-1].
 -- This is enforced by always computing mod scaleSize.
 newtype RelativeNote = RelativeNote Int
+
+type Scale = [RelativeNote]
 
 -- Which octave one is in.
 newtype Octave = Octave Int
@@ -24,29 +26,32 @@ newtype Octave = Octave Int
 type NoteOctave = (RelativeNote, Octave)
 
 relativeToAbsolute ∷ NoteOctave → Note
-relativeToAbsolute (RelativeNote n, Octave o) = Note $ o * scaleSize + n `mod` scaleSize
+relativeToAbsolute (RelativeNote n, Octave o) = Note $ o * chromaticScaleSize + n `mod` chromaticScaleSize
 
 absoluteToRelative ∷ Note → NoteOctave
-absoluteToRelative (Note n) = (RelativeNote $ n `div` scaleSize, Octave $ n `mod` scaleSize)
+absoluteToRelative (Note n) = (RelativeNote $ n `div` chromaticScaleSize, Octave $ n `mod` chromaticScaleSize)
 
-diatonicScale ∷ [RelativeNote]
-diatonicScale = map RelativeNote [0, 2, 4, 5, 7, 9, 11]
+majorScale ∷ Scale
+majorScale = map RelativeNote [0, 2, 4, 5, 7, 9, 11]
 
-diatonicScaleSize ∷ Int
-diatonicScaleSize = length diatonicScale
+harmonicMinorScale ∷ Scale
+harmonicMinorScale = map RelativeNote [0, 2, 3, 5, 7, 8, 11]
+
+scaleSize ∷ Scale → Int
+scaleSize = length
 
 newtype ScaleDegree = ScaleDegree Int -- 0 to 6
   deriving (Eq, Show)
 
 type ScaleDegreeOctave = (ScaleDegree, Octave)
 
-scaleDegreeToRelativeNote ∷ ScaleDegree → RelativeNote
-scaleDegreeToRelativeNote (ScaleDegree d) = diatonicScale !! d
+scaleDegreeToRelativeNote ∷ Scale → ScaleDegree → RelativeNote
+scaleDegreeToRelativeNote scale (ScaleDegree d) = scale !! d
 
 -- TODO: Check that this works with negative k.
-addToDiatonicNote ∷ Int → ScaleDegreeOctave → ScaleDegreeOctave
-addToDiatonicNote k (ScaleDegree d, Octave o) =
-  (ScaleDegree $ (d + k) `mod` diatonicScaleSize, Octave $ o + (d + k) `div` diatonicScaleSize)
+addToScaleNote ∷ Int → Int → ScaleDegreeOctave → ScaleDegreeOctave
+addToScaleNote scaleSize k (ScaleDegree d, Octave o) =
+  (ScaleDegree $ (d + k) `mod` scaleSize, Octave $ o + (d + k) `div` scaleSize)
 
 transpose ∷ Int → Note → Note
 transpose k (Note n) = Note (n + k)

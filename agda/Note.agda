@@ -1,13 +1,12 @@
 module Note where
 
 open import Data.Fin renaming (_+_ to _Fin+_)
-open import Function
 open import Data.Integer
-open import Data.List renaming (map to lmap)
 open import Data.Vec
 open import Data.Nat renaming (_+_ to _N+_;  _*_ to _N*_)
 open import Data.Nat.DivMod
 open import Data.Product renaming (map to pmap)
+open import Function
 
 -- Position of a note on an absolute scale; 0 is later mapped to a base frequency.
 data Note : Set where
@@ -55,12 +54,13 @@ ScaleDegreeOctave = λ n → ScaleDegree n × Octave
 scaleDegreeToRelativeNote : {n : ℕ} → Scale n → ScaleDegree n → RelativeNote
 scaleDegreeToRelativeNote scale (scaleDegree d) = lookup d scale
 
-{-
--- TODO: Check that this works with negative k.
-addToScaleNote : Int → Int → ScaleDegreeOctave → ScaleDegreeOctave
-addToScaleNote scaleSize k (ScaleDegree d, Octave o) =
-  (ScaleDegree $ (d + k) `mod` scaleSize, Octave $ o + (d + k) `div` scaleSize)
--}
+addToScaleNote : {n : ℕ} → ℤ → ScaleDegreeOctave (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n)
+addToScaleNote {n} (+_     k) (scaleDegree d , octave o) =
+  let d' = (toℕ d) N+ k
+  in scaleDegree (d' mod (ℕ.suc n)) , octave (o + (+ (d' div (ℕ.suc n))))
+addToScaleNote {n} (-[1+_] k) (scaleDegree d , octave o) =
+  let d' = (toℕ d) N+ k
+  in scaleDegree (d' mod (ℕ.suc n)) , octave (o + (+ (d' div (ℕ.suc n)))) -- TODO: Fix
 
 transpose : ℤ → Note → Note
 transpose k (note n) = note (n + k)

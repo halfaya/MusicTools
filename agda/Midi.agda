@@ -1,47 +1,82 @@
 module Midi where
 
+open import Agda.Builtin.String using (String)
 open import Data.Integer
 open import Data.List
-open import Data.Product
+open import Data.Product using (_,_)
 
 open import Note
 open import Chord
 open import TimedChord
 
-{-# FOREIGN GHC import qualified Codec.Midi as M #-}
+{-# FOREIGN GHC
+  import Codec.Midi
+  import Data.Text (Text)
 
--- types from Codec.Midi
-Channel  = ℤ -- 0 - 15
-Ticks    = ℤ -- 0 - (2^28 - 1)
-Velocity = ℤ -- 0 - 127
+  type HsChannel    = Integer
+  type HsDuration   = Integer
+  type HsNote       = Integer
+  type HsChord      = [HsNote]
+  type HsTimedChord = (HsChord, HsDuration)
+
+  defaultVelocity :: Velocity
+  defaultVelocity = 60
+
+  fi = fromInteger
+
+  addMessage :: HsChannel -> HsTimedChord -> Track Ticks -> Track Ticks
+  addMessage c ((ns@(n:ns')), d) ts
+    = map (\n -> (0, NoteOn (fi c) (fi n) defaultVelocity)) ns ++
+      [(fi d, NoteOff  (fi c) (fi n) defaultVelocity)] ++
+      map (\n -> (0, NoteOff (fi c) (fi n) defaultVelocity)) ns' ++ ts
+  addMessage c ([], d) ((t,m):ts) = (t + (fi d),m):ts
+  addMessage c ([], _) []         = []
+
+  toMidi :: HsChannel -> Integer -> [HsTimedChord] -> Midi
+  toMidi c ticks es = let track = foldr (addMessage c) [(0, TrackEnd)] es
+                      in Midi SingleTrack (TicksPerBeat (fi ticks)) [track]
+
+  -- ticks is the number of ticks per beat (by default a beat is a quarter note)
+  exportSong :: Text -> HsChannel -> Integer -> [HsTimedChord] -> IO ()
+  exportSong filePath channel ticksPerBeat song =
+    exportFile (Data.Text.unpack filePath) (toMidi channel ticksPerBeat song)
+#-}
+
+data Unit : Set where
+  unit : Unit
+
+{-# COMPILE GHC Unit = data () (()) #-}
 
 postulate
-  Track : Set → Set
+  IO : Set → Set
 
---type Track a = [(a,Message)]
-{-# COMPILE GHC Track = type Track #-}
+{-# BUILTIN IO IO #-}
+{-# COMPILE GHC IO = type IO #-}
 
-defaultVelocity : Velocity
-defaultVelocity = + 60
+FilePath = String
+
+data Pair (A : Set) (B : Set) : Set where
+  pair : A → B → Pair A B
+
+{-# COMPILE GHC Pair = data (,) ((,)) #-}
+
+HDuration   = ℤ
+HChannel    = ℤ
+HNote       = ℤ
+HChord      = List HNote
+HTimedChord = Pair HChord HDuration
+
+postulate 
+  exportSong : FilePath → HChannel → ℤ → List HTimedChord → IO Unit
+
+{-# COMPILE GHC exportSong = exportSong #-}
 
 -- Midi note value of middle C
 middleC : ℤ
 middleC = + 60
 
--- TODO: Convert Codec.Mido to Agda
-addMessage : Channel → TimedChord → Track Ticks → Track Ticks
-addMessage c (chord [] , d) ts = {!!}
-addMessage c (chord (x ∷ x₁) , d) ts = {!!}
---addMessage c (chord (ns@(ote n:ns')), Duration d) ts
---  = map (\(Note n) -> (0, NoteOn  c n defaultVelocity)) ns ++
---    [(d, NoteOff  c n defaultVelocity)] ++
---    map (\(Note n) -> (0, NoteOff c n defaultVelocity)) ns' ++ ts
---addMessage c (Chord [], Duration d)                ((t,m):ts) = (t+d,m):ts
---addMessage c (Chord [], _)                         []         = []
+toHTimedChord : TimedChord → HTimedChord
+toHTimedChord (chord ns , duration d) = pair (map (λ {(note n) → n}) ns) d
 
-{-
--- ticks is the number of ticks per beat (by default a beat is a quarter note)
-toMidi ∷ Channel → Int → [TimedChord] → Midi
-toMidi c ticks es = let track = foldr (addMessage c) [(0, TrackEnd)] es
-                    in Midi SingleTrack (TicksPerBeat ticks) [track]
--}
+toHTimedChords : List TimedChord → List HTimedChord
+toHTimedChords = map toHTimedChord

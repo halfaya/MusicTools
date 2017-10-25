@@ -1,27 +1,17 @@
 module Main where
 
-{-# FOREIGN GHC import qualified Data.Text.IO as Text #-}
+open import Data.Integer using (_-_; +_)
 
-data Unit : Set where
-  unit : Unit
-
-{-# COMPILE GHC Unit = data () (()) #-}
-
-postulate
-  String : Set
-
-{-# BUILTIN STRING String #-}
-
-postulate
-  IO : Set → Set
-
-{-# BUILTIN IO IO #-}
-{-# COMPILE GHC IO = type IO #-}
-
-postulate
-  putStrLn : String → IO Unit
-
-{-# COMPILE GHC putStrLn = Text.putStrLn #-}
+open import Note
+open import TimedChord
+open import Montuno
+open import Midi
 
 main : IO Unit
-main = putStrLn "Hello, World!"
+main =
+  let channel      = + 0
+      ticksPerBeat = + 2
+      baseNote     = middleC - (+ 12)
+      song         = transposeTimedChords baseNote (ex10 harmonicMinorScale)
+      file         = "test.mid"
+  in exportSong file channel ticksPerBeat (toHTimedChords song)

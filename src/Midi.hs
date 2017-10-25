@@ -15,9 +15,10 @@ middleC ∷ Int
 middleC = 60
 
 addMessage ∷ Channel → TimedChord → Track Ticks → Track Ticks
-addMessage c (Chord (ns@(Note n:ns')), Duration d) ts         = map (\(Note n) -> (0, NoteOn  c n defaultVelocity)) ns ++
-                                                                [(d, NoteOff  c n defaultVelocity)] ++
-                                                                map (\(Note n) -> (0, NoteOff c n defaultVelocity)) ns' ++ ts
+addMessage c (Chord (ns@(Note n:ns')), Duration d) ts
+  = map (\(Note n) -> (0, NoteOn  c n defaultVelocity)) ns ++
+    [(d, NoteOff  c n defaultVelocity)] ++
+    map (\(Note n) -> (0, NoteOff c n defaultVelocity)) ns' ++ ts
 addMessage c (Chord [], Duration d)                ((t,m):ts) = (t+d,m):ts
 addMessage c (Chord [], _)                         []         = []
 

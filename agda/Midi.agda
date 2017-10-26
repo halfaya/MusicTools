@@ -36,7 +36,6 @@ open import TimedChord
   toMidi c ticks es = let track = foldr (addMessage c) [(0, TrackEnd)] es
                       in Midi SingleTrack (TicksPerBeat (fi ticks)) [track]
 
-  -- ticks is the number of ticks per beat (by default a beat is a quarter note)
   exportSong :: Text -> HsChannel -> Integer -> [HsTimedChord] -> IO ()
   exportSong filePath channel ticksPerBeat song =
     exportFile (Data.Text.unpack filePath) (toMidi channel ticksPerBeat song)
@@ -60,14 +59,19 @@ data Pair (A : Set) (B : Set) : Set where
 
 {-# COMPILE GHC Pair = data (,) ((,)) #-}
 
+Channel     = ℤ
+
 HDuration   = ℤ
-HChannel    = ℤ
 HNote       = ℤ
 HChord      = List HNote
 HTimedChord = Pair HChord HDuration
 
 postulate 
-  exportSong : FilePath → HChannel → ℤ → List HTimedChord → IO Unit
+  exportSong : FilePath →         -- path to the file to save the MIDI data to
+               Channel →          -- MIDI channel that all data will be played on
+               ℤ →                -- number of ticks per beat (by default a beat is a quarter note)
+               List HTimedChord → -- sequence of timed chords to play
+               IO Unit
 
 {-# COMPILE GHC exportSong = exportSong #-}
 

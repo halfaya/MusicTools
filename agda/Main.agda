@@ -12,6 +12,6 @@ main =
   let channel      = + 0
       ticksPerBeat = + 2
       baseNote     = middleC - (+ 12)
-      song         = transposeTimedChords baseNote (ex10 harmonicMinorScale)
-      file         = "test.mid"
+      song         = transposeTimedChords baseNote (ex10 majorScale)
+      file         = "/Users/leo/Downloads/test.mid"
   in exportSong file channel ticksPerBeat (toHTimedChords song)

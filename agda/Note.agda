@@ -1,14 +1,12 @@
 module Note where
 
-open import Data.Integer
-open import Data.List
-open import Data.Product renaming (map to pmap)
-open import Function
+open import Data.Integer using (ℤ)
+open import Data.Nat     using (ℕ)
 
 open import Pitch renaming (transpose to transposePitch)
 
 data Duration : Set where
-  duration : ℤ → Duration
+  duration : ℕ → Duration
 
 data Note : Set where
   note : Duration → Pitch → Note

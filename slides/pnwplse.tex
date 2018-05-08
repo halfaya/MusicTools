@@ -1,0 +1,60 @@
+ \documentclass{beamer}
+\usefonttheme{professionalfonts}
+\usepackage{agda}
+\usepackage{catchfilebetweentags}
+\usetheme{CambridgeUS}
+\usecolortheme{seahorse}
+
+\usepackage{amssymb}
+\usepackage{bbm}
+\usepackage[greek,english]{babel}
+
+\beamertemplatenavigationsymbolsempty
+
+\title{Musical Ornaments}
+\author{John Leo}
+\institute{Halfaya Research}
+\date{May 14, 2018}
+ 
+\begin{document}
+ 
+\frame{\titlepage}
+ 
+\begin{frame}\frametitle{Outline}
+\begin{itemize}
+\item A look toward the future
+\item Music Tools
+\item Equivalences
+\item Ornaments
+\end{itemize}
+
+\bigskip 
+Sources:
+\begin{itemize}
+\item {\tt https://github.com/halfaya/MusicTools}
+\end{itemize}
+\end{frame}
+
+\begin{frame}\frametitle{Robert Harper}
+\begin{quote}
+Eventually all the arbitrary programming languages are going to be just swept away with the oceans,
+and we will have the permanence of constructive, intuistionistic type theory as the master theory
+of computation---without doubt, in my mind, no question.  So, from my point of view---this is a personal
+statement---working in anything else is a waste of time.
+\end{quote}
+
+CMU Homotopy Type Theory lecture 1, 52:56--53:20.
+\end{frame}
+
+\begin{frame}\frametitle{Music Representation}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{pitch}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{duration}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{note}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{music}
+\end{frame}
+
+\begin{frame}\frametitle{Conclusion}
+Goes here.
+\end{frame}
+
+\end{document}

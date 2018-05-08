@@ -6,8 +6,7 @@ open import Data.List
 open import Data.Product using (_,_)
 
 open import Note
-open import Chord
-open import TimedChord
+open import Music
 
 {-# FOREIGN GHC
   import Codec.Midi
@@ -16,8 +15,9 @@ open import TimedChord
   type HsChannel    = Integer
   type HsDuration   = Integer
   type HsNote       = Integer
-  type HsChord      = [HsNote]
-  type HsTimedChord = (HsChord, HsDuration)
+  type HsTimedNote  = (HsNote, HsDuration)
+
+  data HsMusic = HsMusicNote HsNote | HsMusicSeq HsMusic HsMusic | HsMusicPar HsMusic HsMusic
 
   defaultVelocity :: Velocity
   defaultVelocity = 60
@@ -32,11 +32,11 @@ open import TimedChord
   addMessage c ([], d) ((t,m):ts) = (t + (fi d),m):ts
   addMessage c ([], _) []         = []
 
-  toMidi :: HsChannel -> Integer -> [HsTimedChord] -> Midi
+  toMidi :: HsChannel -> Integer -> HsMusic -> Midi
   toMidi c ticks es = let track = foldr (addMessage c) [(0, TrackEnd)] es
                       in Midi SingleTrack (TicksPerBeat (fi ticks)) [track]
 
-  exportSong :: Text -> HsChannel -> Integer -> [HsTimedChord] -> IO ()
+  exportSong :: Text -> HsChannel -> Integer -> HsMusic -> IO ()
   exportSong filePath channel ticksPerBeat song =
     exportFile (Data.Text.unpack filePath) (toMidi channel ticksPerBeat song)
 #-}
@@ -63,8 +63,7 @@ Channel     = ℤ
 
 HDuration   = ℤ
 HNote       = ℤ
-HChord      = List HNote
-HTimedChord = Pair HChord HDuration
+HTimedNote  = Pair HNote HDuration
 
 postulate 
   exportSong : FilePath →         -- path to the file to save the MIDI data to

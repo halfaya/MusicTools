@@ -1,32 +1,37 @@
-module Chord where
+module Music where
 
-open import Data.Integer
-open import Data.List
-open import Data.Nat using (ℕ; suc)
-open import Data.Product using (proj₁) renaming (map to pmap)
-open import Function
+open import Data.Integer using (ℤ; +_)
+open import Data.List    using (List; foldr)
 
-open import Note
+open import Note         renaming (transpose to transposeNote)
 
-data Chord : Set where
-  chord : List Note → Chord
+data Music : Set where
+  note : Note → Music
+  _∷_  : Music → Music → Music -- sequential composition
+  _∥_  : Music → Music → Music -- parallel   composition
 
-unChord : Chord → List Note
-unChord (chord ns) = ns
+infixr 5 _∷_ _∥_
 
-data RelativeChord : Set where
-  relativeChord : List NoteOctave → RelativeChord
+map : (Note → Note) → Music → Music
+map f (note n) = note (f n)
+map f (m ∷ m') = map f m ∷ map f m'
+map f (m ∥ m') = map f m ∥ map f m'
 
-transposeChord : ℤ → Chord → Chord
-transposeChord k (chord ns) = chord (map (transpose k) ns)
+transpose : ℤ → Music → Music
+transpose k = map (transposeNote k)
 
+-- adds a duration 0 rest at the end which should be removed or ignored
+fromNotes : List Note → Music
+fromNotes = foldr (λ n m → note n ∷ m) (note (rest (duration (+ 0))))
+
+{-
 oompah : Chord → List Chord
 oompah (chord [])       = []
 oompah (chord (n ∷ ns)) = chord (n ∷ []) ∷ chord ns ∷ []
 
 -- convert a chord to a series of single note chords
 arpegiate : Chord → List Chord
-arpegiate = map (chord ∘ (_∷ [])) ∘ unChord
+arpegiate = map toChord ∘ unChord
 
 makeChord : List ℤ → Note → Chord
 makeChord ks (note n) = chord (map (note ∘ (_+ n)) ks)
@@ -51,3 +56,4 @@ triad : {n : ℕ} → Scale (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n) → Re
 triad scale sdo =
   let scaleChord = map ((flip addToScaleNote) sdo) (+ 0 ∷ + 2 ∷ + 4 ∷ [])
   in relativeChord (map ((pmap (scaleDegreeToRelativeNote scale) id)) scaleChord)
+-}

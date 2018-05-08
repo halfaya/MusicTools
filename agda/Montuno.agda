@@ -8,9 +8,8 @@ open import Data.Product using (_,_)
 open import Function using (_∘_)
 
 open import Note
-open import Chord
-open import TimedChord
 
+{-
 double : List Chord → List Chord
 double = map (λ c → flatten (c ∷ (transposeChord (+ chromaticScaleSize) c) ∷ []))
 
@@ -43,3 +42,4 @@ ex8 ex9 ex10 : {n : ℕ} → Scale (5 + n) → List TimedChord
 ex8  scale = zip (make2 scale oompah    (scaleDegree (# 3))) rhythm
 ex9  scale = zip (make2 scale arpegiate (scaleDegree (# 3))) rhythm
 ex10 scale = zip (make2 scale arpegiate (scaleDegree (# 1))) rhythma ++ ex8 scale
+-}

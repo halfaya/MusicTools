@@ -1,0 +1,24 @@
+Musical Ornaments
+
+Research into and practice of functional programming and dependent
+type theory point to a future convergence of programming and
+mathematics, in which one can use the machinery of mathematics to both
+aid in the creation of programs and to reason about them. One hurdle
+to progress is the problem of how to deal with a multiplicity of
+equivalent natural representations of data, as well as augmentation of
+a data structure with additional information. Automated transport of
+equivalences (a feature of homotopy type theory) and the theory of
+ornaments are techniques that have been developed to address these
+issues. However they have not yet seen application in practical
+programming.
+
+This work in progress focuses on a toolkit written using dependent types
+which aims to form the basis for practical programs which synthesize
+and analyze music. Music is a rich yet circumscribed domain in which
+issues of equivalence and ornamentation naturally arise. For example a
+musical score can be interpreted either horizontally (counterpoint) or
+vertically (harmony) and it is important to be able to seamlessly
+convert between these representations. Similarly one may wish to treat
+pitch or rhythm separately as well as combine them, which is a natural
+application of ornamentation. We examine the extent to which this
+cutting-edge research can be put to use in a practical domain.

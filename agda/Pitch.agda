@@ -1,6 +1,6 @@
 module Pitch where
 
-open import Data.Fin renaming (_+_ to _Fin+_)
+open import Data.Fin renaming (_+_ to _Fin+_; _-_ to _Fin-_)
 open import Data.Integer
 open import Data.Vec
 open import Data.Nat renaming (_+_ to _N+_;  _*_ to _N*_)
@@ -13,6 +13,9 @@ open import Util
 -- Position of a pitch on an absolute scale; 0 is later mapped to a base frequency.
 data Pitch : Set where
   pitch : ℤ → Pitch
+
+getPitch : Pitch → ℤ
+getPitch (pitch p) = p
 
 -- Number of steps in the scale (in this case chromatic).
 -- Currently this must be 12.
@@ -52,6 +55,7 @@ scaleSize {n} _ = n
 data ScaleDegree (n : ℕ) : Set where
   scaleDegree : Fin n → ScaleDegree n
 
+ScaleDegreeOctave : ℕ → Set
 ScaleDegreeOctave = λ n → ScaleDegree n × Octave
 
 scaleDegreeToRelativePitch : {n : ℕ} → Scale n → ScaleDegree n → RelativePitch
@@ -67,3 +71,17 @@ addToScalePitch {n} (-[1+_] k) (scaleDegree d , octave o) =
 
 transpose : ℤ → Pitch → Pitch
 transpose k (pitch n) = pitch (n + k)
+
+----
+
+-- Standard Midi pitches
+
+c d e f g a b : ℕ → Pitch
+c n = pitch ((+ 0)  + ((+ 12) * ((+ n) - (+ 3))))
+d n = pitch ((+ 2)  + ((+ 12) * ((+ n) - (+ 3))))
+e n = pitch ((+ 4)  + ((+ 12) * ((+ n) - (+ 3))))
+f n = pitch ((+ 5)  + ((+ 12) * ((+ n) - (+ 3))))
+g n = pitch ((+ 7)  + ((+ 12) * ((+ n) - (+ 3))))
+a n = pitch ((+ 9)  + ((+ 12) * ((+ n) - (+ 3))))
+b n = pitch ((+ 11) + ((+ 12) * ((+ n) - (+ 3))))
+

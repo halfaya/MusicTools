@@ -1,9 +1,10 @@
 module Music where
 
 open import Data.Integer using (ℤ; +_)
-open import Data.List    using (List; foldr)
+open import Data.List    using (List; foldr; []; _∷_)
 
 open import Note         renaming (transpose to transposeNote)
+open import Pitch        renaming (transpose to transposePitch)
 
 data Music : Set where
   note : Note → Music
@@ -22,7 +23,16 @@ transpose k = map (transposeNote k)
 
 -- adds a duration 0 rest at the end which should be removed or ignored
 fromNotes : List Note → Music
-fromNotes = foldr (λ n m → note n ∷ m) (note (rest (duration (+ 0))))
+fromNotes = foldr (λ n m → note n ∷ m) (note (rest (duration 0)))
+
+data Chord : Set where
+  chord : Duration → List Pitch → Chord
+
+fromChord : Chord → Music
+fromChord (chord d ps) = foldr (λ p m → note (note d p) ∥ m) (note (rest (duration 0))) ps
+
+fromChords : List Chord → Music
+fromChords = foldr (λ c m → fromChord c ∷ m) (note (rest (duration 0)))
 
 {-
 oompah : Chord → List Chord

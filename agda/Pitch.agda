@@ -8,7 +8,7 @@ open import Data.Nat.DivMod
 open import Data.Product renaming (map to pmap)
 open import Function using (_∘_)
 
-open import Util
+open import Lemmas
 
 -- Position of a pitch on an absolute scale; 0 is later mapped to a base frequency.
 data Pitch : Set where

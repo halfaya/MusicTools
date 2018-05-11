@@ -14,7 +14,7 @@ open import Music
 
 {-# FOREIGN GHC
   import Codec.Midi
-  import Data.Text (Text)
+  import Data.Text (Text, unpack)
   import Data.List (sort)
 
   type HsTicksPerBeat = Integer
@@ -26,6 +26,8 @@ open import Music
   type HsTempo        = Integer
 
   type HsAbsTime      = Integer
+
+  type HsTrackName    = Text
 
   -- convert beats per minute to microseconds per beat
   bpmToTempo :: Int -> Tempo
@@ -41,7 +43,7 @@ open import Music
   instance Ord HsMidiMessage where
     a <= b = getTicks a <= getTicks b
 
-  data HsMidiTrack = HsMidiTrack HsPreset HsChannel HsTempo [HsMidiMessage]
+  data HsMidiTrack = HsMidiTrack HsTrackName HsPreset HsChannel HsTempo [HsMidiMessage]
 
   fi = fromInteger
 
@@ -53,7 +55,8 @@ open import Music
                                           in ((fi (t' - t), NoteOff c (fi k) (fi v)) : rest, t'')
 
   toTrack :: HsMidiTrack -> Track Ticks
-  toTrack (HsMidiTrack preset channel tempo messages) =
+  toTrack (HsMidiTrack name preset channel tempo messages) =
+    (0, TrackName (unpack name)) :
     (0, ProgramChange (fi channel) (fi preset)) :
     (0, TempoChange (bpmToTempo (fi tempo))) :
     fst (makeTrack (fi channel) 0 (sort messages))
@@ -64,8 +67,9 @@ open import Music
 
   exportTracks :: Text -> HsTicksPerBeat -> [HsMidiTrack] -> IO ()
   exportTracks filePath ticksPerBeat tracks = do
-    putStrLn $ show $ toMidi ticksPerBeat tracks
-    exportFile (Data.Text.unpack filePath) (toMidi ticksPerBeat tracks)
+    putStrLn "exportTracks"
+    -- putStrLn $ show $ toMidi ticksPerBeat tracks
+    exportFile (unpack filePath) (toMidi ticksPerBeat tracks)
 #-}
 
 data Unit : Set where
@@ -106,12 +110,12 @@ event→messages (midiEvent p start stop v) =
   in noteOn v' start p' ∷ noteOff v' stop p' ∷ [] 
 
 data HMidiTrack : Set where
-  htrack : HInstrument → HChannel → HTempo → List MidiMessage → HMidiTrack
+  htrack : String → HInstrument → HChannel → HTempo → List MidiMessage → HMidiTrack
 
 {-# COMPILE GHC HMidiTrack = data HsMidiTrack (HsMidiTrack) #-}
 
 track→htrack : MidiTrack → HMidiTrack
-track→htrack (track i c t m) = htrack (toℕ i) (toℕ c) t (concatMap event→messages m)
+track→htrack (track n i c t m) = htrack n (toℕ i) (toℕ c) t (concatMap event→messages m)
 
 postulate 
   exportTracks : FilePath        → -- path to the file to save the MIDI data to

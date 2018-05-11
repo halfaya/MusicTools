@@ -5,6 +5,7 @@ open import Data.List    using (List; _∷_; []; _++_)
 open import Data.Integer using (ℤ; +_; _-_)
 open import Data.Nat     using (ℕ; _+_; _⊔_)
 open import Data.Product using (_×_; _,_; proj₁)
+open import Data.String  using (String)
 
 open import Music        using (Music; _∷_; _∥_; note)
 open import Note         using (note; rest; duration)
@@ -47,6 +48,7 @@ record MidiEvent : Set where
 record MidiTrack : Set where
   constructor track
   field
+    trackName        : String
     instrumentNumber : InstrumentNumber-1
     channel          : Channel-1
     tempo            : Tempo -- initial tempo

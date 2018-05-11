@@ -12,20 +12,10 @@ open import Note
 open import Music        hiding (map)
 open import Midi
 open import MidiEvent
-
-repeat : ∀ {a} {A : Set a} → (n : ℕ) → List A → List A
-repeat n = concat ∘ replicate n
-
-----
+open import Util
 
 tempo : ℕ
 tempo = 84
-
-----
-
--- duration in 8th notes
-8th : ℕ → Duration
-8th n = duration (2 * n)
 
 ----
 
@@ -33,7 +23,7 @@ melodyChannel : Channel-1
 melodyChannel = # 0
 
 melodyInstrument : InstrumentNumber-1
-melodyInstrument = # 0 -- piano
+melodyInstrument = # 8 -- celesta
 
 melodyNotes : List Note
 melodyNotes =
@@ -141,7 +131,7 @@ melodyNotes =
   []
 
 melodyTrack : MidiTrack
-melodyTrack = track melodyInstrument melodyChannel tempo (music→events defaultVelocity (fromNotes melodyNotes))
+melodyTrack = track "Melody" melodyInstrument melodyChannel tempo (music→events defaultVelocity (fromNotes melodyNotes))
 
 ----
 
@@ -152,13 +142,13 @@ accompInstrument : InstrumentNumber-1
 accompInstrument = # 11 -- vibraphone
 
 accompRhythm : List Duration
-accompRhythm = map (duration ∘ (_* 2)) (3 ∷ 3 ∷ 2 ∷ [])
+accompRhythm = map 8th (3 ∷ 3 ∷ 2 ∷ [])
 
 accompF accompFA accompB2 accompC4 : List Pitch
-accompF  = map pitch (-[1+ 6 ] ∷ -[1+ 2 ] ∷ + 0 ∷ [])
-accompFA = take 2 accompF
-accompB2 = map pitch (-[1+ 6 ] ∷ -[1+ 0 ] ∷ + 2 ∷ [])
-accompC4 = map pitch (-[1+ 6 ] ∷ + 0 ∷ + 4 ∷ [])
+accompF  = f 2 ∷ a 2 ∷ c 3 ∷ []
+accompFA = f 2 ∷ a 2 ∷ []
+accompB2 = f 2 ∷ b 2 ∷ d 2 ∷ []
+accompC4 = f 2 ∷ c 3 ∷ e 3 ∷ []
 
 accompChords1 accompChords2 accompChords3 accompChords4 accompChords5 accompChords : List Chord
 accompChords6 accompChords7 : List Chord
@@ -167,7 +157,7 @@ accompChords1 = map (uncurry chord)
                     (zip (repeat 8 accompRhythm)
                          (repeat 2 (concat (map (replicate 3) (accompF ∷ accompB2 ∷ accompC4 ∷ accompB2 ∷ [])))))
                          
-accompChords2 = chord (duration (16 * 4)) accompFA ∷ []
+accompChords2 = chord (whole 4) accompFA ∷ []
 
 accompChords3 = map (uncurry chord)
                     (zip (repeat 4 accompRhythm)
@@ -176,17 +166,17 @@ accompChords3 = map (uncurry chord)
 
 accompChords4 = map (uncurry chord) (zip accompRhythm (replicate 3 accompFA))
 
-accompChords5 = chord (duration (2 * (8 + 8 + 6))) accompF ∷ chord (duration (2 * 2)) accompF ∷ []
+accompChords5 = chord (8th (8 + 8 + 6)) accompF ∷ chord (8th 2) accompF ∷ []
 
-accompChords6 = chord (duration (2 * (8 + 6))) accompB2 ∷ chord (duration (2 * 2)) accompB2 ∷ []
+accompChords6 = chord (8th (8 + 6))    accompB2 ∷ chord (8th 2) accompB2 ∷ []
 
-accompChords7 = chord (duration (2 * (8 + 8))) accompF ∷ []
+accompChords7 = chord (whole 2) accompF ∷ []
 
 accompChords  = accompChords1 ++ accompChords3 ++ accompChords2 ++ accompChords3 ++ accompChords4
                 ++ accompChords5 ++ accompChords6 ++ accompChords7
   
 accompTrack : MidiTrack
-accompTrack = track accompInstrument accompChannel tempo (music→events defaultVelocity (fromChords accompChords))
+accompTrack = track "Accomp" accompInstrument accompChannel tempo (music→events defaultVelocity (fromChords accompChords))
 
 ----
 
@@ -196,21 +186,17 @@ bassChannel = # 2
 bassInstrument : InstrumentNumber-1
 bassInstrument = # 33 -- finger bass
 
-bassMelodyRel : List RelativePitch
-bassMelodyRel = map (scaleDegreeToRelativePitch majorScale ∘ scaleDegree)
-                 (# 0 ∷ # 2 ∷ # 3 ∷ # 4 ∷ [])
-
 bassMelody : List Pitch
-bassMelody = map (relativeToAbsolute ∘ (_, octave -[1+ 1 ])) bassMelodyRel
+bassMelody = c 1 ∷ e 1 ∷ f 1 ∷ g 1 ∷ []
 
 bassRhythm : List Duration
-bassRhythm = map (duration ∘ (_* 2)) (3 ∷ 1 ∷ 2 ∷ 2 ∷ [])
+bassRhythm = map 8th (3 ∷ 1 ∷ 2 ∷ 2 ∷ [])
 
 bassNotes : List Note
 bassNotes = repeat 28 (map (uncurry note) (zip bassRhythm bassMelody))
 
 bassTrack : MidiTrack
-bassTrack = track bassInstrument bassChannel tempo (music→events defaultVelocity (fromNotes bassNotes))
+bassTrack = track "Bass" bassInstrument bassChannel tempo (music→events defaultVelocity (fromNotes bassNotes))
 
 ----
 
@@ -221,22 +207,22 @@ drumChannel : Channel-1
 drumChannel = # 9
 
 drumRhythmA : List Duration
-drumRhythmA = map duration (2 ∷ [])
+drumRhythmA = map 16th (2 ∷ [])
 
 drumRhythmB : List Duration
-drumRhythmB = map duration (1 ∷ 1 ∷ 2 ∷ [])
+drumRhythmB = map 16th (1 ∷ 1 ∷ 2 ∷ [])
 
 drumRhythm : List Duration
 drumRhythm = drumRhythmA ++ repeat 3 drumRhythmB ++ drumRhythmA
 
 drumPitches : List Pitch
-drumPitches = replicate (length drumRhythm) (pitch -[1+ 0 ]) -- Ride In
+drumPitches = replicate (length drumRhythm) (b 2) -- Ride In
 
 drumNotes : List Note
-drumNotes = rest (duration (16)) ∷ repeat 27 (map (uncurry note) (zip drumRhythm drumPitches))
+drumNotes = rest (whole 1) ∷ repeat 27 (map (uncurry note) (zip drumRhythm drumPitches))
 
 drumTrack : MidiTrack
-drumTrack = track drumInstrument drumChannel tempo (music→events defaultVelocity (fromNotes drumNotes))
+drumTrack = track "Drums" drumInstrument drumChannel tempo (music→events defaultVelocity (fromNotes drumNotes))
 
 ----
 

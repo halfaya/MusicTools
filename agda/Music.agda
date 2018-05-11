@@ -13,6 +13,10 @@ data Music : Set where
 
 infixr 5 _∷_ _∥_
 
+-- empty music as a basis for fold
+nil : Music
+nil = note (rest (duration 0))
+
 map : (Note → Note) → Music → Music
 map f (note n) = note (f n)
 map f (m ∷ m') = map f m ∷ map f m'
@@ -23,16 +27,16 @@ transpose k = map (transposeNote k)
 
 -- adds a duration 0 rest at the end which should be removed or ignored
 fromNotes : List Note → Music
-fromNotes = foldr (λ n m → note n ∷ m) (note (rest (duration 0)))
+fromNotes = foldr (λ n m → note n ∷ m) nil
 
 data Chord : Set where
   chord : Duration → List Pitch → Chord
 
 fromChord : Chord → Music
-fromChord (chord d ps) = foldr (λ p m → note (note d p) ∥ m) (note (rest (duration 0))) ps
+fromChord (chord d ps) = foldr (λ p m → note (note d p) ∥ m) nil ps
 
 fromChords : List Chord → Music
-fromChords = foldr (λ c m → fromChord c ∷ m) (note (rest (duration 0)))
+fromChords = foldr (λ c m → fromChord c ∷ m) nil
 
 {-
 oompah : Chord → List Chord

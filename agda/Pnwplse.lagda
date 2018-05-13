@@ -1,6 +1,8 @@
 \begin{code}
+open import Data.Fin
 open import Data.Integer
 open import Data.Nat
+open import Data.Product
 \end{code}
 
 %<*pitch>
@@ -33,3 +35,31 @@ data Music : Set where
   _∥_  : Music → Music → Music -- parallel
 \end{code}
 %</music>
+
+%<*chromatic>
+\begin{code}
+chromaticScaleSize : ℕ
+chromaticScaleSize = 12
+\end{code}
+%</chromatic>
+
+%<*relpitch>
+\begin{code}
+data RelativePitch : Set where
+  relativePitch : Fin chromaticScaleSize → RelativePitch
+\end{code}
+%</relpitch>
+
+%<*octave>
+\begin{code}
+data Octave : Set where
+  octave : ℤ → Octave
+\end{code}
+%</octave>
+
+%<*pitchoctave>
+\begin{code}
+PitchOctave : Set
+PitchOctave = RelativePitch × Octave
+\end{code}
+%</pitchoctave>

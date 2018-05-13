@@ -1,7 +1,7 @@
 module Pitch where
 
 open import Data.Fin renaming (_+_ to _Fin+_; _-_ to _Fin-_)
-open import Data.Integer
+open import Data.Integer hiding (-_)
 open import Data.Vec
 open import Data.Nat renaming (_+_ to _N+_;  _*_ to _N*_)
 open import Data.Nat.DivMod
@@ -32,6 +32,7 @@ Scale = Vec RelativePitch
 data Octave : Set where
   octave : ℤ → Octave
 
+PitchOctave : Set
 PitchOctave = RelativePitch × Octave
 
 relativeToAbsolute : PitchOctave → Pitch
@@ -61,13 +62,14 @@ ScaleDegreeOctave = λ n → ScaleDegree n × Octave
 scaleDegreeToRelativePitch : {n : ℕ} → Scale n → ScaleDegree n → RelativePitch
 scaleDegreeToRelativePitch scale (scaleDegree d) = lookup d scale
 
-addToScalePitch : {n : ℕ} → ℤ → ScaleDegreeOctave (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n)
-addToScalePitch {n} (+_     k) (scaleDegree d , octave o) =
-  let d' = (toℕ d) N+ k
-  in scaleDegree (d' mod (ℕ.suc n)) , octave (o + (+ (d' div (ℕ.suc n))))
-addToScalePitch {n} (-[1+_] k) (scaleDegree d , octave o) =
-  let d' = (toℕ d) N+ k
-  in scaleDegree (d' mod (ℕ.suc n)) , octave (o + (+ (d' div (ℕ.suc n)))) -- TODO: Fix
+transposeScaleDegree : {n : ℕ} → ℤ → ScaleDegreeOctave (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n)
+transposeScaleDegree {n} (+    k) (scaleDegree d , octave o) =
+  let n' = ℕ.suc n
+      d' = (toℕ d) N+ k
+  in scaleDegree (d' mod n') , octave (o + (+ (d' div n')))
+transposeScaleDegree {n} -[1+ k ] (scaleDegree d , octave o) with (+ (toℕ d)) + -[1+ k ]
+... | +    d'   = let n' = ℕ.suc n in scaleDegree (d' mod n') ,         octave (o + (+ (d' div n')))
+... | -[1+ d' ] = let n' = ℕ.suc n in scaleDegree (- ℕ.suc d' mod n') , octave (o + (- ℕ.suc d' div n'))
 
 transpose : ℤ → Pitch → Pitch
 transpose k (pitch n) = pitch (n + k)

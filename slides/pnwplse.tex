@@ -24,8 +24,7 @@
 \begin{itemize}
 \item A look toward the future
 \item Music Tools
-\item Equivalences
-\item Ornaments
+\item Equivalences and Ornaments
 \end{itemize}
 
 \bigskip 
@@ -71,6 +70,16 @@ CMU Homotopy Type Theory lecture 1, 52:56--53:20.
 \end{figure}
 \end{frame}
 
+\begin{frame}\frametitle{Music Tools}
+\begin{itemize}
+\item Collection of composable tools for synthesis and analysis of music
+\item Originally written in Haskell
+\item Converted to Agda, using Haskell for MIDI interface
+\item Explore programming using dependent types in a circumscribed yet rich domain
+\item Use math, including transport of equivalences (from HoTT) and Ornaments
+\end{itemize}
+\end{frame}
+
 \begin{frame}\frametitle{Look vs Time (1997)}
 \begin{figure}
 \includegraphics[width=\textwidth]{lookVsTime}
@@ -84,8 +93,54 @@ CMU Homotopy Type Theory lecture 1, 52:56--53:20.
 \ExecuteMetaData[../agda/latex/Pnwplse.tex]{music}
 \end{frame}
 
+\begin{frame}\frametitle{Equivalent Representations of Pitch}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{pitch}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{chromatic}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{relpitch}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{octave}
+\ExecuteMetaData[../agda/latex/Pnwplse.tex]{pitchoctave}
+\end{frame}
+
+\begin{frame}\frametitle{Equivalences}
+\begin{itemize}
+\item Define an equivalence between {\tt Pitch} and {\tt PitchOctave}
+\item Using HoTT techniques, automatically lift this equivalence to functions defined using \texttt{Pitch}
+\item See \textit{Equivalences for Free!} (Tabareau, Tanter, Sozeau)
+\item Challenge: Defining base equivalences. Can this be automated?
+\end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]\frametitle{Ornaments}
+\begin{semiverbatim}
+data Music a  = ... 
+  |  Modify Control (Music a)
+
+data Control = ...
+  |  Phrase [PhraseAttribute]
+
+data PhraseAttribute = ...
+  |  Orn Ornament
+
+data Ornament =
+  Trill | Mordent | InvMordent | DoubleMordent |
+  Turn | TrilledTurn | ShortTrill ...
+\end{semiverbatim}
+\end{frame}
+
+\begin{frame}\frametitle{Ornaments}
+\begin{itemize}
+\item Functions on a base {\tt Music} structure can be automatically lifted to operate on {\tt Music} ornamented with additional information
+\item See works on Ornaments by McBride, Dagand and others
+\item Challenge: Shallow embedding of ornaments in Agda
+\end{itemize}
+\end{frame}
+
 \begin{frame}\frametitle{Conclusion}
-Goes here.
+\begin{itemize}
+\item Music is a good domain in which to explore  practical application of dependent types
+\item Using math can be more work at first, but should be a big win in the long term
+\item Figure out how to minimize the work and maximize the reward
+\end{itemize}
 \end{frame}
 
 \end{document}

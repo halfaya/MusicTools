@@ -1,5 +1,6 @@
-module Lemmas where
+{-# OPTIONS --without-K #-}
 
+module Lemmas where
 
 open import Data.Fin                   using (Fin; toℕ; fromℕ≤; zero; suc)
 open import Data.Integer               using (ℤ; +_; -[1+_])

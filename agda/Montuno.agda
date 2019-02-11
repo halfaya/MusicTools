@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 module Montuno where
 
 open import Data.Fin using (#_)

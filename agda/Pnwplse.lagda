@@ -1,4 +1,6 @@
 \begin{code}
+{-# OPTIONS --without-K #-}
+
 open import Data.Fin
 open import Data.Integer
 open import Data.Nat

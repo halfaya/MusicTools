@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 module Hanon where
 
 open import Data.Fin     using (#_)
@@ -16,7 +18,7 @@ offsets : List ℤ
 offsets = + 0 ∷ + 2 ∷ + 4 ∷ + 5 ∷ + 7 ∷ + 9 ∷ + 11 ∷ []
 
 cell cell2 : Music
-cell  = fromNotes (map (note (8th 1)) (c 2 ∷ e 2 ∷ f 2 ∷ g 2 ∷ a 2 ∷ g 2 ∷ f 2 ∷ e 2 ∷ []))
+cell  = fromNotes (map (note (8th 1)) (c 4 ∷ e 4 ∷ f 4 ∷ g 4 ∷ a 4 ∷ g 4 ∷ f 4 ∷ e 4 ∷ []))
 cell2 = cell ∥ transposeMusic -[1+ 11 ] cell
 
 hanon1 : Music

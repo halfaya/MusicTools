@@ -1,21 +1,25 @@
+{-# OPTIONS --without-K #-}
+
 module Pitch where
 
-open import Data.Fin renaming (_+_ to _Fin+_; _-_ to _Fin-_)
-open import Data.Integer hiding (-_)
-open import Data.Vec
-open import Data.Nat renaming (_+_ to _N+_;  _*_ to _N*_)
-open import Data.Nat.DivMod
-open import Data.Product renaming (map to pmap)
-open import Function using (_∘_)
+open import Data.Integer    using (ℤ; +_; -[1+_])
+open import Data.Fin        using (Fin; toℕ; #_)
+open import Data.Vec        using (Vec; map; []; _∷_; lookup)
+open import Data.Nat        using (ℕ; suc; _≤?_; _≤_; _+_; _*_; _∸_)
+open import Data.Nat.DivMod using (_mod_; _div_)
+open import Data.Product    using (_×_; _,_)
+open import Function        using (_∘_)
 
-open import Lemmas
+open import Lemmas          using (revMod; -_mod_; -_div_)
+open import Util            using (findIndex)
 
--- Position of a pitch on an absolute scale; 0 is later mapped to a base frequency.
+-- Position of a pitch on an absolute scale
+-- 0 is C(-1) to correspond to Midi pitch
 data Pitch : Set where
-  pitch : ℤ → Pitch
+  pitch : ℕ → Pitch
 
-getPitch : Pitch → ℤ
-getPitch (pitch p) = p
+getPitchValue : Pitch → ℕ
+getPitchValue (pitch p) = p
 
 -- Number of steps in the scale (in this case chromatic).
 -- Currently this must be 12.
@@ -26,25 +30,23 @@ chromaticScaleSize = 12
 data RelativePitch : Set where
   relativePitch : Fin chromaticScaleSize → RelativePitch
 
+Scale : ℕ → Set
 Scale = Vec RelativePitch
 
 -- Which octave one is in.
 data Octave : Set where
-  octave : ℤ → Octave
+  octave : ℕ → Octave
 
 PitchOctave : Set
 PitchOctave = RelativePitch × Octave
 
 relativeToAbsolute : PitchOctave → Pitch
 relativeToAbsolute (relativePitch n , octave o) =
-  pitch (o * (+ chromaticScaleSize) + (+ (toℕ (toℕ n mod chromaticScaleSize))))
+  pitch (o * chromaticScaleSize + (toℕ ((toℕ n) mod chromaticScaleSize)))
 
 absoluteToRelative : Pitch → PitchOctave
-absoluteToRelative (pitch (+    n  )) =
-  (relativePitch (n mod chromaticScaleSize) , octave (+ (n div chromaticScaleSize)))
-absoluteToRelative (pitch (-[1+ n ])) =
-  (relativePitch (revMod (n mod chromaticScaleSize)) ,
-   octave (-[1+ (n div chromaticScaleSize)]))
+absoluteToRelative (pitch  n) =
+  (relativePitch (n mod chromaticScaleSize) , octave (n div chromaticScaleSize))
 
 majorScale harmonicMinorScale : Scale 7
 majorScale         = map relativePitch (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
@@ -57,33 +59,48 @@ data ScaleDegree (n : ℕ) : Set where
   scaleDegree : Fin n → ScaleDegree n
 
 ScaleDegreeOctave : ℕ → Set
-ScaleDegreeOctave = λ n → ScaleDegree n × Octave
+ScaleDegreeOctave n = ScaleDegree n × Octave
 
 scaleDegreeToRelativePitch : {n : ℕ} → Scale n → ScaleDegree n → RelativePitch
 scaleDegreeToRelativePitch scale (scaleDegree d) = lookup d scale
 
-transposeScaleDegree : {n : ℕ} → ℤ → ScaleDegreeOctave (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n)
-transposeScaleDegree {n} (+    k) (scaleDegree d , octave o) =
-  let n' = ℕ.suc n
-      d' = (toℕ d) N+ k
-  in scaleDegree (d' mod n') , octave (o + (+ (d' div n')))
-transposeScaleDegree {n} -[1+ k ] (scaleDegree d , octave o) with (+ (toℕ d)) + -[1+ k ]
-... | +    d'   = let n' = ℕ.suc n in scaleDegree (d' mod n') ,         octave (o + (+ (d' div n')))
-... | -[1+ d' ] = let n' = ℕ.suc n in scaleDegree (- ℕ.suc d' mod n') , octave (o + (- ℕ.suc d' div n'))
+{-
+open import Relation.Unary using (Decidable; Pred)
+
+relativePitchToScaleDegree : {n : ℕ} → Scale (suc n) → RelativePitch → ScaleDegree (suc n)
+relativePitchToScaleDegree scale (relativePitch p) =
+  let bb : Pred ℕ _ ; bb = (_≤ (toℕ p))
+--      aa : Decidable {A = ℕ} (_≤? (toℕ p)) ; aa = λ {relativePitch r → toℕ r ≤? toℕ p}
+  in scaleDegree (findIndex {!!} scale)
+
+--scaleDegree (findIndex {!_≤? (toℕ p)!} {!!})
+
+transposeScaleDegree : {n : ℕ} → ℕ → ScaleDegreeOctave (suc n) → ScaleDegreeOctave (suc n)
+transposeScaleDegree {n} k (scaleDegree d , octave o) =
+  let n' = suc n
+      d' = (toℕ d) + k
+  in scaleDegree ((toℕ d)  mod n') , octave (o + (d' div n'))
+-}
 
 transpose : ℤ → Pitch → Pitch
-transpose k (pitch n) = pitch (n + k)
+transpose (+_     k) (pitch n) = pitch (n + k)
+transpose (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
 
 ----
 
 -- Standard Midi pitches
 
+-- first argument is relative pitch within octave
+-- second argument is octave (C5 = middle C for Midi)
+standardMidiPitch : Fin chromaticScaleSize → ℕ → Pitch
+standardMidiPitch p o = relativeToAbsolute (relativePitch p , octave o)
+
 c d e f g a b : ℕ → Pitch
-c n = pitch ((+ 0)  + ((+ 12) * ((+ n) - (+ 3))))
-d n = pitch ((+ 2)  + ((+ 12) * ((+ n) - (+ 3))))
-e n = pitch ((+ 4)  + ((+ 12) * ((+ n) - (+ 3))))
-f n = pitch ((+ 5)  + ((+ 12) * ((+ n) - (+ 3))))
-g n = pitch ((+ 7)  + ((+ 12) * ((+ n) - (+ 3))))
-a n = pitch ((+ 9)  + ((+ 12) * ((+ n) - (+ 3))))
-b n = pitch ((+ 11) + ((+ 12) * ((+ n) - (+ 3))))
+c = standardMidiPitch (# 0)
+d = standardMidiPitch (# 2)
+e = standardMidiPitch (# 4)
+f = standardMidiPitch (# 5)
+g = standardMidiPitch (# 7)
+a = standardMidiPitch (# 9)
+b = standardMidiPitch (# 11)
 

@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 module Properties where
 
 open import Data.Fin

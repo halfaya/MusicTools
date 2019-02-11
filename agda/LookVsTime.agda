@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 module LookVsTime where
 
 open import Data.Fin     using (#_)
@@ -27,106 +29,106 @@ melodyInstrument = # 8 -- celesta
 
 melodyNotes : List Note
 melodyNotes =
-  note (8th 3) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 3) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 3) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 3) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 1) (e 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 1) (e 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 1) (e 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 1) (e 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 1) (a 3) ∷
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 2) (e 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 1) (a 5) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 2) (e 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 1) (a 3) ∷
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 2) (e 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 1) (a 5) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 2) (e 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 3) (b 2) ∷
-  note (8th 5) (c 3) ∷
+  note (8th 3) (b 4) ∷
+  note (8th 5) (c 5) ∷
 
-  note (8th 1) (f 3) ∷
-  note (8th 1) (e 3) ∷
-  note (8th 1) (d 3) ∷
-  note (8th 5) (c 3) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 1) (e 5) ∷
+  note (8th 1) (d 5) ∷
+  note (8th 5) (c 5) ∷
 
-  note (8th 3) (g 3) ∷
-  note (8th 3) (e 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 3) (g 5) ∷
+  note (8th 3) (e 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 3) (g 3) ∷
-  note (8th 3) (e 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 3) (g 5) ∷
+  note (8th 3) (e 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 8) (c 3) ∷
+  note (8th 8) (c 5) ∷
 
-  note (8th 8) (b 2) ∷
+  note (8th 8) (b 4) ∷
 
-  note (8th 3) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 3) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 3) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 3) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 3) (a 3) ∷
-  note (8th 5) (f 3) ∷
+  note (8th 3) (a 5) ∷
+  note (8th 5) (f 5) ∷
 
-  note (8th 3) (e 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 3) (e 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 8) (c 3) ∷
+  note (8th 8) (c 5) ∷
 
-  note (8th 8) (d 3) ∷
+  note (8th 8) (d 5) ∷
 
-  note (8th 1) (c 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 1) (c 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 5) (d 3) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 5) (d 5) ∷
 
-  note (8th 3) (a 3) ∷
-  note (8th 5) (f 3) ∷
+  note (8th 3) (a 5) ∷
+  note (8th 5) (f 5) ∷
 
-  note (8th 3) (a 3) ∷
-  note (8th 5) (g 3) ∷
+  note (8th 3) (a 5) ∷
+  note (8th 5) (g 5) ∷
 
-  note (8th 1) (a 3) ∷
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 2) (e 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 1) (a 5) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 2) (e 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 1) (a 3) ∷
-  note (8th 1) (g 3) ∷
-  note (8th 1) (f 3) ∷
-  note (8th 2) (e 3) ∷
-  note (8th 1) (c 3) ∷
-  note (8th 2) (d 3) ∷
+  note (8th 1) (a 5) ∷
+  note (8th 1) (g 5) ∷
+  note (8th 1) (f 5) ∷
+  note (8th 2) (e 5) ∷
+  note (8th 1) (c 5) ∷
+  note (8th 2) (d 5) ∷
 
-  note (8th 3) (b 2) ∷
-  note (8th 5) (c 3) ∷
+  note (8th 3) (b 4) ∷
+  note (8th 5) (c 5) ∷
 
-  note (8th 24) (b 2) ∷
+  note (8th 24) (b 4) ∷
 
   []
 
@@ -145,10 +147,10 @@ accompRhythm : List Duration
 accompRhythm = map 8th (3 ∷ 3 ∷ 2 ∷ [])
 
 accompF accompFA accompB2 accompC4 : List Pitch
-accompF  = f 2 ∷ a 2 ∷ c 3 ∷ []
-accompFA = f 2 ∷ a 2 ∷ []
-accompB2 = f 2 ∷ b 2 ∷ d 2 ∷ []
-accompC4 = f 2 ∷ c 3 ∷ e 3 ∷ []
+accompF  = f 4 ∷ a 4 ∷ c 5 ∷ []
+accompFA = f 4 ∷ a 4 ∷ []
+accompB2 = f 4 ∷ b 4 ∷ d 4 ∷ []
+accompC4 = f 4 ∷ c 5 ∷ e 5 ∷ []
 
 accompChords1 accompChords2 accompChords3 accompChords4 accompChords5 accompChords : List Chord
 accompChords6 accompChords7 : List Chord
@@ -187,7 +189,7 @@ bassInstrument : InstrumentNumber-1
 bassInstrument = # 33 -- finger bass
 
 bassMelody : List Pitch
-bassMelody = c 1 ∷ e 1 ∷ f 1 ∷ g 1 ∷ []
+bassMelody = c 3 ∷ e 3 ∷ f 3 ∷ g 3 ∷ []
 
 bassRhythm : List Duration
 bassRhythm = map 8th (3 ∷ 1 ∷ 2 ∷ 2 ∷ [])
@@ -216,7 +218,7 @@ drumRhythm : List Duration
 drumRhythm = drumRhythmA ++ repeat 3 drumRhythmB ++ drumRhythmA
 
 drumPitches : List Pitch
-drumPitches = replicate (length drumRhythm) (b 2) -- Ride In
+drumPitches = replicate (length drumRhythm) (b 4) -- Ride In
 
 drumNotes : List Note
 drumNotes = rest (whole 1) ∷ repeat 27 (map (uncurry note) (zip drumRhythm drumPitches))

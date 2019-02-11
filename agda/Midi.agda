@@ -1,7 +1,8 @@
+{-# OPTIONS --without-K #-}
+
 module Midi where
 
 open import Agda.Builtin.String using (String)
-open import Data.Integer using (ℤ; +_)
 open import Data.Fin using (toℕ)
 open import Data.Nat using (ℕ)
 open import Data.List
@@ -92,7 +93,7 @@ data Pair (A : Set) (B : Set) : Set where
 
 HInstrument HPitch HVelocity : Set
 HInstrument = ℕ
-HPitch      = ℤ
+HPitch      = ℕ
 HVelocity   = ℕ
 HChannel    = ℕ
 HTempo      = ℕ
@@ -106,7 +107,7 @@ data MidiMessage : Set where
 event→messages : MidiEvent → List MidiMessage
 event→messages (midiEvent p start stop v) =
   let v' = toℕ v
-      p' = getPitch p
+      p' = getPitchValue p
   in noteOn v' start p' ∷ noteOff v' stop p' ∷ [] 
 
 data HMidiTrack : Set where
@@ -119,7 +120,7 @@ track→htrack (track n i c t m) = htrack n (toℕ i) (toℕ c) t (concatMap eve
 
 postulate 
   exportTracks : FilePath        → -- path to the file to save the MIDI data to
-                 ℤ               → -- number of ticks per beat (by default a beat is a quarter note)
+                 ℕ               → -- number of ticks per beat (by default a beat is a quarter note)
                  List HMidiTrack → -- tracks, one per instrument
                  IO Unit
 

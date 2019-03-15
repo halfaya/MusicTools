@@ -27,9 +27,6 @@ map f (m ∥ m') = map f m ∥ map f m'
 transpose : ℤ → Music → Music
 transpose k = map (transposeNote k)
 
---transposeScaleDegree : ℤ → Music → Music
---transposeScaleDegree k = map (transposePitchScaleDegree k)
-
 -- adds a duration 0 rest at the end which should be removed or ignored
 fromNotes : List Note → Music
 fromNotes = foldr (λ n m → note n ∷ m) nil

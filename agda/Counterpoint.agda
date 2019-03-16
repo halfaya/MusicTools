@@ -16,15 +16,45 @@ open import Relation.Binary.PropositionalEquality hiding ([_])
 Interval : Set
 Interval = Pitch × Pitch
 
+-- allowed intervals only
 data IntervalQuality : Set where
-  fifthOctave : IntervalQuality
-  other       : IntervalQuality
+  min3 : IntervalQuality
+  maj3 : IntervalQuality
+  per5 : IntervalQuality
+  min6 : IntervalQuality
+  maj6 : IntervalQuality
+  per8 : IntervalQuality
+  min10 : IntervalQuality
+  maj10 : IntervalQuality
+
+PitchInterval : Set
+PitchInterval = Pitch × IntervalQuality
+
+pitchIntervalToInterval : PitchInterval → Interval
+pitchIntervalToInterval (p , min3) = {!!}
+pitchIntervalToInterval (p , maj3) = {!!}
+pitchIntervalToInterval (p , per5) = {!!}
+pitchIntervalToInterval (p , min6) = {!!}
+pitchIntervalToInterval (p , maj6) = {!!}
+pitchIntervalToInterval (p , per8) = {!!}
+pitchIntervalToInterval (p , min10) = {!!}
+pitchIntervalToInterval (p , maj10) = {!!}
+
+isPerfect : IntervalQuality → Bool
+isPerfect min3 = false
+isPerfect maj3 = false
+isPerfect per5 = true
+isPerfect min6 = false
+isPerfect maj6 = false
+isPerfect per8 = true
+isPerfect min10 = true
+isPerfect maj10 = true
 
 -- assume a ≥ b
-intervalQuality : Interval → IntervalQuality
-intervalQuality (pitch a , pitch b) =
+isPerfectInterval : Interval → Bool
+isPerfectInterval (pitch a , pitch b) =
   let d = a ∸ b
-  in if d ≡ᵇ 7 then fifthOctave else if d ≡ᵇ 12 then fifthOctave else other
+  in if d ≡ᵇ 7 then true else if d ≡ᵇ 12 then true else false
 
 data Motion : Set where
   contrary : Motion
@@ -46,24 +76,13 @@ motion (pitch .(suc (c + k)) , pitch .(suc (d + k₁))) (pitch c , pitch d) | no
 
 -- contrary/oblique other has overlapping constructors
 data MotionOk (i1 : Interval) (i2 : Interval) : Set where
-  other    : intervalQuality i2 ≡ other → MotionOk i1 i2
+  other    : isPerfectInterval i2 ≡ true → MotionOk i1 i2
   contrary : motion i1 i2 ≡ contrary → MotionOk i1 i2
   oblique  : motion i1 i2 ≡ oblique → MotionOk i1 i2
 
-data FirstSpecies : List⁺ Interval → Set where
-  -- p is Cantus Firmus pitch
-  cadence2 : (p : Pitch) → FirstSpecies ((transpose (+ 10) p , transpose (+ 2) p)      ∷⁺ [ transpose (+ 12) p , p ])
-  cadence7 : (p : Pitch) → FirstSpecies ((transpose (+ 14) p , transpose (-[1+ 1 ]) p) ∷⁺ [ transpose (+ 12) p , p ])
-  min3     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 3) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 3) p , p) ∷⁺ ps)
-  maj3     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 4) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 4) p , p) ∷⁺ ps)
-  per5     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 7) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 7) p , p) ∷⁺ ps)
-  min6     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 8) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 8) p , p) ∷⁺ ps)
-  maj6     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 9) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 9) p , p) ∷⁺ ps)
-  per8     : {ps : List⁺ Interval} → (p : Pitch) → MotionOk (transpose (+ 12) p , p) (head ps) → FirstSpecies ps →
-             FirstSpecies ((transpose (+ 12) p , p) ∷⁺ ps)
-
+data FirstSpecies : List⁺ PitchInterval → Set where
+  cadence2 : (p : Pitch) → FirstSpecies ((transpose (+ 2) p , maj6) ∷⁺ [ p , per8 ])
+  cadence7 : (p : Pitch) → FirstSpecies ((transpose -[1+ 0 ] p , min10) ∷⁺ [ p , per8 ])
+  other    : {ps : List⁺ PitchInterval} → (p : PitchInterval) →
+             MotionOk (pitchIntervalToInterval p) (pitchIntervalToInterval (head ps)) →
+             FirstSpecies ps → FirstSpecies (p ∷⁺ ps)

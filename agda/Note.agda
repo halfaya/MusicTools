@@ -19,9 +19,10 @@ transpose k (note d p) = note d (transposePitch k p)
 transpose k (rest d)   = rest d
 
 -- duration in 16th notes
-16th 8th qtr half whole : ℕ → Duration
-16th  n = duration n
-8th   n = duration (2 * n)
-qtr   n = duration (4 * n)
-half  n = duration (8 * n)
-whole n = duration (16 * n)
+-- assume duration of a 16th note is 1
+16th 8th qtr half whole : Duration
+16th  = duration 1
+8th   = duration 2
+qtr   = duration 4
+half  = duration 8
+whole = duration 16

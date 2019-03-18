@@ -19,13 +19,13 @@ infixr 5 _∷_ _∥_
 nil : Music
 nil = note (rest (duration 0))
 
-map : (Note → Note) → Music → Music
-map f (note n) = note (f n)
-map f (m ∷ m') = map f m ∷ map f m'
-map f (m ∥ m') = map f m ∥ map f m'
+lift : (Note → Note) → Music → Music
+lift f (note n) = note (f n)
+lift f (m ∷ m') = lift f m ∷ lift f m'
+lift f (m ∥ m') = lift f m ∥ lift f m'
 
 transpose : ℤ → Music → Music
-transpose k = map (transposeNote k)
+transpose k = lift (transposeNote k)
 
 -- adds a duration 0 rest at the end which should be removed or ignored
 fromNotes : List Note → Music

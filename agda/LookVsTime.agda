@@ -11,7 +11,7 @@ open import Function     using (_∘_)
 
 open import Pitch
 open import Note
-open import Music        hiding (map)
+open import Music
 open import Midi
 open import MidiEvent
 open import Util

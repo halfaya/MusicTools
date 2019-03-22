@@ -11,11 +11,16 @@ open import Data.Integer.Base using (+_;  -[1+_])-- hiding (_+_)
 open import Data.List.NonEmpty
 open import Data.Nat
 open import Data.Product hiding (map)
+open import Data.Unit using (⊤)
 
 open import Function using (_∘_; id)
 
 open import Relation.Nullary
 open import Relation.Binary.PropositionalEquality hiding ([_])
+
+instance
+  tt′ : ⊤
+  tt′ = _
 
 Interval : Set
 Interval = Pitch × Pitch
@@ -80,16 +85,31 @@ motion (pitch .(suc (c + k)) , pitch .(suc (d + k₁))) (pitch c , pitch d) | no
 
 -- contrary/oblique other has overlapping constructors
 data MotionOk (i1 : Interval) (i2 : Interval) : Set where
-  other    : isPerfectInterval i2 ≡ false → MotionOk i1 i2
-  contrary : motion i1 i2 ≡ contrary → MotionOk i1 i2
-  oblique  : motion i1 i2 ≡ oblique → MotionOk i1 i2
+  instance
+    other    : {{_ : isPerfectInterval i2 ≡ false}} → MotionOk i1 i2
+    contrary : {{_ : motion i1 i2 ≡ contrary}} → MotionOk i1 i2
+    oblique  : {{_ : motion i1 i2 ≡ oblique}} → MotionOk i1 i2
+
+motionOk : (i1 : Interval) (i2 : Interval) → Set
+motionOk i1 i2 with motion i1 i2
+motionOk i1 i2 | contrary = ⊤
+motionOk i1 i2 | parallel = isPerfectInterval i2 ≡ false
+motionOk i1 i2 | similar  = isPerfectInterval i2 ≡ false
+motionOk i1 i2 | oblique  = ⊤
 
 data FirstSpecies : List⁺ PitchInterval → Set where
-  cadence2 : (p : Pitch) → FirstSpecies ((transpose (+ 2) p , maj6) ∷⁺ [ p , per8 ])
-  cadence7 : (p : Pitch) → FirstSpecies ((transpose -[1+ 0 ] p , min10) ∷⁺ [ p , per8 ])
-  i        : {ps : List⁺ PitchInterval} → (p : PitchInterval) →
-             MotionOk (pitchIntervalToInterval p) (pitchIntervalToInterval (head ps)) →
+  instance
+    cadence2 : {p : Pitch} → FirstSpecies ((transpose (+ 2) p , maj6) ∷⁺ [ p , per8 ])
+    cadence7 : {p : Pitch} → FirstSpecies ((transpose -[1+ 0 ] p , min10) ∷⁺ [ p , per8 ])
+  i        : {ps : List⁺ PitchInterval} → {p : PitchInterval} →
+             {{_ : motionOk (pitchIntervalToInterval p) (pitchIntervalToInterval (head ps))}} →
              FirstSpecies ps → FirstSpecies (p ∷⁺ ps)
+
+instance
+  i′ : {ps : List⁺ PitchInterval} → {p p1 p2 : PitchInterval} →
+             {{_ : motionOk (pitchIntervalToInterval p) (pitchIntervalToInterval (head ps))}} →
+             {{_ : FirstSpecies ps}} → FirstSpecies (p ∷⁺ ps)
+
 
 intervaltoMusic : Interval → Music
 intervaltoMusic (p , q) = note (note 8th p) ∥ note (note 8th q)

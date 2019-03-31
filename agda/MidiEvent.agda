@@ -23,7 +23,7 @@ Tick = ℕ
 Velocity : Set
 Velocity  = Fin 128
 
-defaultVelocity : Fin 128
+defaultVelocity : Velocity
 defaultVelocity = # 60
 
 -- percussion is channel 10, so 9 as Channel-1

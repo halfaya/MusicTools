@@ -4,6 +4,7 @@ module Music where
 
 open import Data.Integer using (ℤ; +_)
 open import Data.List    using (List; foldr; []; _∷_)
+open import Data.Product using (_×_; _,_)
 
 open import Note         renaming (transpose to transposeNote)
 open import Pitch        renaming (transpose to transposePitch)
@@ -39,6 +40,22 @@ fromChord (chord d ps) = foldr (λ p m → note (note d p) ∥ m) nil ps
 
 fromChords : List Chord → Music
 fromChords = foldr (λ c m → fromChord c ∷ m) nil
+
+-- unzip parallel lines as far as possible
+unzip : Music → Music × Music
+unzip (note _)                = nil , nil
+unzip (note _ ∷ _)            = nil , nil
+unzip ((_ ∷ _) ∷ _)           = nil , nil
+unzip ((note n ∥ note o) ∷ m) = let (x , y) = unzip m in note n ∷ x , note o ∷ y
+unzip ((note _ ∥ _ ∷ _) ∷ _)  = nil , nil
+unzip ((note _ ∥ _ ∥ _) ∷ _)  = nil , nil
+unzip (((_ ∷ _) ∥ _) ∷ _)     = nil , nil
+unzip (((_ ∥ _) ∥ _) ∷ _)     = nil , nil
+unzip (note n ∥ note o)       = note n , note o
+unzip (note _ ∥ _ ∷ _)        = nil , nil
+unzip (note _ ∥ _ ∥ _)        = nil , nil
+unzip ((_ ∷ _) ∥ _)           = nil , nil
+unzip ((_ ∥ _) ∥ _)           = nil , nil
 
 {-
 oompah : Chord → List Chord

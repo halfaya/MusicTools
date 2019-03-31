@@ -18,5 +18,5 @@ main =
   let channel      = 0
       ticksPerBeat = 4 -- 16th notes
       file         = "/Users/leo/Downloads/test.mid"
-      song         = ycpTrack
+      song         = ycpTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

@@ -48,13 +48,21 @@
 \begin{document}
 
 %% Title information
-\title{Musical Ornaments}
-\subtitle{Functional Pearl}
+\title{Demo: Counterpoint by Construction}
+%\subtitle{Functional Pearl}
 
 %% Author information
 %% Contents and number of authors suppressed with 'anonymous'.
 
 %% Author with single affiliation.
+\author{Youyou Cong}
+\affiliation{
+  \institution{Tokyo Institute of Technology}            %% \institution is required
+  \city{Tokyo}
+  \country{Japan}
+}
+\email{cong@c.titech.ac.jp}          %% \email is recommended
+
 \author{John Leo}
 \affiliation{
   \institution{Halfaya Research}            %% \institution is required
@@ -64,19 +72,33 @@
 }
 \email{leo@halfaya.org}          %% \email is recommended
 
-\author{Youyou Cong}
-\affiliation{
-  \institution{Tokyo Institute of Technology}            %% \institution is required
-  \city{Tokyo}
-  \country{Japan}
-}
-\email{cong@c.titech.ac.jp}          %% \email is recommended
 
 %% Abstract
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-Text of abstract \ldots.
+Western music of the common practice period tends to loosely follow sets of rules which
+were developed over time to help ensure the aethetic quality of the composition. Rules in
+developed in particular for harmony (\cite{piston1987harmony}) and counterpoint (\cite{fux1965study}),
+and continue to be taught to music students
+both to to understand the music of that time and because they continue to provide a foundation for
+modern art and popular music. To help both analyze and synthesize
+tonal music, it is worthwhile to attempt to encode these rules into a programming
+language, with functional programming languages being particularly wells-suited to this task.
+Recently quite a bit of work has been done in Haskell (\cite{fmmh, hihseufha, faamh, hafha, fghm})
+to encode the rules of harmony, but little work seems to have been done with counterpoint (\cite{mezzo}).
+Furthermore Haskell's type system, lacking full dependent types, is not strong enough to encode
+the required logic in a natural way, and requires using a number of extensions.
+
+In this demonstration of work in progress, we present Music Tools (\cite{MusicTools}), a library of
+small tools that can be combined functionally to help analyze and synthesize music. The library is
+written in the dependently typed language Agda (with Haskell used for I/O), which allows a simple
+and natural encoding of rules. We demonstrate its use in writing species counterpoint following
+Fux (\cite{fux1965study}), in which type system ensures by construction that the rules are followed.
+We show how this both aids human composition and allows for computer-generated creation of correct
+counterpoint. We also contrast this work to recent use of machine learnring to generated natural-sounding
+counterpoint which does not necessarily follow specific rules (\cite{CounterpointByConvolution}). Finally
+we indicate future planned work including extension to handle functional harmony.
 \end{abstract}
 
 
@@ -101,7 +123,6 @@ Text of abstract \ldots.
 \ccsdesc[300]{Social and professional topics~History of programming languages}
 %% End of generated code
 
-
 %% Keywords
 %% comma separated list
 \keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
@@ -114,17 +135,14 @@ Text of abstract \ldots.
 \maketitle
 
 
-\section{Introduction}
-
-Text of paper \ldots
-
-
 %% Acknowledgments
 \begin{acks}                            %% contents suppressed with 'anonymous'
+  Thanks to the participants of the Tokyo Agda Implmentors' Meeting, especially Ulf Norell and Jesper Cockx,
+  for many helpful suggestions that improved our Agda code.
 \end{acks}
 
 
 %% Bibliography
-%\bibliography{bibfile}
+\bibliography{farm-abstract.bib}
 
 \end{document}

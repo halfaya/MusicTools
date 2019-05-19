@@ -8,7 +8,7 @@ open import Pitch
 
 open import Data.Bool hiding (_≟_)
 open import Data.Empty using (⊥)
-open import Data.Integer.Base using (+_;  -[1+_])-- hiding (_+_)
+open import Data.Integer.Base using (+_;  -[1+_])
 open import Data.List.NonEmpty
 open import Data.Nat
 open import Data.Product hiding (map)

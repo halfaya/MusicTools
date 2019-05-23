@@ -76,30 +76,6 @@
 %% Abstract
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
-\begin{abstract}
-Western music of the common practice period tends to loosely follow sets of rules which
-were developed over time to help ensure the aethetic quality of the composition. Rules in
-developed in particular for harmony (\cite{piston1987harmony}) and counterpoint (\cite{fux1965study}),
-and continue to be taught to music students
-both to to understand the music of that time and because they continue to provide a foundation for
-modern art and popular music. To help both analyze and synthesize
-tonal music, it is worthwhile to attempt to encode these rules into a programming
-language, with functional programming languages being particularly wells-suited to this task.
-Recently quite a bit of work has been done in Haskell (\cite{fmmh, hihseufha, faamh, hafha, fghm})
-to encode the rules of harmony, but little work seems to have been done with counterpoint (\cite{mezzo}).
-Furthermore Haskell's type system, lacking full dependent types, is not strong enough to encode
-the required logic in a natural way, and requires using a number of extensions.
-
-In this demonstration of work in progress, we present Music Tools (\cite{MusicTools}), a library of
-small tools that can be combined functionally to help analyze and synthesize music. The library is
-written in the dependently typed language Agda (with Haskell used for I/O), which allows a simple
-and natural encoding of rules. We demonstrate its use in writing species counterpoint following
-Fux (\cite{fux1965study}), in which type system ensures by construction that the rules are followed.
-We show how this both aids human composition and allows for computer-generated creation of correct
-counterpoint. We also contrast this work to recent use of machine learnring to generated natural-sounding
-counterpoint which does not necessarily follow specific rules (\cite{CounterpointByConvolution}). Finally
-we indicate future planned work including extension to handle functional harmony.
-\end{abstract}
 
 
 %% 2012 ACM Computing Classification System (CSS) concepts
@@ -125,7 +101,7 @@ we indicate future planned work including extension to handle functional harmony
 
 %% Keywords
 %% comma separated list
-\keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
+% \keywords{keyword1, keyword2, keyword3}  %% \keywords are mandatory in final camera-ready submission
 
 
 %% \maketitle
@@ -134,11 +110,47 @@ we indicate future planned work including extension to handle functional harmony
 %% environment and commands, and keywords command.
 \maketitle
 
+Western music of the common practice period tends to loosely
+follow sets of rules, which were developed over time to help
+ensure the aethetic quality of the composition. 
+Among various rules, those for harmony \citep{piston1987harmony}
+and counterpoint \citep{fux1965study} are continue to be taught
+to music students, not only as a means to understand the music of
+that period, but also as a foundation for modern art and popular music.
+To help analyze and synthesize tonal music, it is worthwhile to encode
+these rules into a programming language, and in particular, functional
+programming languages have proven ideally suited to this task.
+In the past decade, quite a bit of work has been done in Haskell
+\citep{fmmh, hihseufha, faamh, hafha, fghm} to encode the rules of harmony,
+but little progress has been made on counterpoint \citep{mezzo}.
+Furthermore, due to the lack of full dependent types, Haskell's
+type system is not strong enough to encode the logic of counterpoint
+in a natural way; indeed, existing implementation relies on a number
+of language extensions.
+
+In this demonstration of work in progress, we present Music Tools
+\citep{MusicTools}, a library of small tools that can be combined
+functionally to help analyze and synthesize music.
+The library is written in Agda (with Haskell used for I/O), which
+allows simple and natural encoding of rules by means of dependent types.
+As an application of the library, we demonstrate an implementation of 
+species counterpoint \citep{fux1965study}, which uses Agda's rich type
+system to ensure (by construction) that all rules are followed.
+We show how this both aids human composition and allows for
+computer-generated creation of correct counterpoint.
+We also contrast our approach to a recent study on generating
+natural-sounding counterpoint by machine learning
+\citep{CounterpointByConvolution}, which does not give us correctness
+guarantees.
+Finally, we discuss further applications of our library, including handling 
+of functional harmony.
+
 
 %% Acknowledgments
 \begin{acks}                            %% contents suppressed with 'anonymous'
-  Thanks to the participants of the Tokyo Agda Implmentors' Meeting, especially Ulf Norell and Jesper Cockx,
-  for many helpful suggestions that improved our Agda code.
+ The authors would like to thank the participants of the Tokyo Agda 
+ Implmentors' Meeting, especially Ulf Norell and Jesper Cockx,
+ for many helpful suggestions that improved our Agda code.
 \end{acks}
 
 

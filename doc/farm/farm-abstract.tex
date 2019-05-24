@@ -111,39 +111,50 @@
 \maketitle
 
 Western music of the common practice period tends to loosely
-follow sets of rules, which were developed over time to help
-ensure the aethetic quality of the composition. 
+follow sets of rules, which were developed over time to ensure
+the aethetic quality of the composition. 
 Among various rules, those for harmony \citep{piston1987harmony}
-and counterpoint \citep{fux1965study} are continue to be taught
-to music students, not only as a means to understand the music of
-that period, but also as a foundation for modern art and popular music.
-To help analyze and synthesize tonal music, it is worthwhile to encode
-these rules into a programming language, and in particular, functional
-programming languages have proven ideally suited to this task.
-In the past decade, quite a bit of work has been done in Haskell
-\citep{fmmh, hihseufha, faamh, hafha, fghm} to encode the rules of harmony,
-but little progress has been made on counterpoint \citep{mezzo}.
-Furthermore, due to the lack of full dependent types, Haskell's
-type system is not strong enough to encode the logic of counterpoint
-in a natural way; indeed, existing implementation relies on a number
-of language extensions.
+and counterpoint \citep{fux1965study} (a technique for generating
+multi-voice melodies) are continue to be taught to music students,
+not only as a means to understand the music of that period, but
+also as a foundation for modern art and popular music.
+
+To help analyze and synthesize tonal music, it is worthwhile to
+encode these rules into a programming language, and as shown by
+recent studies, functional programming languages are particularly
+suited to this task.
+In the past decade, Haskell has been extensively used to encode
+the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
+as well as counterpoint \citep{szamozvancev2017well}.
+Since Haskell is a statically typed language, these frameworks 
+often come with a form of type safety property, namely
+``well-typed music does not sound wrong''.
+Unfortunately, it turns out that the type system of plain Haskell
+is sometimes not powerful enough to guarantee this property.
+To avoid generating music that ``sounds wrong'', previous studies
+have incorporated various language extensions, such as GADTs 
+\citep{cheney2002lightweight} and singleton types 
+\citep{eisenberg2013dependently}, to enable dependently-typed 
+programming.
 
 In this demonstration of work in progress, we present Music Tools
 \citep{MusicTools}, a library of small tools that can be combined
 functionally to help analyze and synthesize music.
-The library is written in Agda (with Haskell used for I/O), which
-allows simple and natural encoding of rules by means of dependent types.
+To allow simple and natural encoding of rules, we built the library
+in Agda \citep{norellphd}, which is a functional language with full
+dependent types.
 As an application of the library, we demonstrate an implementation of 
-species counterpoint \citep{fux1965study}, which uses Agda's rich type
-system to ensure (by construction) that all rules are followed.
-We show how this both aids human composition and allows for
-computer-generated creation of correct counterpoint.
-We also contrast our approach to a recent study on generating
+species counterpoint, based on the rules given by \citet{fux1965study}.
+Thanks to Agda's rich type system, we can ensure by construction that
+well-typed counterpoint satisfies all the required rules.
+We show how the type-based approach both aids human composition and
+allows for computer-generated creation of correct counterpoint.
+We also contrast our work to a recent study on generating
 natural-sounding counterpoint by machine learning
 \citep{CounterpointByConvolution}, which does not give us correctness
 guarantees.
-Finally, we discuss further applications of our library, including handling 
-of functional harmony.
+Finally, we discuss further applications of our library, including
+handling of functional harmony.
 
 
 %% Acknowledgments

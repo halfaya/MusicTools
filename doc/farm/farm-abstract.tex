@@ -145,11 +145,25 @@ in Agda \citep{norellphd}, which is a functional language with full
 dependent types.
 As an application of the library, we demonstrate an implementation of 
 species counterpoint, based on the rules given by \citet{fux1965study}.
-Thanks to Agda's rich type system, we can ensure by construction that
+To give a rough idea of what the rules look like, here are some of
+the requirements for composing two-part, first-species counterpoint:
+
+\begin{itemize}
+\item The interval between the two voices should not be a perfect fourth
+\item The two voices should not move to a perfect fifth or octave 
+by similar motion
+\item The counterpoint should end with a proper cadence
+\end{itemize}
+
+\noindent Thanks to Agda's rich type system, we can fully express 
+these rules using types, and thus ensure by construction that
 well-typed counterpoint satisfies all the required rules.
-We show how the type-based approach both aids human composition and
-allows for computer-generated creation of correct counterpoint.
-We also contrast our work to a recent study on generating
+
+At the FARM workshop, we intend to give a gentle introduction to
+counterpoint, and describe our Agda implementation, showing how the
+type-based approach both aids human composition and allows for 
+computer-generated creation of correct counterpoint.
+We then contrast our work to a recent study on generating
 natural-sounding counterpoint by machine learning
 \citep{CounterpointByConvolution}, which does not give us correctness
 guarantees.

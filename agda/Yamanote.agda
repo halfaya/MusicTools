@@ -44,9 +44,14 @@ firstSpecies =
   (g 4 , maj6) ∷ (e 4 , min10) ∷ (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
   (cadence2 (c 6))
 
+farm : FirstSpecies (g 4 , per8)
+farm = 
+  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
+  (cadence2 (c 6))
+
 
 exercise : Music × Music
-exercise = unzip (firstSpeciesToMusic firstSpecies)
+exercise = unzip (firstSpeciesToMusic farm)
 
 yamanote cp : Music
 yamanote = proj₁ exercise

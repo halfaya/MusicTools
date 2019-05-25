@@ -22,5 +22,5 @@ transposeScaleDegree {n} k (scaleDegree d , octave o) =
   in scaleDegree (d' mod (suc n)) , octave (o + (d' div (suc n)))
 
 scaleDegreeToRelativePitch : {n : ℕ} → Scale n → ScaleDegree n → RelativePitch
-scaleDegreeToRelativePitch scale (scaleDegree d) = lookup d scale
+scaleDegreeToRelativePitch scale (scaleDegree d) = lookup scale d
 

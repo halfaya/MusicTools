@@ -43,7 +43,7 @@
                         %% http://ctan.org/pkg/booktabs
 \usepackage{subcaption} %% For complex figures with subfigures/subcaptions
                         %% http://ctan.org/pkg/subcaption
-
+\usepackage{listings}
 
 \begin{document}
 
@@ -112,29 +112,28 @@
 
 Western music of the common practice period tends to loosely
 follow sets of rules, which were developed over time to ensure
-the aethetic quality of the composition. 
-Among various rules, those for harmony \citep{piston1987harmony}
-and counterpoint \citep{fux1965study} (a technique for generating
-multi-voice melodies) are continue to be taught to music students,
+the aesthetic quality of the composition. 
+Among these rules, those for harmony \citep{piston1987harmony}
+and counterpoint (harmonically interdependent
+melodies) \citep{fux1965study} are particularly fundamental and continue
+to be taught to music students,
 not only as a means to understand the music of that period, but
 also as a foundation for modern art and popular music.
 
 To help analyze and synthesize tonal music, it is worthwhile to
-encode these rules into a programming language, and as shown by
+encode these rules into a programming language. As shown by
 recent studies, functional programming languages are particularly
 suited to this task.
 In the past decade, Haskell has been extensively used to encode
 the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
 as well as counterpoint \citep{szamozvancev2017well}.
-Since Haskell is a statically typed language, these frameworks 
-often come with a form of type safety property, namely
+Haskell's static type sytem is used to encode these rules, so that
 ``well-typed music does not sound wrong''.
-Unfortunately, it turns out that the type system of plain Haskell
-is sometimes not powerful enough to guarantee this property.
-To avoid generating music that ``sounds wrong'', previous studies
-have incorporated various language extensions, such as GADTs 
+Unfortunately the type system of plain Haskell
+is not powerful enough to guarantee these properties. Previous studies
+have thus incorporated language extensions such as GADTs 
 \citep{cheney2002lightweight} and singleton types 
-\citep{eisenberg2013dependently}, to enable dependently-typed 
+\citep{eisenberg2013dependently} to approximate dependently-typed 
 programming.
 
 In this demonstration of work in progress, we present Music Tools
@@ -145,19 +144,68 @@ in Agda \citep{norellphd}, which is a functional language with full
 dependent types.
 As an application of the library, we demonstrate an implementation of 
 species counterpoint, based on the rules given by \citet{fux1965study}.
-To give a rough idea of what the rules look like, here are some of
-the requirements for composing two-part, first-species counterpoint:
-
-\begin{itemize}
-\item The interval between the two voices should not be a perfect fourth
-\item The two voices should not move to a perfect fifth or octave 
-by similar motion
-\item The counterpoint should end with a proper cadence
-\end{itemize}
-
-\noindent Thanks to Agda's rich type system, we can fully express 
-these rules using types, and thus ensure by construction that
+Thanks to Agda's rich type system, we can express 
+these rules naturally, and thus ensure by construction that
 well-typed counterpoint satisfies all the required rules.
+
+As an example, the simplest of Fux's rule systems is first-species
+counterpoint, in which one starts with a base melody (the \textit{cantus firmus})
+and contructs a counterpoint melody note-by-note in the same rhythm.
+``Dissonant'' intervals (2nds, 7ths and 4ths) are probibited, as are
+are parallel and similar motion of perfect intervals (5ths and octaves).
+The latter is encoded in Agda as follows.
+
+\begin{lstlisting}
+motionOk : (i1 : Interval)
+           (i2 : Interval) → Set
+motionOk i1 i2 with motion i1 i2
+         | isPerfectInterval i2
+motionOk i1 i2 | contrary | _     = ⊤
+motionOk i1 i2 | oblique  | _     = ⊤
+motionOk i1 i2 | parallel | false = ⊤
+motionOk i1 i2 | parallel | true  = ⊥
+motionOk i1 i2 | similar  | false = ⊤
+motionOk i1 i2 | similar  | true  = ⊥
+\end{lstlisting}
+
+The music must also end with a cadence, which is a final motion from
+the second or seventh degree to the tonic (first degree). These rules
+are encoded in the following type, whose terms are exactly valid
+first-species counterpoint.
+
+\begin{lstlisting}
+data FirstSpecies : PitchInterval →
+                    Set where
+  cadence2 : (p : Pitch) →
+    FirstSpecies
+      (transpose (+ 2) p , maj6)
+  cadence7 : (p : Pitch) →
+    FirstSpecies
+      (transpose -[1+ 0 ] p , min10)
+  _::_ : (pi : PitchInterval) →
+         {pj : PitchInterval} →
+         {_ : motionOk pi pj} →
+         FirstSpecies pj →
+         FirstSpecies pi
+\end{lstlisting}
+
+Explicit conversions from \texttt{PitchInterval} (which ensures
+the inteval is not dissonant) to the general \texttt{Interval} have
+been omitted in the listing above.
+Note that \texttt{motionOk} is an implicit argument of the cons
+constructor, and is able to be resolved automatically by the type checker,
+and thus the proof does not need to be supplied by the user. Valid
+first-species counterpoint can thus be written very naturally as
+in the following simple example.
+
+\begin{lstlisting}
+example : FirstSpecies (g 4 , per8)
+example = 
+  (g 4 , per8) :: (c 5 , maj10) ::
+  (c 5 , per8) :: (c 5 , maj10) ::
+  (e 5 , min10) :: (g 5 , per8) ::
+  (cadence2 (c 6))
+\end{lstlisting}
 
 At the FARM workshop, we intend to give a gentle introduction to
 counterpoint, and describe our Agda implementation, showing how the
@@ -165,16 +213,16 @@ type-based approach both aids human composition and allows for
 computer-generated creation of correct counterpoint.
 We then contrast our work to a recent study on generating
 natural-sounding counterpoint by machine learning
-\citep{CounterpointByConvolution}, which does not give us correctness
+\citep{CounterpointByConvolution}, which does not provide correctness
 guarantees.
 Finally, we discuss further applications of our library, including
-handling of functional harmony.
+representation of functional harmony.
 
 
 %% Acknowledgments
 \begin{acks}                            %% contents suppressed with 'anonymous'
  The authors would like to thank the participants of the Tokyo Agda 
- Implmentors' Meeting, especially Ulf Norell and Jesper Cockx,
+ Implementors' Meeting, especially Ulf Norell and Jesper Cockx,
  for many helpful suggestions that improved our Agda code.
 \end{acks}
 

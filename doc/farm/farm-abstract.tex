@@ -148,12 +148,33 @@ Thanks to Agda's rich type system, we can express
 these rules naturally, and thus ensure by construction that
 well-typed counterpoint satisfies all the required rules.
 
-As an example, the simplest of Fux's rule systems is first-species
-counterpoint, in which one starts with a base melody (the \textit{cantus firmus})
-and contructs a counterpoint melody note-by-note in the same rhythm.
-``Dissonant'' intervals (2nds, 7ths and 4ths) are probibited, as are
-parallel and similar motion of perfect intervals (5ths and octaves).
-The latter is encoded in Agda as follows.
+Let us briefly explain how to implement the rule system of 
+first-species counterpoint\footnote{The code is available at
+\url{https://github.com/halfaya/MusicTools/blob/master/agda/Counterpoint.agda}.}.
+In this exercise, we pick a base melody (the \emph{cantus firmus}),
+and contruct a counterpoint melody note-by-note in the same rhythm.
+The two voices are represented as a list of pitch-interval pairs,
+where intervals must not be dissonant ones (2nds, 7ths, or 4ths).
+
+\begin{lstlisting}
+data IntervalQuality : Set where
+  min3  : IntervalQuality
+  maj3  : IntervalQuality
+  per5  : IntervalQuality
+  min6  : IntervalQuality
+  maj6  : IntervalQuality
+  per8  : IntervalQuality
+  min10 : IntervalQuality
+  maj10 : IntervalQuality
+
+PitchInterval : Set
+PitchInterval = Pitch × IntervalQuality
+\end{lstlisting}
+
+In a counterpoint list, there must not be perfect intervals 
+(5ths and octaves) resulted from parallel or similar motion.
+Therefore, we define a predicate that checks whether a motion 
+is allowed or not.
 
 \begin{lstlisting}
 motionOk : (i1 : Interval)
@@ -168,10 +189,15 @@ motionOk i1 i2 | similar  | false = ⊤
 motionOk i1 i2 | similar  | true  = ⊥
 \end{lstlisting}
 
-The music must also end with a cadence, which is a final motion from
-the second or seventh degree to the tonic (first degree). These rules
-are encoded in the following type, whose terms are exactly valid
-first-species counterpoint.
+The last requirement is that the music must end with a cadence,
+ which is a final motion from the 2nd or 7th degree to the tonic 
+(1st degree). 
+We impose this requirement by declaring two cadence constructors 
+as the base cases of counterpoint.
+Thus, we arrive at the following datatype for well-typed counterpoint\footnote{
+For readability, we have ommited explicit conversions 
+from \texttt{PitchInterval} (which ensures the interval is not dissonant) 
+to the general \texttt{Interval}.}.
 
 \begin{lstlisting}
 data FirstSpecies : PitchInterval →
@@ -189,14 +215,13 @@ data FirstSpecies : PitchInterval →
          FirstSpecies pi
 \end{lstlisting}
 
-Explicit conversions from \texttt{PitchInterval} (which ensures
-the inteval is not dissonant) to the general \texttt{Interval} have
-been omitted in the listing above.
-Note that \texttt{motionOk} is an implicit argument of the cons
-constructor, and is able to be resolved automatically by the type checker,
-and thus the proof does not need to be supplied by the user. Valid
-first-species counterpoint can thus be written very naturally as
-in the following simple example.
+\noindent Observe that \texttt{motionOk} is an implicit argument of 
+the \texttt{\_::\_} constructor. 
+The argument can be resolved automatically by the type checker,
+hence there is no need to manually supply this proof. 
+
+Now, we can write valid first-species counterpoint as in the 
+example below.
 
 \begin{lstlisting}
 example : FirstSpecies (g 4 , per8)

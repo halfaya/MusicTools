@@ -151,10 +151,10 @@ well-typed counterpoint satisfies all the required rules.
 Let us briefly explain how to implement the rule system of 
 first-species counterpoint\footnote{The code is available at
 \url{https://github.com/halfaya/MusicTools/blob/master/agda/Counterpoint.agda}.}.
-In this exercise, we pick a base melody (the \emph{cantus firmus}),
-and contruct a counterpoint melody note-by-note in the same rhythm.
+In first-species counterpoint, one starts with a base melody (the \emph{cantus firmus}),
+and contructs a counterpoint melody note-by-note in the same rhythm.
 The two voices are represented as a list of pitch-interval pairs,
-where intervals must not be dissonant ones (2nds, 7ths, or 4ths).
+where intervals must not be dissonant (2nds, 7ths, or 4ths).
 
 \begin{lstlisting}
 data IntervalQuality : Set where
@@ -171,8 +171,8 @@ PitchInterval : Set
 PitchInterval = Pitch × IntervalQuality
 \end{lstlisting}
 
-In a counterpoint list, there must not be perfect intervals 
-(5ths and octaves) resulted from parallel or similar motion.
+In addition, it is prohibited to move from any interval to
+a perfect interval (5th or octave) via parallel or similar motion.
 Therefore, we define a predicate that checks whether a motion 
 is allowed or not.
 
@@ -220,7 +220,7 @@ the \texttt{\_::\_} constructor.
 The argument can be resolved automatically by the type checker,
 hence there is no need to manually supply this proof. 
 
-Now, we can write valid first-species counterpoint as in the 
+Now we can write valid first-species counterpoint as in the 
 example below.
 
 \begin{lstlisting}

@@ -205,11 +205,9 @@ to the general \texttt{Interval}.}.
 data FirstSpecies : PitchInterval →
                     Set where
   cadence2 : (p : Pitch) →
-    FirstSpecies
-      (transpose (+ 2) p , maj6)
+    FirstSpecies (transpose (+ 2) p , maj6)
   cadence7 : (p : Pitch) →
-    FirstSpecies
-      (transpose -[1+ 0 ] p , min10)
+    FirstSpecies (transpose -[1+ 0 ] p , min10)
   _::_ : (pi : PitchInterval) →
          {pj : PitchInterval} →
          {_ : motionOk pi pj} →

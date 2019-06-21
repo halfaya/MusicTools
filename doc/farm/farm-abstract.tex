@@ -1,5 +1,6 @@
 %% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
-\documentclass[sigplan,review]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\documentclass[sigplan,10pt,screen]{acmart}
+\settopmatter{printfolios=true, printccs=true, printacmref=false}
 %% For double-blind review submission, w/ CCS and ACM Reference
 %\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true}
 %% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
@@ -9,15 +10,9 @@
 %% For final camera-ready submission, w/ required CCS and ACM Reference
 %\documentclass[acmsmall]{acmart}\settopmatter{}
 
-%% Journal information
-%% Supplied to authors by publisher for camera-ready submission;
-%% use defaults for review submission.
-\acmJournal{PACMPL}
-\acmVolume{1}
-\acmNumber{CONF} % CONF = POPL or ICFP or OOPSLA
-\acmArticle{1}
-\acmYear{2018}
-\acmMonth{1}
+\acmConference[FARM 2019]{The ACM SIGPLAN International Workshop on Functional Art, Music, Modelling and Design}{August, 2019}{Berlin, Germany}
+\acmYear{2019}
+\acmISBN{} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
 \acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
 \startPage{1}
 
@@ -43,9 +38,7 @@
                         %% http://ctan.org/pkg/booktabs
 \usepackage{subcaption} %% For complex figures with subfigures/subcaptions
                         %% http://ctan.org/pkg/subcaption
-\usepackage{listings}
-
-\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true}
+\usepackage{alltt}
 
 \begin{document}
 
@@ -78,6 +71,17 @@
 %% Abstract
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
+\begin{abstract}
+We present \emph{Music Tools}, an Agda library for analyzing 
+and synthesizing music.  
+The library uses dependent types to simplify encoding of 
+music rules, thus improving existing approaches based on 
+simply typed languages.  
+As an application of the library, we demonstrate an 
+implementation of first-species counterpoint, where we use
+dependent types to constrain the motion of two parallely
+sounding voices.
+\end{abstract}
 
 
 %% 2012 ACM Computing Classification System (CSS) concepts
@@ -85,20 +89,20 @@
 \begin{CCSXML}
 <ccs2012>
 <concept>
-<concept_id>10011007.10011006.10011008</concept_id>
-<concept_desc>Software and its engineering~General programming languages</concept_desc>
+<concept_id>10010405.10010469.10010475</concept_id>
+<concept_desc>Applied computing~Sound and music computing</concept_desc>
 <concept_significance>500</concept_significance>
 </concept>
 <concept>
-<concept_id>10003456.10003457.10003521.10003525</concept_id>
-<concept_desc>Social and professional topics~History of programming languages</concept_desc>
-<concept_significance>300</concept_significance>
+<concept_id>10011007.10011006.10011008.10011009.10011012</concept_id>
+<concept_desc>Software and its engineering~Functional languages</concept_desc>
+<concept_significance>500</concept_significance>
 </concept>
 </ccs2012>
 \end{CCSXML}
 
-\ccsdesc[500]{Software and its engineering~General programming languages}
-\ccsdesc[300]{Social and professional topics~History of programming languages}
+\ccsdesc[500]{Applied computing~Sound and music computing}
+\ccsdesc[500]{Software and its engineering~Functional languages}
 %% End of generated code
 
 %% Keywords
@@ -112,53 +116,72 @@
 %% environment and commands, and keywords command.
 \maketitle
 
+\section{Introduction}
+
 Western music of the common practice period tends to loosely
 follow sets of rules, which were developed over time to ensure
 the aesthetic quality of the composition. 
-Among these rules, those for harmony \citep{piston1987harmony}
-and counterpoint (harmonically interdependent
-melodies) \citep{fux1965study} are particularly fundamental and continue
-to be taught to music students,
-not only as a means to understand the music of that period, but
-also as a foundation for modern art and popular music.
+Among such rules, those for harmony \citep{piston1987harmony}
+and counterpoint (harmonically independent melodies) 
+\citep{fux1965study} are particularly fundamental and continue 
+to be taught to music students, not only as a means to understand 
+the music of that period, but also as a foundation for modern art 
+and popular music.
 
-To help analyze and synthesize tonal music, it is worthwhile to
-encode these rules into a programming language. As shown by
-recent studies, functional programming languages are particularly
-suited to this task.
+To analyze and synthesize tonal music, researchers have been
+attempting to encode various rules into a programming language.
+It has proven that functional programming languages are
+ideally suited for this task, and in particular, those with a static
+type system can further guarantee that \emph{well-typed music 
+does not sound wrong}.
 In the past decade, Haskell has been extensively used to encode
 the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
 as well as counterpoint \citep{szamozvancev2017well}.
-Haskell's static type sytem is used to encode these rules, so that
-``well-typed music does not sound wrong''.
-Unfortunately the type system of plain Haskell
-is not powerful enough to guarantee these properties. Previous studies
-have thus incorporated language extensions such as GADTs 
-\citep{cheney2002lightweight} and singleton types 
-\citep{eisenberg2013dependently} to approximate dependently-typed 
-programming.
+An interesting observation is that, many of the existing encodings
+rely on some form of \emph{dependent types}, \textit{i.e.},  
+types that depend on terms. 
+Since Haskell is not a dependently typed language, one has to
+use other facilities, such as GADTs \citep{cheney2002lightweight} 
+and singleton types \citep{eisenberg2013dependently},
+to indirectly simulate dependencies.
+While this allows to encode a wide class of music rules, it may
+require duplicating certain pieces of code to reflect terms into 
+types, making the implementation less elegant 
+\citep{monnier2010singleton}.
+This motivates us to explore music programming in a language
+with intrinsic support for dependent types.
 
-In this demonstration of work in progress, we present Music Tools
-\citep{MusicTools}, a library of small tools that can be combined
-functionally to help analyze and synthesize music.
-To allow simple and natural encoding of rules, we built the library
-in Agda \citep{norellphd}, which is a functional language with full
-dependent types.
-As an application of the library, we demonstrate an implementation of 
-species counterpoint, based on the rules given by \citet{fux1965study}.
+We present Music Tools\footnote{\url{https://github.com/halfaya/MusicTools}}, a library of small tools that can be combined functionally to 
+help analyze and synthesize music.
+To allow simple and natural encoding of rules, we build our 
+library in the Agda \citep{norellphd} proof assistant, where
+dependent types are readily available.
+As an application of the library, we demonstrate an
+implementation  of  species counterpoint, based on the rules 
+given by \citet{fux1965study}.
 Thanks to Agda's rich type system, we can express 
-these rules naturally, and thus ensure by construction that
-well-typed counterpoint satisfies all the required rules.
+the rules in a straightforward manner, and thus ensure by 
+construction that well-typed counterpoint satisfies all the 
+required rules.
 
-Let us briefly explain how to implement the rule system of 
-first-species counterpoint\footnote{The code is available at
+
+\section{The Music Tools Library}
+
+TODO: describe the key ingredients of the library.
+
+
+\section{Application: First-Species Counterpoint}
+
+Now, let us explain how to implement the rule system of 
+first-species counterpoint\footnote{The code is available at \\
 \url{https://github.com/halfaya/MusicTools/blob/master/agda/Counterpoint.agda}.}.
-In first-species counterpoint, one starts with a base melody (the \emph{cantus firmus}),
-and contructs a counterpoint melody note-by-note in the same rhythm.
+In first-species counterpoint, one starts with a base melody 
+(the \emph{cantus firmus}), and constructs a counterpoint 
+melody note-by-note in the same rhythm.
 The two voices are represented as a list of pitch-interval pairs,
 where intervals must not be dissonant (2nds, 7ths, or 4ths).
 
-\begin{lstlisting}
+\begin{alltt}
 data IntervalQuality : Set where
   min3  : IntervalQuality
   maj3  : IntervalQuality
@@ -170,29 +193,29 @@ data IntervalQuality : Set where
   maj10 : IntervalQuality
 
 PitchInterval : Set
-PitchInterval = Pitch × IntervalQuality
-\end{lstlisting}
+PitchInterval = Pitch \(\times\) IntervalQuality
+\end{alltt}
 
 In addition, it is prohibited to move from any interval to
 a perfect interval (5th or octave) via parallel or similar motion.
 Therefore, we define a predicate that checks whether a motion 
 is allowed or not.
 
-\begin{lstlisting}
+\begin{alltt}
 motionOk : (i1 : Interval)
-           (i2 : Interval) → Set
+           (i2 : Interval) \(\rightarrow\) Set
 motionOk i1 i2 with motion i1 i2
          | isPerfectInterval i2
-motionOk i1 i2 | contrary | _     = ⊤
-motionOk i1 i2 | oblique  | _     = ⊤
-motionOk i1 i2 | parallel | false = ⊤
-motionOk i1 i2 | parallel | true  = ⊥
-motionOk i1 i2 | similar  | false = ⊤
-motionOk i1 i2 | similar  | true  = ⊥
-\end{lstlisting}
+motionOk i1 i2 | contrary | \_     = \(\top\)
+motionOk i1 i2 | oblique  | \_     = \(\top\)
+motionOk i1 i2 | parallel | false = \(\top\)
+motionOk i1 i2 | parallel | true  = \(\bot\)
+motionOk i1 i2 | similar  | false = \(\top\)
+motionOk i1 i2 | similar  | true  = \(\bot\)
+\end{alltt}
 
 The last requirement is that the music must end with a cadence,
- which is a final motion from the 2nd or 7th degree to the tonic 
+which is a final motion from the 2nd or 7th degree to the tonic 
 (1st degree). 
 We impose this requirement by declaring two cadence constructors 
 as the base cases of counterpoint.
@@ -201,19 +224,19 @@ For readability, we have ommited explicit conversions
 from \texttt{PitchInterval} (which ensures the interval is not dissonant) 
 to the general \texttt{Interval}.}.
 
-\begin{lstlisting}
-data FirstSpecies : PitchInterval →
+\begin{alltt}
+data FirstSpecies : PitchInterval \(\rightarrow\)
                     Set where
-  cadence2 : (p : Pitch) →
+  cadence2 : (p : Pitch) \(\rightarrow\)
     FirstSpecies (transpose (+ 2) p , maj6)
-  cadence7 : (p : Pitch) →
+  cadence7 : (p : Pitch) \(\rightarrow\)
     FirstSpecies (transpose -[1+ 0 ] p , min10)
-  _::_ : (pi : PitchInterval) →
-         {pj : PitchInterval} →
-         {_ : motionOk pi pj} →
-         FirstSpecies pj →
+  \_::\_ : (pi : PitchInterval) \(\rightarrow\)
+         {pj : PitchInterval} \(\rightarrow\)
+         {\_ : motionOk pi pj} \(\rightarrow\)
+         FirstSpecies pj \(\rightarrow\)
          FirstSpecies pi
-\end{lstlisting}
+\end{alltt}
 
 \noindent Observe that \texttt{motionOk} is an implicit argument of 
 the \texttt{\_::\_} constructor. 
@@ -223,26 +246,30 @@ hence there is no need to manually supply this proof.
 Now we can write valid first-species counterpoint as in the 
 example below.
 
-\begin{lstlisting}
+\begin{alltt}
 example : FirstSpecies (g 4 , per8)
 example = 
   (g 4 , per8) :: (c 5 , maj10) ::
   (c 5 , per8) :: (c 5 , maj10) ::
   (e 5 , min10) :: (g 5 , per8) ::
   (cadence2 (c 6))
-\end{lstlisting}
+\end{alltt}
 
-At the FARM workshop, we intend to give a gentle introduction to
-counterpoint, and describe our Agda implementation, showing how the
-type-based approach both aids human composition and allows for 
-computer-generated creation of correct counterpoint.
-We then contrast our work to a recent study on generating
-natural-sounding counterpoint by machine learning
-\citep{CounterpointByConvolution}, which does not provide correctness
-guarantees.
-Finally, we discuss further applications of our library, including
-representation of functional harmony.
 
+\section{Future Work}
+
+TODO
+
+%At the FARM workshop, we intend to give a gentle introduction to
+%counterpoint, and describe our Agda implementation, showing how the
+%type-based approach both aids human composition and allows for 
+%computer-generated creation of correct counterpoint.
+%We then contrast our work to a recent study on generating
+%natural-sounding counterpoint by machine learning
+%\citep{CounterpointByConvolution}, which does not provide correctness
+%guarantees.
+%Finally, we discuss further applications of our library, including
+%representation of functional harmony.
 
 %% Acknowledgments
 \begin{acks}                            %% contents suppressed with 'anonymous'

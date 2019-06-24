@@ -167,8 +167,28 @@ required rules.
 
 \section{The Music Tools Library}
 
-TODO: describe the key ingredients of the library.
+The goal of Music Tools is to provide a core collection of types and functions
+that can be used to easily build applications to analyze and synthesize music.
+It is intended to evolved into a dependently-typed replacement for Euterpea
+\citep{hudak2018haskell} and borrows many ideas from that library.
+It is currently restricted to the chromatic scale for simplicity, and like
+Euterpea is designed to work well with MIDI.
 
+The fundamental type for melody is \texttt{Pitch} which is just a natural number with $0$
+representing the lowest expressible pitch (it is intended to correspond to MIDI note 0, but
+the interpretation can change depending upon the application). One can also
+express pitch as a pair of an octave and relative pitch within the ocatve, which is
+more convenient for some applications, and convert between this representation and
+absolute pitch. One can then prove that converting back and forth is the identity function.
+
+For rhythm the fundamental type is \texttt{Duration}, also a natural number, which represents
+some unspecified unit of time (when the music is played the unit is then specified).
+A combination of a pitch and a duration gives a \texttt{Note}, and notes in turn are
+made into \texttt{Music} via sequential and parallel composition, as in Euterpea.
+
+Music in turn can be converted to MIDI and and played on synthesizers. Existing Haskell
+MIDI libraries are called via Agda's Haskell FFI. Details can be found in the github
+repository.
 
 \section{Application: First-Species Counterpoint}
 
@@ -260,24 +280,37 @@ example =
 
 \section{Future Work}
 
-TODO
+We intend to expand the Music Tools library to include
+richer functionality for analysis and synthesis. We are
+particularly interested in expressing the work done in Haskell
+on functional harmony in the library, to see just how much
+dependent types can simplify the representation.
 
-%At the FARM workshop, we intend to give a gentle introduction to
-%counterpoint, and describe our Agda implementation, showing how the
-%type-based approach both aids human composition and allows for 
-%computer-generated creation of correct counterpoint.
-%We then contrast our work to a recent study on generating
-%natural-sounding counterpoint by machine learning
-%\citep{CounterpointByConvolution}, which does not provide correctness
-%guarantees.
-%Finally, we discuss further applications of our library, including
-%representation of functional harmony.
+Music is a rich yet circumscribed domain in which
+issues of equivalence \citep{tabareau2017equivalences}
+and ornamentation \citep{dagand2017essence} naturally arise.
+For example a
+musical score can be interpreted either horizontally (counterpoint) or
+vertically (harmony) and it is important to be able to seamlessly
+convert between these representations. Similarly one may wish to treat
+pitch or rhythm separately as well as combine them, which is a natural
+application of ornamentation. We plan to examine the extent to which this
+research can be put to use in a practical domain.
+
+For counterpoint specifically, we plan represent higher species counterpoint
+and also to explore automatic generation of species counterpoint,
+contrasting the music created to recent work on generating
+natural-sounding counterpoint by machine learning
+\citep{CounterpointByConvolution}, which does not provide correctness
+guarantees.
 
 %% Acknowledgments
 \begin{acks}                            %% contents suppressed with 'anonymous'
  The authors would like to thank the participants of the Tokyo Agda 
  Implementors' Meeting, especially Ulf Norell and Jesper Cockx,
  for many helpful suggestions that improved our Agda code.
+ We also thank the anonymous reviewers for their thoughtful feedback
+ which improved our presentation.
 \end{acks}
 
 

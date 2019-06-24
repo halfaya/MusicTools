@@ -122,15 +122,15 @@ Western music of the common practice period tends to loosely
 follow sets of rules, which were developed over time to ensure
 the aesthetic quality of the composition. 
 Among such rules, those for harmony \citep{piston1987harmony}
-and counterpoint (harmonically independent melodies) 
+and counterpoint (harmonically interdependent melodies) 
 \citep{fux1965study} are particularly fundamental and continue 
 to be taught to music students, not only as a means to understand 
 the music of that period, but also as a foundation for modern art 
 and popular music.
 
-To analyze and synthesize tonal music, researchers have been
-attempting to encode various rules into a programming language.
-It has proven that functional programming languages are
+To analyze and synthesize tonal music, researchers have
+attempted to encode these rules into programming languages.
+Functional programming languages seem
 ideally suited for this task, and in particular, those with a static
 type system can further guarantee that \emph{well-typed music 
 does not sound wrong}.
@@ -138,26 +138,26 @@ In the past decade, Haskell has been extensively used to encode
 the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
 as well as counterpoint \citep{szamozvancev2017well}.
 An interesting observation is that, many of the existing encodings
-rely on some form of \emph{dependent types}, \textit{i.e.},  
+rely on some form of \emph{dependent types}, i.e.,  
 types that depend on terms. 
 Since Haskell is not a dependently typed language, one has to
-use other facilities, such as GADTs \citep{cheney2002lightweight} 
+use language extensions, such as GADTs \citep{cheney2002lightweight} 
 and singleton types \citep{eisenberg2013dependently},
-to indirectly simulate dependencies.
-While this allows to encode a wide class of music rules, it may
-require duplicating certain pieces of code to reflect terms into 
+to simulate dependencies.
+While this allows encoding a wide class of music rules, it can
+require duplicating code to reflect terms into 
 types, making the implementation less elegant 
 \citep{monnier2010singleton}.
 This motivates us to explore music programming in a language
 with intrinsic support for dependent types.
 
-We present Music Tools\footnote{\url{https://github.com/halfaya/MusicTools}}, a library of small tools that can be combined functionally to 
+We present Music Tools\footnote{\url{https://github.com/halfaya/MusicTools}},
+a library of small tools that can be combined functionally to 
 help analyze and synthesize music.
 To allow simple and natural encoding of rules, we build our 
-library in the Agda \citep{norellphd} proof assistant, where
-dependent types are readily available.
+library in Agda \citep{norellphd}, a functional language with full dependent types.
 As an application of the library, we demonstrate an
-implementation  of  species counterpoint, based on the rules 
+implementation  of species counterpoint, based on the rules 
 given by \citet{fux1965study}.
 Thanks to Agda's rich type system, we can express 
 the rules in a straightforward manner, and thus ensure by 
@@ -172,7 +172,7 @@ TODO: describe the key ingredients of the library.
 
 \section{Application: First-Species Counterpoint}
 
-Now, let us explain how to implement the rule system of 
+We now explain how to implement the rule system of 
 first-species counterpoint\footnote{The code is available at \\
 \url{https://github.com/halfaya/MusicTools/blob/master/agda/Counterpoint.agda}.}.
 In first-species counterpoint, one starts with a base melody 
@@ -232,8 +232,8 @@ data FirstSpecies : PitchInterval \(\rightarrow\)
   cadence7 : (p : Pitch) \(\rightarrow\)
     FirstSpecies (transpose -[1+ 0 ] p , min10)
   \_::\_ : (pi : PitchInterval) \(\rightarrow\)
-         {pj : PitchInterval} \(\rightarrow\)
-         {\_ : motionOk pi pj} \(\rightarrow\)
+         \{pj : PitchInterval\} \(\rightarrow\)
+         \{\_ : motionOk pi pj\} \(\rightarrow\)
          FirstSpecies pj \(\rightarrow\)
          FirstSpecies pi
 \end{alltt}

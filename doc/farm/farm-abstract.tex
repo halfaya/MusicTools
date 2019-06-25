@@ -79,8 +79,8 @@ music rules, thus improving existing approaches based on
 simply typed languages.  
 As an application of the library, we demonstrate an 
 implementation of first-species counterpoint, where we use
-dependent types to constrain the motion of two parallely
-sounding voices.
+dependent types to constrain the motion of two parallel
+voices.
 \end{abstract}
 
 
@@ -239,7 +239,7 @@ which is a final motion from the 2nd or 7th degree to the tonic
 (1st degree). 
 We impose this requirement by declaring two cadence constructors 
 as the base cases of counterpoint (note that the final interval of
-the cadence is always \texttt{(p, per8)} and is thus not explicitly
+the cadence is always \texttt{(p , per8)} and is thus not explicitly
 specified).
 Thus, we arrive at the following datatype for well-typed counterpoint\footnote{
 For readability, we have omitted explicit conversions 
@@ -301,7 +301,7 @@ For counterpoint specifically, we plan to represent higher species
 counterpoint by extending the rules, 
 and to explore automatic generation of species counterpoint.
 It would be interesting to compare our correct-by-construction counterpoint
-and one created by machine learning \citep{CounterpointByConvolution}, 
+with that created by machine learning \citep{CounterpointByConvolution}, 
 which does not have correctness guarantees.
 
 %% Acknowledgments

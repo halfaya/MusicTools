@@ -1,6 +1,6 @@
 %% For double-blind review submission, w/o CCS and ACM Reference (max submission space)
 \documentclass[sigplan,10pt,screen]{acmart}
-\settopmatter{printfolios=true, printccs=true, printacmref=false}
+\settopmatter{printfolios=true, printccs=true, printacmref=true}
 %% For double-blind review submission, w/ CCS and ACM Reference
 %\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true}
 %% For single-blind review submission, w/o CCS and ACM Reference (max submission space)
@@ -10,21 +10,18 @@
 %% For final camera-ready submission, w/ required CCS and ACM Reference
 %\documentclass[acmsmall]{acmart}\settopmatter{}
 
-\acmConference[FARM 2019]{The ACM SIGPLAN International Workshop on Functional Art, Music, Modelling and Design}{August, 2019}{Berlin, Germany}
+%%% The following is specific to FARM '19 and the paper
+%%% 'Demo: Counterpoint by Construction'
+%%% by Youyou Cong and John Leo.
+%%%
+\setcopyright{rightsretained}
+\acmPrice{}
+\acmDOI{10.1145/3331543.3342578}
 \acmYear{2019}
-\acmISBN{} % \acmISBN{978-x-xxxx-xxxx-x/YY/MM}
-\acmDOI{} % \acmDOI{10.1145/nnnnnnn.nnnnnnn}
-\startPage{1}
-
-%% Copyright information
-%% Supplied to authors (based on authors' rights management selection;
-%% see authors.acm.org) by publisher for camera-ready submission;
-%% use 'none' for review submission.
-\setcopyright{none}
-%\setcopyright{acmcopyright}
-%\setcopyright{acmlicensed}
-%\setcopyright{rightsretained}
-%\copyrightyear{2018}           %% If different from \acmYear
+\copyrightyear{2019}
+\acmISBN{978-1-4503-6811-7/19/08}
+\acmConference[FARM '19]{Proceedings of the 7th ACM SIGPLAN International Workshop on Functional Art, Music, Modeling, and Design}{August 23, 2019}{Berlin, Germany}
+\acmBooktitle{Proceedings of the 7th ACM SIGPLAN International Workshop on Functional Art, Music, Modeling, and Design (FARM '19), August 23, 2019, Berlin, Germany}
 
 %% Bibliography style
 \bibliographystyle{ACM-Reference-Format}
@@ -134,20 +131,21 @@ Functional programming languages seem
 ideally suited for this task, and in particular, those with a static
 type system can further guarantee that \emph{well-typed music 
 does not sound wrong}.
-In the past decade, Haskell has been extensively used to encode
+In the past decade, Haskell has been a popular choice for encoding
 the rules of harmony \citep{fmmh, hihseufha, faamh, hafha, fghm}
 as well as counterpoint \citep{szamozvancev2017well}.
 An interesting observation is that, many of the existing encodings
 rely on some form of \emph{dependent types}, i.e.,  
 types that depend on terms. 
-Since Haskell is not a dependently typed language, one has to
-use language extensions, such as GADTs \citep{cheney2002lightweight} 
-and singleton types \citep{eisenberg2013dependently},
-to simulate dependencies.
-While this allows encoding a wide class of music rules, it can
-require duplicating code to reflect terms into 
-types, making the implementation less elegant 
-\citep{monnier2010singleton}.
+While Haskell is not a dependently typed language, it has various 
+language extensions (such as GADTs \citep{cheney2002lightweight} 
+and singleton types \citep{eisenberg2013dependently}) for 
+simulating dependent types, and as shown by previous studies,
+the extended type system is expressive enough for 
+a wide class of music applications.
+On the other hand, the need for simulating dependent types 
+can also result in code duplication, making the implementation 
+less elegant \citep{monnier2010singleton}.
 This motivates us to explore music programming in a language
 with intrinsic support for dependent types.
 
@@ -157,7 +155,7 @@ help analyze and synthesize music.
 To allow simple and natural encoding of rules, we build our 
 library in Agda \citep{norellphd}, a functional language with full dependent types.
 As an application of the library, we demonstrate an
-implementation  of species counterpoint, based on the rules 
+implementation of species counterpoint, based on the rules 
 given by \citet{fux1965study}.
 Thanks to Agda's rich type system, we can express 
 the rules in a straightforward manner, and thus ensure by 
@@ -170,9 +168,9 @@ required rules.
 The goal of Music Tools is to provide a core collection of types and functions
 that can be used to easily build applications to analyze and synthesize music.
 It is intended to evolve into a dependently-typed replacement for Euterpea
-\citep{hudak2018haskell} and borrows many ideas from that library.
-It is currently restricted to the chromatic scale for simplicity, and like
-Euterpea is designed to work well with MIDI.
+\citep{hudak2018haskell}, and borrows many ideas from that library.
+Currently, Music Tools is restricted to the chromatic scale for simplicity, 
+and like Euterpea is designed to work well with MIDI.
 
 The fundamental type for melody is \texttt{Pitch}, which is just a natural number with $0$
 representing the lowest expressible pitch (it is intended to correspond to MIDI note 0, but
@@ -188,7 +186,7 @@ made into \texttt{Music} via sequential and parallel composition, as in Euterpea
 
 To play music on synthesizers, one can convert it to MIDI by calling 
 Haskell MIDI libraries via Agda's Haskell FFI. 
-Details can be found in the github repository.
+Details can be found in the GitHub repository.
 
 \section{Application: First-Species Counterpoint}
 
@@ -239,7 +237,7 @@ which is a final motion from the 2nd or 7th degree to the tonic
 (1st degree). 
 We impose this requirement by declaring two cadence constructors 
 as the base cases of counterpoint (note that the final interval of
-the cadence is always \texttt{(p , per8)} and is thus not explicitly
+the cadence is always \texttt{(p\ ,\ per8)} and hence is not explicitly
 specified).
 Thus, we arrive at the following datatype for well-typed counterpoint\footnote{
 For readability, we have omitted explicit conversions 
@@ -261,7 +259,7 @@ data FirstSpecies : PitchInterval \(\rightarrow\)
 \end{alltt}
 
 \noindent Observe that \texttt{motionOk} is an implicit argument of 
-the \texttt{\_::\_} constructor. 
+the \texttt{\_::\_} constructor, here denoted by the curly braces. 
 The argument can be resolved automatically by the type checker,
 hence there is no need to manually supply this proof. 
 
@@ -283,7 +281,7 @@ example =
 We intend to expand the Music Tools library to include
 richer functionality for analysis and synthesis. We are
 particularly interested in expressing the work done in Haskell
-on functional harmony in the library, to see just how much
+on functional harmony in the library, to see how much
 dependent types can simplify the representation.
 
 Music is a rich yet circumscribed domain in which
@@ -297,7 +295,7 @@ pitch or rhythm separately as well as combine them, which is a natural
 application of ornamentation. We plan to examine the extent to which this
 research can be put to use in a practical domain.
 
-For counterpoint specifically, we plan to represent higher species 
+For counterpoint specifically, we intend to represent higher species 
 counterpoint by extending the rules, 
 and to explore automatic generation of species counterpoint.
 It would be interesting to compare our correct-by-construction counterpoint
@@ -309,7 +307,7 @@ which does not have correctness guarantees.
  The authors would like to thank the participants of the Tokyo Agda 
  Implementors' Meeting, especially Ulf Norell and Jesper Cockx,
  for many helpful suggestions that improved our Agda code.
- We also thank the anonymous reviewers for their thoughtful feedback
+ We also thank the anonymous reviewers for their thoughtful feedback,
  which improved our presentation.
 \end{acks}
 

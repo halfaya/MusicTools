@@ -25,10 +25,10 @@ PitchPair = Pitch × Pitch
 data Interval : Set where
   interval : ℕ → Interval
 
-_=i_ : Interval → Interval → Bool
-(interval a) =i (interval b) = a ≡ᵇ b
+infix 4 _==_
 
-infix 4 _=i_
+_==_ : Interval → Interval → Bool
+(interval a) == (interval b) = a ≡ᵇ b
 
 -- Names for intervals
 per1  = interval 0
@@ -52,18 +52,24 @@ maj10 = interval 16
 -- TODO: Generalize
 isConsonant : Interval → Bool
 isConsonant i =
-  (i =i per1)  ∨
-  (i =i min3)  ∨
-  (i =i maj3)  ∨
-  (i =i per5)  ∨
-  (i =i min6)  ∨
-  (i =i maj6)  ∨
-  (i =i per8)  ∨
-  (i =i min10) ∨
-  (i =i maj10)
+  (i == per1)  ∨
+  (i == min3)  ∨
+  (i == maj3)  ∨
+  (i == per5)  ∨
+  (i == min6)  ∨
+  (i == maj6)  ∨
+  (i == per8)  ∨
+  (i == min10) ∨
+  (i == maj10)
 
 isDissonant : Interval → Bool
 isDissonant = not ∘ isConsonant
+
+-- Half or whole step; ignores key for now.
+isStep : Interval → Bool
+isStep i =
+  (i == min2)  ∨
+  (i == maj2)
 
 PitchInterval : Set
 PitchInterval = Pitch × Interval
@@ -78,14 +84,10 @@ pitchPairInterval (pitch a , pitch b) = interval (b ∸ a)
 -- TODO: Generalize
 isPerfect : Interval → Bool
 isPerfect i =
-  (i =i per1)  ∨
-  (i =i per4)  ∨
-  (i =i per5)  ∨
-  (i =i per8)
-
--- assume a ≤ b
-isPerfectPair : PitchPair → Bool
-isPerfectPair = isPerfect ∘ pitchPairInterval
+  (i == per1)  ∨
+  (i == per4)  ∨
+  (i == per5)  ∨
+  (i == per8)
 
 data Motion : Set where
   contrary : Motion
@@ -105,8 +107,8 @@ motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .(suc (b + m))) | no ¬
 motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .b)             | no ¬p | greater .c k | equal .b     = oblique
 motion (pitch .(suc (c + k)) , pitch .(suc (d + m))) (pitch c , pitch d) | no ¬p | greater .c k | greater .d m = similar
 
-motionOk : (i1 : PitchPair) (i2 : PitchPair) → Set
-motionOk i1 i2 with motion i1 i2 | isPerfectPair i2
+motionOk : (i1 : PitchInterval) (i2 : PitchInterval) → Set
+motionOk i1 i2 with motion (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2) | isPerfect (proj₂ i2)
 motionOk i1 i2 | contrary | _     = ⊤
 motionOk i1 i2 | oblique  | _     = ⊤
 motionOk i1 i2 | parallel | false = ⊤
@@ -121,14 +123,13 @@ data FirstSpecies :  PitchInterval → Set where
   cadence7 : (p : Pitch) → FirstSpecies (transpose -[1+ 0 ] p , min10)
   _∷_ : (pi : PitchInterval){_ : (T ∘ isConsonant ∘ proj₂) pi}
         {pj : PitchInterval}{_ : (T ∘ isConsonant ∘ proj₂) pj} →
-        {_ : motionOk (pitchIntervalToPitchPair pi) (pitchIntervalToPitchPair pj)} →
-        FirstSpecies pj → FirstSpecies pi
+        {_ : motionOk pi pj} → FirstSpecies pj → FirstSpecies pi
 
-intervaltoMusic : PitchPair → Music
-intervaltoMusic (p , q) = note (note 8th p) ∥ note (note 8th q)
+pitchPairToMusic : PitchPair → Music
+pitchPairToMusic (p , q) = note (note 8th p) ∥ note (note 8th q)
 
-pitchIntervalToMusic :  PitchInterval → Music
-pitchIntervalToMusic = intervaltoMusic ∘ pitchIntervalToPitchPair
+pitchIntervalToMusic : PitchInterval → Music
+pitchIntervalToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
 
 firstSpeciesToMusic : {pi : PitchInterval} → FirstSpecies pi → Music
 firstSpeciesToMusic {pi} (cadence2 p) = pitchIntervalToMusic pi ∷ pitchIntervalToMusic (p , per8)

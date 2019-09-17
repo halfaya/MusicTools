@@ -2,20 +2,20 @@
 
 module Yamanote where
 
-
-open import Pitch
-open import Counterpoint
-open import Note
-open import Music        renaming (transpose to transposeMusic)
-open import MidiEvent
-open import ScaleDegree
-open import Util
-
 open import Data.Fin
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
 open import Data.List hiding ([_]; fromMaybe; unzip)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
+
+open import Counterpoint
+open import Note
+open import Music        renaming (transpose to transposeMusic)
+open import MidiEvent
+open import Pitch
+open import ScaleDegree
+open import SecondSpecies
+open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.
 cantusFirmus : List Pitch
@@ -68,8 +68,13 @@ farm =
   (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
   (cadence2 (c 6))
 
+test2 : SecondSpecies (e 5 , min10)
+test2 = 
+--  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ 
+   [ (e 5 , min10) / maj10 ]∷ [ (g 5 , maj10) / min10 ]∷ (cadence2 (c 6))
+
 exercise : Music × Music
-exercise = unzip (firstSpeciesToMusic firstSpecies2)
+exercise = unzip (secondSpeciesToMusic test2)
 
 yamanote cp : Music
 yamanote = proj₁ exercise

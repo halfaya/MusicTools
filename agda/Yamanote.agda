@@ -17,7 +17,7 @@ open import Data.Nat
 open import Data.List hiding ([_]; fromMaybe; unzip)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 
--- Yamanoto melody transposed down an octave and with an addition d6 at the end.
+-- Yamanoto melody transposed down an octave and with an additional d6 at the end.
 cantusFirmus : List Pitch
 cantusFirmus =
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
@@ -25,6 +25,7 @@ cantusFirmus =
   g 4 ∷ e 4  ∷ g 4 ∷ c 5 ∷ c 5 ∷ c 5 ∷ e 5 ∷ g 5 ∷
   d 6 ∷ c 6 ∷ []
 
+{-
 -- Counterpoint by Youyou Cong
 counterpoint : List IntervalQuality
 counterpoint =
@@ -44,6 +45,7 @@ counterpoint2 =
   maj3 ∷ maj3 ∷ min3 ∷ per5 ∷ min6 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
+-}
 
 firstSpecies : FirstSpecies (g 5 , per8)
 firstSpecies = 
@@ -68,9 +70,8 @@ farm =
   (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
   (cadence2 (c 6))
 
-
 exercise : Music × Music
-exercise = unzip (firstSpeciesToMusic farm)
+exercise = unzip (firstSpeciesToMusic firstSpecies2)
 
 yamanote cp : Music
 yamanote = proj₁ exercise

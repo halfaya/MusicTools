@@ -25,9 +25,8 @@ cantusFirmus =
   g 4 ∷ e 4  ∷ g 4 ∷ c 5 ∷ c 5 ∷ c 5 ∷ e 5 ∷ g 5 ∷
   d 6 ∷ c 6 ∷ []
 
-{-
 -- Counterpoint by Youyou Cong
-counterpoint : List IntervalQuality
+counterpoint : List Interval
 counterpoint =
   per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
@@ -37,7 +36,7 @@ counterpoint =
   maj6 ∷ per8 ∷ []
   
 -- this one sounds slightly better
-counterpoint2 : List IntervalQuality
+counterpoint2 : List Interval
 counterpoint2 =
   per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
@@ -45,7 +44,6 @@ counterpoint2 =
   maj3 ∷ maj3 ∷ min3 ∷ per5 ∷ min6 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
--}
 
 firstSpecies : FirstSpecies (g 5 , per8)
 firstSpecies = 

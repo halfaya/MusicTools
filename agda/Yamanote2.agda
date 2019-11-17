@@ -1,16 +1,17 @@
 {-# OPTIONS --without-K #-}
 
-module Yamanote where
+module Yamanote2 where
 
 open import Data.Fin
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
-open import Data.List hiding ([_]; fromMaybe; unzip)
+open import Data.List hiding ([_]; fromMaybe)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Function using (_∘_)
 
 open import Counterpoint
 open import Note
-open import Music        renaming (transpose to transposeMusic)
+open import Music renaming (transpose to transposeMusic) hiding (unzip)
 open import MidiEvent
 open import Pitch
 open import ScaleDegree
@@ -47,40 +48,15 @@ counterpoint2 =
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
 
-firstSpecies : FirstSpecies (g 5 , per8)
-firstSpecies = 
-  (g 5 , per8) ∷ (g 4 , maj6) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (c 5 , maj3) ∷ (g 4 , per8) ∷ (e 5 , min3) ∷ (g 4 , maj6) ∷
-  (g 5 , maj6) ∷ (g 4 , maj6) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (c 5 , maj3) ∷ (g 4 , maj6) ∷ (e 5 , min3) ∷ (g 4 , per8) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , per8) ∷ (g 4 , maj10) ∷ (b 4 , min6) ∷ (g 4 , per8) ∷ (d 5 , maj6) ∷ (g 4 , maj10) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (b 4 , min3) ∷ (g 4 , per8) ∷ (d 5 , min3) ∷ (g 4 , per8) ∷
-  (g 4 , maj6) ∷ (e 4 , min10) ∷ (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
+firstSpecies : List PitchInterval
+firstSpecies = zip cantusFirmus counterpoint
   
-firstSpecies2 : FirstSpecies (g 5 , per8)
-firstSpecies2 = 
-  (g 5 , per8) ∷ (g 4 , maj6) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (c 5 , maj3) ∷ (g 4 , per8) ∷ (e 5 , min3) ∷ (g 4 , maj6) ∷
-  (g 5 , maj6) ∷ (g 4 , maj6) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (c 5 , maj3) ∷ (g 4 , maj6) ∷ (e 5 , min3) ∷ (g 4 , per8) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , per8) ∷ (g 4 , maj10) ∷ (b 4 , min6) ∷ (g 4 , per8) ∷ (d 5 , maj6) ∷ (g 4 , maj10) ∷
-  (g 5 , maj3) ∷ (g 4 , maj3) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (b 4 , min6) ∷ (g 4 , maj6) ∷ (d 5 , min3) ∷ (g 4 , per8) ∷
-  (g 4 , maj6) ∷ (e 4 , min10) ∷ (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
-
-farm : FirstSpecies (g 4 , per8)
-farm = 
-  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
-
-test2 : SecondSpecies (e 5 , min10)
-test2 = 
---  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ 
-   [ (e 5 , min10) / maj10 ]∷ [ (g 5 , maj10) / min10 ]∷ (cadence2 (c 6))
-
-exercise : Music × Music
-exercise = unzip (secondSpeciesToMusic test2)
+firstSpecies2 : List PitchInterval
+firstSpecies2 = zip cantusFirmus counterpoint2
 
 yamanote cp : Music
-yamanote = proj₁ exercise
-cp       = proj₂ exercise
+yamanote = buildMusic pitchToMusic (map (proj₁ ∘ pitchIntervalToPitchPair) firstSpecies2)
+cp       = buildMusic pitchToMusic (map (proj₂ ∘ pitchIntervalToPitchPair) firstSpecies2)
 
 ----
 

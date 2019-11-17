@@ -28,18 +28,21 @@ lift f (m ∥ m') = lift f m ∥ lift f m'
 transpose : ℤ → Music → Music
 transpose k = lift (transposeNote k)
 
+buildMusic : {A : Set} → (A → Music) → List A → Music
+buildMusic f = foldr (λ x m → f x ∷ m) nil
+
 -- adds a duration 0 rest at the end which should be removed or ignored
 fromNotes : List Note → Music
-fromNotes = foldr (λ n m → note n ∷ m) nil
+fromNotes = buildMusic note
 
 data Chord : Set where
   chord : Duration → List Pitch → Chord
 
 fromChord : Chord → Music
-fromChord (chord d ps) = foldr (λ p m → note (note d p) ∥ m) nil ps
+fromChord (chord d ps) = foldr (λ p m → note (tone d p) ∥ m) nil ps
 
 fromChords : List Chord → Music
-fromChords = foldr (λ c m → fromChord c ∷ m) nil
+fromChords = buildMusic fromChord
 
 -- TODO: Fix this.
 -- unzip parallel lines as far as possible

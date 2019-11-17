@@ -23,8 +23,7 @@ data Pitch : Set where
 pitchValue : Pitch → ℕ
 pitchValue (pitch p) = p
 
--- Number of steps in the scale (in this case chromatic).
--- Currently this must be 12.
+-- Number of notes in the chromatic scale.
 chromaticScaleSize : ℕ
 chromaticScaleSize = 12
 

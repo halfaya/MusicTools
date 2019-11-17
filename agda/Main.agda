@@ -11,7 +11,7 @@ open import Exercises
 open import Hanon
 open import Montuno
 --open import LookVsTime
-open import Yamanote
+open import Yamanote2
 
 main : IO Unit
 main =

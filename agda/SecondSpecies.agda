@@ -33,7 +33,7 @@ data SecondSpecies :  PitchInterval → Set where
             SecondSpecies pj → SecondSpecies pi
 
 pitchPairToMusic2 : PitchPair → PitchPair → Music
-pitchPairToMusic2 (p , q) (r , s) = (note (note 16th p) ∥ note (note 16th q)) ∷ (note (note 16th r) ∥ note (note 16th s))
+pitchPairToMusic2 (p , q) (r , s) = (note (tone 16th p) ∥ note (tone 16th q)) ∷ (note (tone 16th r) ∥ note (tone 16th s))
 
 pitchIntervalToMusic2 : PitchInterval → Interval → Music
 pitchIntervalToMusic2 (p , i) j = pitchPairToMusic2 (pitchIntervalToPitchPair (p , i)) (pitchIntervalToPitchPair (p , j))

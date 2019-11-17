@@ -19,7 +19,7 @@ cantusFirmus : List Pitch
 cantusFirmus = a 4 ∷ c 5 ∷ b 4 ∷ c 5 ∷ d 5 ∷ e 5 ∷ c 5 ∷ b 4 ∷ a 4 ∷ []
 
 cfNotes : List Note
-cfNotes = Data.List.map (λ p → note whole p) cantusFirmus
+cfNotes = Data.List.map (λ p → tone whole p) cantusFirmus
 
 cfMusic : Music
 cfMusic = fromNotes cfNotes

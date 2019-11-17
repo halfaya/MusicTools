@@ -33,7 +33,7 @@ half1pitch : List Pitch
 half1pitch = map (relativeToAbsolute ∘ map₁ (scaleDegreeToRelativePitch majorScale)) half1scale
 
 half1bot half1 : Music
-half1bot  = fromNotes (map (note 8th) half1pitch)
+half1bot  = fromNotes (map (tone 8th) half1pitch)
 half1 = half1bot ∥ transposeMusic (+ 12) half1bot
 
 hanon1 : Music

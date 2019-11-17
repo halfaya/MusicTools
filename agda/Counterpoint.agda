@@ -78,8 +78,8 @@ pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , interval n) = (p , transpose (+ n)  p)
 
 -- assume a ≤ b
-pitchPairInterval : PitchPair → Interval
-pitchPairInterval (pitch a , pitch b) = interval (b ∸ a)
+pitchPairToInterval : PitchPair → Interval
+pitchPairToInterval (pitch a , pitch b) = interval (b ∸ a)
 
 -- TODO: Generalize
 isPerfect : Interval → Bool
@@ -107,6 +107,20 @@ motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .(suc (b + m))) | no ¬
 motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .b)             | no ¬p | greater .c k | equal .b     = oblique
 motion (pitch .(suc (c + k)) , pitch .(suc (d + m))) (pitch c , pitch d) | no ¬p | greater .c k | greater .d m = similar
 
+data MotionCheck : Set where
+  ok       : MotionCheck
+  parallel : PitchInterval → PitchInterval → MotionCheck
+  similar  : PitchInterval → PitchInterval → MotionCheck
+
+motionCheck : (i1 : PitchInterval) (i2 : PitchInterval) → MotionCheck
+motionCheck i1 i2 with motion (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2) | isPerfect (proj₂ i2)
+motionCheck i1 i2 | contrary | _     = ok
+motionCheck i1 i2 | oblique  | _     = ok
+motionCheck i1 i2 | parallel | false = ok
+motionCheck i1 i2 | parallel | true  = parallel i1 i2
+motionCheck i1 i2 | similar  | false = ok
+motionCheck i1 i2 | similar  | true  = similar i1 i2
+
 motionOk : (i1 : PitchInterval) (i2 : PitchInterval) → Set
 motionOk i1 i2 with motion (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2) | isPerfect (proj₂ i2)
 motionOk i1 i2 | contrary | _     = ⊤
@@ -125,11 +139,17 @@ data FirstSpecies :  PitchInterval → Set where
         {pj : PitchInterval}{_ : (T ∘ isConsonant ∘ proj₂) pj} →
         {_ : motionOk pi pj} → FirstSpecies pj → FirstSpecies pi
 
+pitchToMusic : Pitch → Music
+pitchToMusic = note ∘ tone 8th
+
 pitchPairToMusic : PitchPair → Music
-pitchPairToMusic (p , q) = note (note 8th p) ∥ note (note 8th q)
+pitchPairToMusic (p , q) = note (tone 8th p) ∥ note (tone 8th q)
 
 pitchIntervalToMusic : PitchInterval → Music
 pitchIntervalToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
+
+pitchIntervalsToMusic : PitchInterval → Music
+pitchIntervalsToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
 
 firstSpeciesToMusic : {pi : PitchInterval} → FirstSpecies pi → Music
 firstSpeciesToMusic {pi} (cadence2 p) = pitchIntervalToMusic pi ∷ pitchIntervalToMusic (p , per8)

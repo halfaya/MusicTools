@@ -9,7 +9,7 @@ open import Data.Product using (_×_; _,_; proj₁)
 open import Data.String  using (String)
 
 open import Music        using (Music; _∷_; _∥_; note)
-open import Note         using (note; rest; duration)
+open import Note         using (tone; rest; duration)
 open import Pitch        using (Pitch)
 
 -- General MIDI instrument numbers range from 1 to 128,
@@ -54,7 +54,7 @@ record MidiTrack : Set where
 music→events : Velocity → Music → List MidiEvent
 music→events v m = proj₁ (me 0 m) where
   me : Tick → Music → List MidiEvent × Tick
-  me t (note (note (duration d) p)) = midiEvent p t (t + d) v ∷ [] , t + d
+  me t (note (tone (duration d) p)) = midiEvent p t (t + d) v ∷ [] , t + d
   me t (note (rest (duration d)))   = [] , t + d
   me t (m₁ ∷ m₂)                    = let mes₁ , t₁ = me t  m₁
                                           mes₂ , t₂ = me t₁ m₂

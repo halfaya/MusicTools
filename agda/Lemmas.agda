@@ -2,7 +2,7 @@
 
 module Lemmas where
 
-open import Data.Fin                   using (Fin; toℕ; fromℕ≤; zero; suc)
+open import Data.Fin                   using (Fin; toℕ; fromℕ<; zero; suc)
 open import Data.Integer               using (ℤ; +_; -[1+_])
 open import Data.Nat
 open import Data.Nat.DivMod
@@ -25,7 +25,7 @@ suc≤-injective (s≤s p) = p
 
 -- revMod k = n - k
 revMod : ∀ {n : ℕ} → Fin (suc n) → Fin (suc n)
-revMod {n} k = fromℕ≤ (s≤s (k≤n⇒n-k≤n (toℕ k) n (suc≤-injective (finN<N k))))
+revMod {n} k = fromℕ< (s≤s (k≤n⇒n-k≤n (toℕ k) n (suc≤-injective (finN<N k))))
 
 ----
 

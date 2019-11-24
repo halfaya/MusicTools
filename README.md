@@ -1,8 +1,9 @@
 # MusicTools
 
-To compile and run the main program, do the following in the agda directory.
+To compile and run the main program, do the following in the `agda` directory.
 Note that you will need to modify `Main.agda` as it hardcodes some local information.
-I am using Agda 2.6.0 (development) and GHC 8.6.3 but it probably works with other versions as well.
+Also you will need to `cabal install HCodecs` for the MIDI libraries if not already installed.
+I am using Agda 2.6.1 (development) and GHC 8.6.5 but it probably works with other versions as well.
 * `agda -c Main.agda`
 * `./Main`
 

@@ -5,7 +5,7 @@ module Pitch where
 open import Data.Integer    using (ℤ; +_; -[1+_])
 open import Data.Fin        using (Fin; toℕ; #_)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup)
-open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_)
+open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.Product    using (_×_; _,_)
 open import Function        using (_∘_)
@@ -59,8 +59,6 @@ scaleSize {n} _ = n
 transpose : ℤ → Pitch → Pitch
 transpose (+_     k) (pitch n) = pitch (n + k)
 transpose (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
-
-----
 
 -- Standard Midi pitches
 

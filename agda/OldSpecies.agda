@@ -1,6 +1,6 @@
 {-# OPTIONS --without-K #-}
 
-module SecondSpecies where
+module OldSpecies where
 
 open import Music hiding (transpose)
 open import Note hiding (transpose)
@@ -17,8 +17,28 @@ open import Data.Unit using (⊤)
 
 open import Function using (_∘_; id)
 
-open import Relation.Nullary
-open import Relation.Binary.PropositionalEquality hiding ([_])
+motionOk : (i1 : PitchInterval) (i2 : PitchInterval) → Set
+motionOk i1 i2 with motion (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2) | isPerfect (proj₂ i2)
+motionOk i1 i2 | contrary | _     = ⊤
+motionOk i1 i2 | oblique  | _     = ⊤
+motionOk i1 i2 | parallel | false = ⊤
+motionOk i1 i2 | parallel | true  = ⊥
+motionOk i1 i2 | similar  | false = ⊤
+motionOk i1 i2 | similar  | true  = ⊥
+
+-- interval in index is initial interval
+-- final interval of a cadence is (p , per 8)
+data FirstSpecies :  PitchInterval → Set where
+  cadence2 : (p : Pitch) → FirstSpecies (transpose (+ 2) p    , maj6)
+  cadence7 : (p : Pitch) → FirstSpecies (transpose -[1+ 0 ] p , min10)
+  _∷_ : (pi : PitchInterval){_ : (T ∘ isConsonant ∘ proj₂) pi}
+        {pj : PitchInterval}{_ : (T ∘ isConsonant ∘ proj₂) pj} →
+        {_ : motionOk pi pj} → FirstSpecies pj → FirstSpecies pi
+
+firstSpeciesToMusic : {pi : PitchInterval} → FirstSpecies pi → Music
+firstSpeciesToMusic {pi} (cadence2 p) = pitchIntervalToMusic pi ∷ pitchIntervalToMusic (p , per8)
+firstSpeciesToMusic {pi} (cadence7 p) = pitchIntervalToMusic pi ∷ pitchIntervalToMusic (p , per8)
+firstSpeciesToMusic      (pi ∷ fs)    = pitchIntervalToMusic pi ∷ firstSpeciesToMusic fs
 
 -- NOTE: Not yet the exact conditions for second species.
 -- interval in index is initial interval

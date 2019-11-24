@@ -14,8 +14,8 @@ open import Note
 open import Music renaming (transpose to transposeMusic) hiding (unzip)
 open import MidiEvent
 open import Pitch
+open import Interval
 open import ScaleDegree
-open import SecondSpecies
 open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.

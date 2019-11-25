@@ -2,18 +2,61 @@
 
 module Music where
 
+open import Data.Nat     using (ℕ; zero; suc; _+_; _*_)
 open import Data.Integer using (ℤ; +_)
 open import Data.List    using (List; foldr; []; _∷_)
 open import Data.Product using (_×_; _,_)
+open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map)
+open import Function     using (_∘_)
 
-open import Note         renaming (transpose to transposeNote)
-open import Pitch        renaming (transpose to transposePitch)
+open import Note  renaming (transpose to transposeNote)
+open import Pitch renaming (transpose to transposePitch)
 
-data Music : Set where
+-- A point in the music grid, which can either be a tone,
+-- a continuation of a previous tone, or a rest.
+data Point : Set where
+  tone : Pitch → Point
+  cont : Pitch → Point
+  rest : Point
+
+data Melody (n : ℕ) : Set where
+  melody : Vec Point n → Melody n
+
+melodyPoints : {n : ℕ} → Melody n → Vec Point n
+melodyPoints (melody ps) = ps
+
+note→melody : (n : Note) → Melody (noteDuration n)
+note→melody (tone (duration zero)    p) = melody []
+note→melody (tone (duration (suc d)) p) = melody (tone p ∷ replicate (cont p))
+note→melody (rest _)                    = melody (replicate rest)
+
+pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * duration→ℕ d)
+pitches→melody d ps = melody (concat (map (melodyPoints ∘ note→melody ∘ tone d) ps))
+
+-- Assumes melody is well-formed in that a continuation note has the
+-- same pitch as the note before it.
+{-
+melody→notes : {n : ℕ} → Melody n → List Note
+melody→notes (melody []) = []
+melody→notes (melody (p ∷ ps)) = {!!}
+-}
+
+data Chord (n : ℕ) : Set where
+  chord : Vec Point n → Chord n
+
+-- Music is a v × d grid where v is the number of voices and d is the duration.
+-- The primary representation is as parallel melodies (counterpoint).
+data Music (v : ℕ) (d : ℕ): Set where
+  music : Vec (Melody d) v → Music v d
+
+-- An alternative representation of music is as a series of chords (harmony).
+data Harmony (v : ℕ) (d : ℕ): Set where
+  harmony : Vec (Chord v) d → Harmony v d
+
+{-
   note : Note → Music
   _∷_  : Music → Music → Music -- sequential composition
   _∥_  : Music → Music → Music -- parallel   composition
-
 infixr 5 _∷_ _∥_
 
 -- empty music as a basis for fold
@@ -61,37 +104,4 @@ unzip (note _ ∥ _ ∷ _)        = nil , nil
 unzip (note _ ∥ _ ∥ _)        = nil , nil
 unzip ((_ ∷ _) ∥ _)           = nil , nil
 unzip ((_ ∥ _) ∥ _)           = nil , nil
-
-{-
-oompah : Chord → List Chord
-oompah (chord [])       = []
-oompah (chord (n ∷ ns)) = chord (n ∷ []) ∷ chord ns ∷ []
-
--- convert a chord to a series of single note chords
-arpegiate : Chord → List Chord
-arpegiate = map toChord ∘ unChord
-
-makeChord : List ℤ → Note → Chord
-makeChord ks (note n) = chord (map (note ∘ (_+ n)) ks)
-
-majorTriad minorTriad : Note → Chord
-majorTriad = makeChord (+ 0 ∷ + 4 ∷ + 7 ∷ [])
-minorTriad = makeChord (+ 0 ∷ + 3 ∷ + 7 ∷ [])
-
-flatten : List Chord → Chord
-flatten = chord ∘ concat ∘ (map unChord)
-
-prependNote : Note → Chord → Chord
-prependNote n (chord ns) = chord (n ∷ ns)
-
-appendNote : Note → Chord → Chord
-appendNote n (chord ns) = chord (ns ++ (n ∷ []))
-
-relativeChordToChord : RelativeChord → Chord
-relativeChordToChord (relativeChord c) = chord (map relativeToAbsolute c)
-
-triad : {n : ℕ} → Scale (ℕ.suc n) → ScaleDegreeOctave (ℕ.suc n) → RelativeChord
-triad scale sdo =
-  let scaleChord = map ((flip addToScaleNote) sdo) (+ 0 ∷ + 2 ∷ + 4 ∷ [])
-  in relativeChord (map ((pmap (scaleDegreeToRelativeNote scale) id)) scaleChord)
 -}

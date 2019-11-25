@@ -3,22 +3,24 @@
 module Yamanote where
 
 open import Data.Fin
+open import Data.List using (List; map) renaming (_∷_ to _L∷_; [] to L[])
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
-open import Data.List hiding ([_]; fromMaybe; unzip)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Function using (_∘_)
+open import Data.Vec using (Vec; []; _∷_; zip; toList) renaming (map to vmap)
 
 open import Counterpoint
 open import Note
-open import Music        renaming (transpose to transposeMusic)
+open import Music
 open import MidiEvent
 open import Pitch
+open import Interval
 open import ScaleDegree
-open import SecondSpecies
 open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.
-cantusFirmus : List Pitch
+cantusFirmus : Vec Pitch 42
 cantusFirmus =
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
@@ -28,7 +30,7 @@ cantusFirmus =
   d 6 ∷ c 6 ∷ []
 
 -- Counterpoint by Youyou Cong
-counterpoint : List Interval
+counterpoint : Vec Interval 42
 counterpoint =
   per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
@@ -38,7 +40,7 @@ counterpoint =
   maj6 ∷ per8 ∷ []
   
 -- this one sounds slightly better
-counterpoint2 : List Interval
+counterpoint2 : Vec Interval 42
 counterpoint2 =
   per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
@@ -47,40 +49,15 @@ counterpoint2 =
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
 
-firstSpecies : FirstSpecies (g 5 , per8)
-firstSpecies = 
-  (g 5 , per8) ∷ (g 4 , maj6) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (c 5 , maj3) ∷ (g 4 , per8) ∷ (e 5 , min3) ∷ (g 4 , maj6) ∷
-  (g 5 , maj6) ∷ (g 4 , maj6) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (c 5 , maj3) ∷ (g 4 , maj6) ∷ (e 5 , min3) ∷ (g 4 , per8) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , per8) ∷ (g 4 , maj10) ∷ (b 4 , min6) ∷ (g 4 , per8) ∷ (d 5 , maj6) ∷ (g 4 , maj10) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (b 4 , min3) ∷ (g 4 , per8) ∷ (d 5 , min3) ∷ (g 4 , per8) ∷
-  (g 4 , maj6) ∷ (e 4 , min10) ∷ (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
+firstSpecies : Vec PitchInterval 42
+firstSpecies = zip cantusFirmus counterpoint
   
-firstSpecies2 : FirstSpecies (g 5 , per8)
-firstSpecies2 = 
-  (g 5 , per8) ∷ (g 4 , maj6) ∷ (a 4 , min6) ∷ (g 4 , per8) ∷ (c 5 , maj3) ∷ (g 4 , per8) ∷ (e 5 , min3) ∷ (g 4 , maj6) ∷
-  (g 5 , maj6) ∷ (g 4 , maj6) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (c 5 , maj3) ∷ (g 4 , maj6) ∷ (e 5 , min3) ∷ (g 4 , per8) ∷
-  (g 5 , maj3) ∷ (g 4 , maj10) ∷ (a 4 , per8) ∷ (g 4 , maj10) ∷ (b 4 , min6) ∷ (g 4 , per8) ∷ (d 5 , maj6) ∷ (g 4 , maj10) ∷
-  (g 5 , maj3) ∷ (g 4 , maj3) ∷ (a 4 , min3) ∷ (g 4 , per5) ∷ (b 4 , min6) ∷ (g 4 , maj6) ∷ (d 5 , min3) ∷ (g 4 , per8) ∷
-  (g 4 , maj6) ∷ (e 4 , min10) ∷ (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
+firstSpecies2 : Vec PitchInterval 42
+firstSpecies2 = zip cantusFirmus counterpoint2
 
-farm : FirstSpecies (g 4 , per8)
-farm = 
-  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ (e 5 , min10) ∷ (g 5 , per8) ∷
-  (cadence2 (c 6))
-
-test2 : SecondSpecies (e 5 , min10)
-test2 = 
---  (g 4 , per8) ∷ (c 5 , maj10) ∷ (c 5 , per8) ∷ (c 5 , maj10) ∷ 
-   [ (e 5 , min10) / maj10 ]∷ [ (g 5 , maj10) / min10 ]∷ (cadence2 (c 6))
-
-exercise : Music × Music
-exercise = unzip (secondSpeciesToMusic test2)
-
-yamanote cp : Music
-yamanote = proj₁ exercise
-cp       = proj₂ exercise
+yamanote cp : List Note
+yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
+cp       = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
 
 ----
 
@@ -100,10 +77,11 @@ yVelocity = # 60
 cVelocity = # 30
 
 yamanoteTrack : MidiTrack
-yamanoteTrack = track "Cantus Firmus" piano channel1 tempo (music→events yVelocity yamanote)
+yamanoteTrack = track "Cantus Firmus" piano channel1 tempo (notes→events yVelocity yamanote)
 
 cpTrack : MidiTrack
-cpTrack = track "Counterpoint" marimba channel2 tempo (music→events cVelocity cp)
+cpTrack = track "Counterpoint" marimba channel2 tempo (notes→events cVelocity cp)
 
 ycpTracks : List MidiTrack
-ycpTracks = cpTrack ∷ yamanoteTrack ∷ []
+ycpTracks = cpTrack L∷ yamanoteTrack L∷ L[]
+

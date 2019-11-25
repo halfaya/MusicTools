@@ -2,7 +2,7 @@
 
 module Counterpoint where
 
-open import Music hiding (transpose)
+open import Music
 open import Note hiding (transpose)
 open import Pitch
 open import Interval
@@ -10,6 +10,7 @@ open import Interval
 open import Data.Bool using (true; false)
 open import Data.Nat using (suc; _+_;  _∸_; _≟_; compare; equal; less; greater)
 open import Data.Product using (_,_; proj₂)
+open import Data.Vec using ([]; _∷_)
 
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
@@ -46,14 +47,16 @@ motionCheck i1 i2 | parallel | true  = parallel i1 i2
 motionCheck i1 i2 | similar  | false = ok
 motionCheck i1 i2 | similar  | true  = similar i1 i2
 
-pitchToMusic : Pitch → Music
-pitchToMusic = note ∘ tone 8th
+--pitchToMusic : Pitch → Music
+--pitchToMusic = note ∘ tone 8th
 
-pitchPairToMusic : PitchPair → Music
-pitchPairToMusic (p , q) = note (tone 8th p) ∥ note (tone 8th q)
+pitchPairToMusic : (d : Duration) → PitchPair → Music 2 (duration→ℕ d)
+pitchPairToMusic d (p , q) = music (note→melody (tone d p) ∷ note→melody (tone d q) ∷ [])
 
+{-
 pitchIntervalToMusic : PitchInterval → Music
 pitchIntervalToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
 
 pitchIntervalsToMusic : PitchInterval → Music
 pitchIntervalsToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
+-}

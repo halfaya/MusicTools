@@ -5,7 +5,6 @@
 module Exercises where
 
 open import MidiEvent
-open import Music
 open import Note
 open import Pitch
 
@@ -21,9 +20,6 @@ cantusFirmus = a 4 ∷ c 5 ∷ b 4 ∷ c 5 ∷ d 5 ∷ e 5 ∷ c 5 ∷ b 4 ∷ a
 cfNotes : List Note
 cfNotes = Data.List.map (λ p → tone whole p) cantusFirmus
 
-cfMusic : Music
-cfMusic = fromNotes cfNotes
-
 ----
 
 instrument : InstrumentNumber-1
@@ -36,5 +32,5 @@ tempo : ℕ
 tempo = 120
 
 cfTrack : List MidiTrack
-cfTrack = track "Piano" instrument channel tempo (music→events defaultVelocity cfMusic) ∷ []
+cfTrack = track "Piano" instrument channel tempo (notes→events defaultVelocity cfNotes) ∷ []
 

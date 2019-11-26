@@ -4,9 +4,9 @@ module Music where
 
 open import Data.Nat     using (ℕ; zero; suc; _+_; _*_)
 open import Data.Integer using (ℤ; +_)
-open import Data.List    using (List; foldr; []; _∷_)
+open import Data.List    using (List; foldr; []; _∷_; reverse)
 open import Data.Product using (_×_; _,_)
-open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map)
+open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map; zipWith; toList)
 open import Function     using (_∘_)
 
 open import Note  renaming (transpose to transposeNote)
@@ -22,86 +22,56 @@ data Point : Set where
 data Melody (n : ℕ) : Set where
   melody : Vec Point n → Melody n
 
-melodyPoints : {n : ℕ} → Melody n → Vec Point n
-melodyPoints (melody ps) = ps
+unmelody : {n : ℕ} → Melody n → Vec Point n
+unmelody (melody ps) = ps
 
 note→melody : (n : Note) → Melody (noteDuration n)
 note→melody (tone (duration zero)    p) = melody []
 note→melody (tone (duration (suc d)) p) = melody (tone p ∷ replicate (cont p))
 note→melody (rest _)                    = melody (replicate rest)
 
-pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * duration→ℕ d)
-pitches→melody d ps = melody (concat (map (melodyPoints ∘ note→melody ∘ tone d) ps))
+pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * unduration d)
+pitches→melody d ps = melody (concat (map (unmelody ∘ note→melody ∘ tone d) ps))
 
 -- Assumes melody is well-formed in that a continuation note has the
 -- same pitch as the note before it.
-{-
+-- Does not consolidate rests.
 melody→notes : {n : ℕ} → Melody n → List Note
-melody→notes (melody []) = []
-melody→notes (melody (p ∷ ps)) = {!!}
--}
+melody→notes (melody m) = (reverse ∘ mn 0 ∘ reverse ∘ toList) m
+  where mn : ℕ → List Point → List Note -- c is the number of continuations
+        mn c []            = []
+        mn c (tone p ∷ ps) = tone (duration (suc c)) p ∷ mn 0 ps
+        mn c (cont _ ∷ ps) = mn (suc c) ps
+        mn c (rest ∷ ps)   = rest (duration 1) ∷ mn 0 ps
 
 data Chord (n : ℕ) : Set where
   chord : Vec Point n → Chord n
+
+unchord : {n : ℕ} → Chord n → Vec Point n
+unchord (chord ps) = ps
 
 -- Music is a v × d grid where v is the number of voices and d is the duration.
 -- The primary representation is as parallel melodies (counterpoint).
 data Music (v : ℕ) (d : ℕ): Set where
   music : Vec (Melody d) v → Music v d
 
--- An alternative representation of music is as a series of chords (harmony).
+unmusic : {v d : ℕ} → Music v d → Vec (Melody d) v
+unmusic (music m) = m
+
+-- An alternative representation of music is as a series of chords (harmonic progression).
 data Harmony (v : ℕ) (d : ℕ): Set where
   harmony : Vec (Chord v) d → Harmony v d
 
-{-
-  note : Note → Music
-  _∷_  : Music → Music → Music -- sequential composition
-  _∥_  : Music → Music → Music -- parallel   composition
-infixr 5 _∷_ _∥_
+unharmony : {v d : ℕ} → Harmony v d → Vec (Chord v) d
+unharmony (harmony h) = h
 
--- empty music as a basis for fold
-nil : Music
-nil = note (rest (duration 0))
+-- matrix transposition
+mtranspose : {A : Set}{m n : ℕ} → Vec (Vec A n) m → Vec (Vec A m) n
+mtranspose []         = replicate []
+mtranspose (xs ∷ xss) = zipWith _∷_ xs (mtranspose xss)
 
-lift : (Note → Note) → Music → Music
-lift f (note n) = note (f n)
-lift f (m ∷ m') = lift f m ∷ lift f m'
-lift f (m ∥ m') = lift f m ∥ lift f m'
+counterpoint→harmony : {v d : ℕ} → Music v d → Harmony v d
+counterpoint→harmony = harmony ∘ map chord ∘ mtranspose ∘ map unmelody ∘ unmusic
 
-transpose : ℤ → Music → Music
-transpose k = lift (transposeNote k)
-
-buildMusic : {A : Set} → (A → Music) → List A → Music
-buildMusic f = foldr (λ x m → f x ∷ m) nil
-
--- adds a duration 0 rest at the end which should be removed or ignored
-fromNotes : List Note → Music
-fromNotes = buildMusic note
-
-data Chord : Set where
-  chord : Duration → List Pitch → Chord
-
-fromChord : Chord → Music
-fromChord (chord d ps) = foldr (λ p m → note (tone d p) ∥ m) nil ps
-
-fromChords : List Chord → Music
-fromChords = buildMusic fromChord
-
--- TODO: Fix this.
--- unzip parallel lines as far as possible
-unzip : Music → Music × Music
-unzip (note _)                = nil , nil
-unzip (note _ ∷ _)            = nil , nil
-unzip (((note n ∥ note o) ∷ b) ∷ c) = let (x , y) = unzip (b ∷ c) in note n ∷ x , note o ∷ y
-unzip ((a ∷ b) ∷ c)           = nil , nil
-unzip ((note n ∥ note o) ∷ m) = let (x , y) = unzip m in note n ∷ x , note o ∷ y
-unzip ((note _ ∥ _ ∷ _) ∷ _)  = nil , nil
-unzip ((note _ ∥ _ ∥ _) ∷ _)  = nil , nil
-unzip (((_ ∷ _) ∥ _) ∷ _)     = nil , nil
-unzip (((_ ∥ _) ∥ _) ∷ _)     = nil , nil
-unzip (note n ∥ note o)       = note n , note o
-unzip (note _ ∥ _ ∷ _)        = nil , nil
-unzip (note _ ∥ _ ∥ _)        = nil , nil
-unzip ((_ ∷ _) ∥ _)           = nil , nil
-unzip ((_ ∥ _) ∥ _)           = nil , nil
--}
+harmony→counterpoint : {v d : ℕ} → Harmony v d → Music v d
+harmony→counterpoint = music ∘ map melody ∘ mtranspose ∘ map unchord ∘ unharmony

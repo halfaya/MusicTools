@@ -10,18 +10,18 @@ open import Pitch renaming (transpose to transposePitch)
 data Duration : Set where
   duration : ℕ → Duration
 
-duration→ℕ : Duration → ℕ
-duration→ℕ (duration d) = d
+unduration : Duration → ℕ
+unduration (duration d) = d
 
 data Note : Set where
   tone : Duration → Pitch → Note
   rest : Duration         → Note
 
--- Note: If we inline duration→ℕ here Agda can't figure out
--- that noteDuration (tone d _) = duration→ℕ d
+-- Note: If we inline unduration here Agda can't figure out
+-- that noteDuration (tone d _) = unduration d
 noteDuration : Note → ℕ
-noteDuration (tone d _) = duration→ℕ d
-noteDuration (rest d)   = duration→ℕ d
+noteDuration (tone d _) = unduration d
+noteDuration (rest d)   = unduration d
 
 transpose : ℤ → Note → Note
 transpose k (tone d p) = tone d (transposePitch k p)

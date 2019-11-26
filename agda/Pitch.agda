@@ -20,8 +20,8 @@ open import Util            using (findIndex)
 data Pitch : Set where
   pitch : ℕ → Pitch
 
-pitchValue : Pitch → ℕ
-pitchValue (pitch p) = p
+unpitch : Pitch → ℕ
+unpitch (pitch p) = p
 
 -- Number of notes in the chromatic scale.
 chromaticScaleSize : ℕ

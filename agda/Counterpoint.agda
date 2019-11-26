@@ -50,7 +50,7 @@ motionCheck i1 i2 | similar  | true  = similar i1 i2
 --pitchToMusic : Pitch → Music
 --pitchToMusic = note ∘ tone 8th
 
-pitchPairToMusic : (d : Duration) → PitchPair → Music 2 (duration→ℕ d)
+pitchPairToMusic : (d : Duration) → PitchPair → Music 2 (unduration d)
 pitchPairToMusic d (p , q) = music (note→melody (tone d p) ∷ note→melody (tone d q) ∷ [])
 
 {-

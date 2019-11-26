@@ -33,4 +33,3 @@ tempo = 120
 
 cfTrack : List MidiTrack
 cfTrack = track "Piano" instrument channel tempo (notes→events defaultVelocity cfNotes) ∷ []
-

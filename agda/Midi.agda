@@ -107,7 +107,7 @@ data MidiMessage : Set where
 event→messages : MidiEvent → List MidiMessage
 event→messages (midiEvent p start stop v) =
   let v' = toℕ v
-      p' = pitchValue p
+      p' = unpitch p
   in noteOn v' start p' ∷ noteOff v' stop p' ∷ [] 
 
 data HMidiTrack : Set where

@@ -9,8 +9,8 @@ open import Data.Product using (_×_; _,_)
 open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map; zipWith; toList)
 open import Function     using (_∘_)
 
-open import Note  renaming (transpose to transposeNote)
-open import Pitch renaming (transpose to transposePitch)
+open import Note
+open import Pitch
 
 -- A point in the music grid, which can either be a tone,
 -- a continuation of a previous tone, or a rest.
@@ -32,6 +32,14 @@ note→melody (rest _)                    = melody (replicate rest)
 
 pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * unduration d)
 pitches→melody d ps = melody (concat (map (unmelody ∘ note→melody ∘ tone d) ps))
+
+transposePoint : ℤ → Point → Point
+transposePoint k (tone p) = tone (transposePitch k p)
+transposePoint k (cont p) = cont (transposePitch k p)
+transposePoint k rest     = rest
+
+transposeMelody : {n : ℕ} → ℤ → Melody n → Melody n
+transposeMelody k = melody ∘ map (transposePoint k) ∘ unmelody
 
 -- Assumes melody is well-formed in that a continuation note has the
 -- same pitch as the note before it.

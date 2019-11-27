@@ -3,12 +3,14 @@
 module MidiEvent where
 
 open import Data.Fin     using (Fin; #_)
-open import Data.List    using (List; _∷_; []; concat)
+open import Data.List    using (List; _∷_; []; concat; map)
 open import Data.Nat     using (ℕ; _+_; _⊔_)
 open import Data.Product using (_×_; _,_; proj₁)
 open import Data.String  using (String)
+open import Data.Vec     using (toList)
+open import Function     using (_∘_)
 
-open import Music        using (Melody; melody)
+open import Music        using (Melody; melody; Music; music; Harmony; melody→notes; harmony→counterpoint)
 open import Note         using (Note; tone; rest; duration)
 open import Pitch        using (Pitch)
 
@@ -57,3 +59,12 @@ notes→events v ns = me 0 ns where
   me t [] = []
   me t (tone (duration d) p ∷ ns) = midiEvent p t (t + d) v ∷ me (t + d) ns
   me t (rest (duration d)   ∷ ns) = me (t + d) ns
+
+melody→events : {n : ℕ} → Velocity → Melody n → List MidiEvent
+melody→events v = notes→events v ∘ melody→notes
+
+music→events : {v d : ℕ} → Velocity → Music v d → List MidiEvent
+music→events v (music ms) = concat (map (melody→events v) (toList ms))
+
+harmony→events : {v d : ℕ} → Velocity → Harmony v d → List MidiEvent
+harmony→events v = music→events v ∘ harmony→counterpoint

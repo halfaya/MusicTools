@@ -7,11 +7,12 @@ open import Data.Integer using (+_; -[1+_]; ℤ)
 open import Data.List    using (List; _∷_; []; map; concat; _++_; replicate; zip; length; take; foldr)
 open import Data.Nat     using (ℕ; zero; suc; _+_)
 open import Data.Product using (_,_; map₁)
+open import Data.Vec     using (fromList)
 open import Function     using (_∘_)
 
 open import Pitch
 open import Note
-open import Music        renaming (transpose to transposeMusic)
+open import Music
 open import MidiEvent
 open import ScaleDegree
 open import Util
@@ -29,15 +30,15 @@ tcell n = map (transposeScaleDegree n) cell
 half1scale : List (ScaleDegreeOctave 7)
 half1scale = concat (map tcell (0toN 13))
 
-half1pitch : List Pitch
-half1pitch = map (relativeToAbsolute ∘ map₁ (scaleDegreeToRelativePitch majorScale)) half1scale
+half1pitches : List Pitch
+half1pitches = map (relativeToAbsolute ∘ map₁ (scaleDegreeToRelativePitch majorScale)) half1scale
 
-half1bot half1 : Music
-half1bot  = fromNotes (map (tone 8th) half1pitch)
-half1 = half1bot ∥ transposeMusic (+ 12) half1bot
+half1bot half1top : Melody 224
+half1bot = pitches→melody 8th (fromList half1pitches)
+half1top = transposeMelody (+ 12) half1bot
 
-hanon1 : Music
-hanon1 = half1
+hanon1 : Music 2 224
+hanon1 = music (fromList (half1bot ∷ half1top ∷ []))
 
 ----
 

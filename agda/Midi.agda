@@ -68,9 +68,10 @@ open import Music
 
   exportTracks :: Text -> HsTicksPerBeat -> [HsMidiTrack] -> IO ()
   exportTracks filePath ticksPerBeat tracks = do
-    putStrLn "exportTracks"
+    let path = unpack filePath
+    putStrLn $ "Writing file " ++ path
     -- putStrLn $ show $ toMidi ticksPerBeat tracks
-    exportFile (unpack filePath) (toMidi ticksPerBeat tracks)
+    exportFile path (toMidi ticksPerBeat tracks)
 #-}
 
 data Unit : Set where

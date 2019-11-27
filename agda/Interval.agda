@@ -70,7 +70,7 @@ PitchInterval : Set
 PitchInterval = Pitch × Interval
 
 pitchIntervalToPitchPair : PitchInterval → PitchPair
-pitchIntervalToPitchPair (p , interval n) = (p , transpose (+ n)  p)
+pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 
 -- assume a ≤ b
 pitchPairToInterval : PitchPair → Interval

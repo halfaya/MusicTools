@@ -3,7 +3,7 @@
 module Counterpoint where
 
 open import Music
-open import Note hiding (transpose)
+open import Note
 open import Pitch
 open import Interval
 

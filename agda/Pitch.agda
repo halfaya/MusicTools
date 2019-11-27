@@ -56,9 +56,9 @@ harmonicMinorScale = map relativePitch (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ 
 scaleSize : {n : ℕ} → Scale n → ℕ
 scaleSize {n} _ = n
 
-transpose : ℤ → Pitch → Pitch
-transpose (+_     k) (pitch n) = pitch (n + k)
-transpose (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
+transposePitch : ℤ → Pitch → Pitch
+transposePitch (+_     k) (pitch n) = pitch (n + k)
+transposePitch (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
 
 -- Standard Midi pitches
 

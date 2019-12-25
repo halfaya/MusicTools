@@ -6,7 +6,7 @@ open import Data.Nat     using (ℕ; zero; suc; _+_; _*_)
 open import Data.Integer using (ℤ; +_)
 open import Data.List    using (List; foldr; []; _∷_; reverse)
 open import Data.Product using (_×_; _,_)
-open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map; zipWith; toList; _++_)
+open import Data.Vec     using (Vec; []; _∷_; replicate; concat; map; zipWith; toList; _++_; sum; foldr₁)
 open import Function     using (_∘_)
 
 open import Note
@@ -73,7 +73,7 @@ data Harmony (v : ℕ) (d : ℕ): Set where
 unharmony : {v d : ℕ} → Harmony v d → Vec (Chord v) d
 unharmony (harmony h) = h
 
-pitches→harmony : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Harmony n (unduration d)
+pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n (unduration d)
 pitches→harmony (duration zero)    ps = harmony []
 pitches→harmony (duration (suc d)) ps = harmony (chord (map tone ps) ∷ replicate (chord (map cont ps)))
 
@@ -83,6 +83,10 @@ addEmptyVoice (harmony h) = harmony (map (chord ∘ (rest ∷_) ∘ unchord) h)
 infixl 5 _+H+_
 _+H+_ : {v d d' : ℕ} → Harmony v d → Harmony v d' → Harmony v (d + d')
 h +H+ h' = harmony (unharmony h ++ unharmony h')
+
+foldIntoHarmony : {k n : ℕ} (ds : Vec Duration (suc k)) → (pss : Vec (Vec Pitch n) (suc k)) → Harmony n (foldr₁ _+_ (map unduration ds))
+foldIntoHarmony (d ∷ [])      (ps ∷ [])        = pitches→harmony d ps
+foldIntoHarmony (d ∷ d' ∷ ds) (ps ∷ ps' ∷ pss) = (pitches→harmony d ps) +H+ (foldIntoHarmony (d' ∷ ds) (ps' ∷ pss))
 
 -- matrix transposition
 mtranspose : {A : Set}{m n : ℕ} → Vec (Vec A n) m → Vec (Vec A m) n

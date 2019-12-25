@@ -10,7 +10,7 @@ open import Note
 open import Exercises
 open import Hanon
 --open import Montuno
---open import LookVsTime
+open import LookVsTime
 open import Yamanote
 
 main : IO Unit
@@ -19,5 +19,6 @@ main =
       ticksPerBeat = 4 -- 16th notes
       file         = "/Users/leo/Music/MusicTools/test.mid"
 --      song         = ycpTracks
-      song         = hanonTrack
+--      song         = hanonTrack
+      song         = lookVsTime
   in exportTracks file ticksPerBeat (map track→htrack song)

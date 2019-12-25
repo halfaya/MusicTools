@@ -7,7 +7,7 @@ open import Data.Integer using (+_; -[1+_])
 open import Data.List    using (List; _∷_; []; map; concat; _++_; replicate; zip; length; take)
 open import Data.Nat     using (_*_; ℕ; suc; _+_)
 open import Data.Product using (_,_; uncurry)
-open import Data.Vec     using (fromList)
+open import Data.Vec     using (fromList; Vec; _∷_; []) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
 open import Function     using (_∘_)
 
 open import Pitch
@@ -15,7 +15,7 @@ open import Note         using (tone; rest; Note; Duration; duration; unduration
 open import Music
 open import Midi
 open import MidiEvent
-open import Util         using (repeat)
+open import Util         using (repeat; repeatV)
 
 tempo : ℕ
 tempo = 84
@@ -27,9 +27,6 @@ tempo = 84
 
 whole : ℕ → Duration
 whole n = duration (16 * n)
-
-makeHarmony : (d : Duration) → (ps : List Pitch) → Harmony (length ps) (unduration d)
-makeHarmony d = pitches→harmony d ∘ fromList
 
 melodyChannel : Channel-1
 melodyChannel = # 0
@@ -153,51 +150,48 @@ accompChannel = # 1
 accompInstrument : InstrumentNumber-1
 accompInstrument = # 11 -- vibraphone
 
-accompRhythm : List Duration
-accompRhythm = map 8th (3 ∷ 3 ∷ 2 ∷ [])
+accompRhythm : Vec Duration 3
+accompRhythm = vmap 8th (3 ∷ 3 ∷ 2 ∷ [])
 
-accompF accompFA accompB2 accompC4 : List Pitch
+accompF accompB2 accompC4 : Vec Pitch 3
 accompF  = f 4 ∷ a 4 ∷ c 5 ∷ []
-accompFA = f 4 ∷ a 4 ∷ []
 accompB2 = f 4 ∷ b 4 ∷ d 4 ∷ []
 accompC4 = f 4 ∷ c 5 ∷ e 5 ∷ []
 
---accompChords1 accompChords2 accompChords3 accompChords4 accompChords5 accompChords6 accompChords7 : List (List Note)
+accompFA : Vec Pitch 2
+accompFA = f 4 ∷ a 4 ∷ []
 
-{-
-accompChords1 = map (uncurry makeHarmony)
-                    (zip (repeat 8 accompRhythm)
-                         (repeat 2 (concat (map (replicate 3) (accompF ∷ accompB2 ∷ accompC4 ∷ accompB2 ∷ [])))))
--}
+accompChords1 : Harmony 3 128
+accompChords1 =
+  foldIntoHarmony (repeatV 8 accompRhythm)
+                  (repeatV 2 (vconcat (vmap (rep {n = 3}) (accompF ∷ accompB2 ∷ accompC4 ∷ accompB2 ∷ []))))
 
-accompChords2 = makeHarmony (whole 4) accompFA ∷ []
+accompChords2 : Harmony 3 64
+accompChords2 = addEmptyVoice (pitches→harmony (whole 4) accompFA)
 
-{-
-accompChords3 = map (uncurry makeHarmony)
-                    (zip (repeat 4 accompRhythm)
-                         ((concat (map (replicate 3) (accompF ∷ accompB2 ∷ accompC4 ∷ [])))
-                          ++        (accompB2 ∷ accompB2 ∷ accompF ∷ [])))
--}
+accompChords3 : Harmony 3 64
+accompChords3 =
+  foldIntoHarmony (repeatV 4 accompRhythm)
+                  (vconcat (vmap (rep {n = 3}) (accompF ∷ accompB2 ∷ accompC4 ∷ [])) +v (accompB2 ∷ accompB2 ∷ accompF ∷ []))
 
---accompChords4 = map (uncurry makeHarmony) (zip accompRhythm (replicate 3 accompFA))
+accompChords4 : Harmony 3 16
+accompChords4 = addEmptyVoice (foldIntoHarmony accompRhythm (rep accompFA))
 
 accompChords5 : Harmony 3 48
-accompChords5 = makeHarmony (8th (8 + 8 + 6)) accompF +H+ makeHarmony (8th 2) accompF
+accompChords5 = pitches→harmony (8th (8 + 8 + 6)) accompF +H+ pitches→harmony (8th 2) accompF
 
 accompChords6 : Harmony 3 32
-accompChords6 = makeHarmony (8th (8 + 6)) accompB2 +H+ makeHarmony (8th 2) accompB2
+accompChords6 = pitches→harmony (8th (8 + 6)) accompB2 +H+ pitches→harmony (8th 2) accompB2
 
 accompChords7 : Harmony 3 32
-accompChords7 = makeHarmony (whole 2) accompF
+accompChords7 = pitches→harmony (whole 2) accompF
 
-{-
-accompChords : List (List Note)
-accompChords = accompChords1 ++ accompChords3 ++ accompChords2 ++ accompChords3 ++ accompChords4
-                 ++ accompChords5 ++ accompChords6 ++ accompChords7
--}
+accompChords : Harmony 3 448
+accompChords = accompChords1 +H+ accompChords3 +H+ accompChords2 +H+ accompChords3 +H+ accompChords4
+                 +H+ accompChords5 +H+ accompChords6 +H+ accompChords7
 
 accompTrack : MidiTrack
-accompTrack = track "Accomp" accompInstrument accompChannel tempo (harmony→events defaultVelocity {!!})
+accompTrack = track "Accomp" accompInstrument accompChannel tempo (harmony→events defaultVelocity accompChords)
 
 ----
 

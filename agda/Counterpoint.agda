@@ -15,6 +15,7 @@ open import Data.Vec using ([]; _∷_)
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
 
+-- Possible motion
 data Motion : Set where
   contrary : Motion
   parallel : Motion
@@ -33,6 +34,7 @@ motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .(suc (b + m))) | no ¬
 motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .b)             | no ¬p | greater .c k | equal .b     = oblique
 motion (pitch .(suc (c + k)) , pitch .(suc (d + m))) (pitch c , pitch d) | no ¬p | greater .c k | greater .d m = similar
 
+-- No parallel or similar motion towards a perfect interval
 data MotionCheck : Set where
   ok       : MotionCheck
   parallel : PitchInterval → PitchInterval → MotionCheck
@@ -60,3 +62,26 @@ pitchIntervalToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
 pitchIntervalsToMusic : PitchInterval → Music
 pitchIntervalsToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
 -}
+
+-- Possible ending
+data Ending : Set where
+  cadence2 : Ending
+  cadence7 : Ending
+  other    : Ending
+
+ending : PitchPair → PitchPair → Ending
+ending (pitch a , pitch b) (pitch c , pitch d) with b ∸ a | d ∸ c
+ending (pitch a , pitch b) (pitch c , pitch d) | 9  | 12 = cadence2
+ending (pitch a , pitch b) (pitch c , pitch d) | 15 | 12 = cadence7
+ending _                   _                   | _  | _  = other
+
+-- Ending must be cadence → octave
+data EndingCheck : Set where
+  ok  : EndingCheck
+  bad : PitchInterval → PitchInterval → EndingCheck
+
+endingCheck : (i1 : PitchInterval) (i2 : PitchInterval) → EndingCheck
+endingCheck i1 i2 with ending (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2)
+endingCheck i1 i2 | cadence2 = ok
+endingCheck i1 i2 | cadence7 = ok
+endingCheck i1 i2 | other    = bad i1 i2

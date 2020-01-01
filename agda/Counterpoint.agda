@@ -8,12 +8,14 @@ open import Pitch
 open import Interval
 
 open import Data.Bool using (true; false)
-open import Data.Nat using (suc; _+_;  _∸_; _≟_; compare; equal; less; greater)
-open import Data.Product using (_,_; proj₂)
-open import Data.Vec using ([]; _∷_)
+open import Data.Nat using (ℕ; zero; suc; pred; _+_;  _∸_; _≟_; compare; equal; less; greater)
+open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Data.Vec using (Vec; []; _∷_; lookup)
+open import Data.Fin using (Fin; suc)
 
 open import Function using (_∘_)
 open import Relation.Nullary using (yes; no)
+open import Relation.Binary.PropositionalEquality using (_≡_)
 
 -- Possible motion
 data Motion : Set where
@@ -85,3 +87,28 @@ endingCheck i1 i2 with ending (pitchIntervalToPitchPair i1) (pitchIntervalToPitc
 endingCheck i1 i2 | cadence2 = ok
 endingCheck i1 i2 | cadence7 = ok
 endingCheck i1 i2 | other    = bad i1 i2
+
+-- Type of counterpoint
+Counterpoint : ℕ → Set
+Counterpoint n = Vec PitchInterval (suc (suc n))
+
+-- Extract the last two intervals
+extractEnding : {n : ℕ} → Counterpoint n → PitchInterval × PitchInterval
+extractEnding (i1 ∷ i2 ∷ [])  = i1 , i2
+extractEnding {suc n} (i ∷ c) = extractEnding {n} c
+
+-- Drop the last interval
+dropLast : {n : ℕ} → Counterpoint n → Vec PitchInterval (suc n)
+dropLast c with reverse c
+dropLast c | _ ∷ c' = reverse c'
+
+-- First species counterpoint
+data FirstSpecies : {n : ℕ} → Counterpoint n → Set where
+  fs : {n : ℕ} → (c : Counterpoint n) →
+       -- all intervals are consonant
+       (∀ (m : Fin (suc (suc n))) → isConsonant (proj₂ (lookup c m)) ≡ true) →
+       -- all motions are valid
+       (∀ (m : Fin (suc n)) → motionCheck (lookup (dropLast c) m) (lookup c (suc m)) ≡ ok) →
+       -- ending is valid
+       let i = extractEnding c in endingCheck (proj₁ i) (proj₂ i) ≡ ok →
+       FirstSpecies c

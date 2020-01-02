@@ -16,7 +16,7 @@ open import Music
 open import MidiEvent
 open import Pitch
 open import Interval
-open import ScaleDegree
+-- open import ScaleDegree
 open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.

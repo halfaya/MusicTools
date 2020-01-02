@@ -98,6 +98,17 @@ extractEnding (i1 ∷ i2 ∷ [])  = i1 , i2
 extractEnding {suc n} (i ∷ c) = extractEnding {n} c
 
 -- Drop the last interval
+
+foldl : ∀ {a b} {A : Set a} (B : ℕ → Set b) {m} →
+        (∀ {n} → B n → A → B (suc n)) →
+        B zero →
+        Vec A m → B m
+foldl b _⊕_ n []       = n
+foldl b _⊕_ n (x ∷ xs) = foldl (λ n → b (suc n)) _⊕_ (n ⊕ x) xs
+
+reverse : ∀ {a n} {A : Set a} → Vec A n → Vec A n
+reverse {A = A} = foldl (Vec A) (λ rev x → x ∷ rev) []
+
 dropLast : {n : ℕ} → Counterpoint n → Vec PitchInterval (suc n)
 dropLast c with reverse c
 dropLast c | _ ∷ c' = reverse c'

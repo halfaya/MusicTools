@@ -7,9 +7,9 @@ open import Note
 open import Pitch
 open import Interval
 
-open import Data.Bool using (Bool; true; false; _∧_; if_then_else_)
+open import Data.Bool using (Bool; true; false; not; _∧_; if_then_else_)
 open import Data.Nat using (ℕ; zero; suc; pred; _+_;  _∸_; _≟_; compare; equal; less; greater)
-open import Data.Integer    using (+_)
+open import Data.Integer using (+_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Data.Vec using (Vec; []; _∷_; lookup)
 open import Data.Fin using (Fin; zero; suc)
@@ -89,7 +89,7 @@ endingCheck i1 i2 | cadence2  = ok
 endingCheck i1 i2 | cadence7  = ok
 endingCheck i1 i2 | other _ _ = bad i1 i2
 
--- Type of counterpoint
+-- Type of first-species counterpoint
 Counterpoint : ℕ → Set
 Counterpoint n = Vec PitchInterval (suc (suc n))
 
@@ -98,8 +98,7 @@ extractEnding : {A : Set} {n : ℕ} → Vec A (suc (suc n)) → A × A
 extractEnding (i1 ∷ i2 ∷ [])  = i1 , i2
 extractEnding {n = suc n} (i ∷ c) = extractEnding {n = n} c
 
--- Drop the last interval
-
+-- Some useful functions
 foldl : ∀ {a b} {A : Set a} (B : ℕ → Set b) {m} →
         (∀ {n} → B n → A → B (suc n)) →
         B zero →
@@ -117,7 +116,7 @@ dropLast v | _ ∷ xs = reverse xs
 dropFirst : {A : Set} {n : ℕ} → Vec A (suc n) → Vec A n
 dropFirst (_ ∷ xs) = xs
 
--- First-species counterpoint
+-- Correct first-species counterpoint
 data FirstSpecies : {n : ℕ} → Counterpoint n → Set where
   fs : {n : ℕ} → (c : Counterpoint n) →
        -- all intervals are consonant
@@ -128,33 +127,7 @@ data FirstSpecies : {n : ℕ} → Counterpoint n → Set where
        let i = extractEnding c in endingCheck (proj₁ i) (proj₂ i) ≡ ok →
        FirstSpecies c
 
--- Types for second-species counterpoint
-data PitchPair2 : Set where
-  rest : Pitch → Pitch × Pitch → PitchPair2
-  hold : Pitch × Pitch → PitchPair2
-  pair : Pitch × (Pitch × Pitch) → PitchPair2
-
-data PitchInterval2 : Set where
-  rest : Pitch → Pitch × Interval → PitchInterval2
-  hold : Pitch × Interval → PitchInterval2
-  pair : Pitch × (Interval × Interval) → PitchInterval2
-
-isRest : PitchInterval2 → Bool
-isRest (rest _ _) = true
-isRest _          = false
-
-isHold : PitchInterval2 → Bool
-isHold (hold _) = true
-isHold _        = false
-
-pitchIntervalToPitchPair2 : PitchInterval2 → PitchPair2
-pitchIntervalToPitchPair2 (rest p (p' , interval n))               =
-  rest p (p' , transposePitch (+ n) p')
-pitchIntervalToPitchPair2 (hold (p , interval n))                  =
-  hold (p , transposePitch (+ n) p)
-pitchIntervalToPitchPair2 (pair (p , (interval n1 , interval n2))) =
-  pair (p , (transposePitch (+ n1) p , transposePitch (+ n2) p))
-
+-- No parallel or similar motion towards a perfect interval across bars
 motionCheck2 : (i1 : PitchInterval2) (i2 : PitchInterval2) (p : isRest i2 ≡ false) → MotionCheck
 motionCheck2 (rest p1 (p1' , i1)) (rest _ _) ()
 motionCheck2 (rest p1 (p1' , i1)) (hold (p2 , i2)) refl           = motionCheck (p1' , i1) (p2 , i2) 
@@ -177,6 +150,64 @@ strongCheck (hold (p , i)) = if (isConsonant i) then ok else bad i
 strongCheck (pair (p , (i1 , i2))) with isConsonant i1 | isConsonant i2
 strongCheck (pair (p , (i1 , i2))) | b1 | b2 =
   if b1 then (if b2 then ok else bad i2) else bad i1
+
+-- Step-wise motion
+data StepMotion : Set where
+  up1   : StepMotion
+  up2   : StepMotion
+  down1 : StepMotion
+  down2 : StepMotion
+  other : StepMotion
+
+stepMotion : Pitch → Pitch → StepMotion
+stepMotion (pitch p1) (pitch p2) with compare p1 p2
+stepMotion (pitch p1) (pitch .(suc (p1 + 0)))           | less .p1 Data.Fin.0F      = up1
+stepMotion (pitch p1) (pitch .(suc (p1 + 1)))           | less .p1 Data.Fin.1F      = up2
+stepMotion (pitch p1) (pitch .(suc (p1 + suc (suc k)))) | less .p1 (suc (suc k))    = other
+stepMotion (pitch p1) (pitch .p1)                       | equal .p1                 = other
+stepMotion (pitch .(suc (p2 + 0))) (pitch p2)           | greater .p2 Data.Fin.0F   = down1
+stepMotion (pitch .(suc (p2 + 1))) (pitch p2)           | greater .p2 Data.Fin.1F   = down2
+stepMotion (pitch .(suc (p2 + suc (suc k)))) (pitch p2) | greater .p2 (suc (suc k)) = other
+
+-- Check if p2 is a passing note
+isPassingNote : Pitch → Pitch → Pitch → Bool
+isPassingNote p1 p2 p3 with stepMotion p1 p2 | stepMotion p2 p3
+isPassingNote p1 p2 p3 | up1   | up1   = true
+isPassingNote p1 p2 p3 | up1   | up2   = true
+isPassingNote p1 p2 p3 | up1   | _     = false
+isPassingNote p1 p2 p3 | up2   | up1   = true
+isPassingNote p1 p2 p3 | up2   | up2   = true
+isPassingNote p1 p2 p3 | up2   | _     = false
+isPassingNote p1 p2 p3 | down1 | down1 = true
+isPassingNote p1 p2 p3 | down1 | down2 = true
+isPassingNote p1 p2 p3 | down1 | _     = false
+isPassingNote p1 p2 p3 | down2 | down1 = true
+isPassingNote p1 p2 p3 | down2 | down2 = true
+isPassingNote p1 p2 p3 | down2 | _     = false
+isPassingNote p1 p2 p3 | other | _     = false
+
+-- Weak beats may be dissonant if they are passing notes
+data WeakCheck : Set where
+  ok  : WeakCheck
+  bad : Pitch → Pitch → Pitch → WeakCheck
+
+weakCheck : (i1 : PitchInterval2) → isPair i1 ≡ true →
+            (i2 : PitchInterval2) → isRest i2 ≡ false →
+            WeakCheck
+weakCheck (pair (p1 , interval i1a , interval i1b)) _ (hold (p2 , interval i2)) _ =
+  if (not (isConsonant (interval i1b)))
+  then (let p1' = transposePitch (+ i1a) p1 in
+        let p2' = transposePitch (+ i1b) p1 in
+        let p3' = transposePitch (+ i2)  p2 in
+        if (isPassingNote p1' p2' p3') then ok else bad p1' p2' p3')
+  else ok
+weakCheck (pair (p1 , interval i1a , interval i1b)) _ (pair (p2 , (interval i2a , i2b))) _ =
+  if (not (isConsonant (interval i1b)))
+  then (let p1' = transposePitch (+ i1a) p1 in
+        let p2' = transposePitch (+ i1b) p1 in
+        let p3' = transposePitch (+ i2a) p2 in
+        if (isPassingNote p1' p2' p3') then ok else bad p1' p2' p3')
+  else ok
 
 -- Possible beginning
 beginningCheck : PitchInterval2 → Bool
@@ -205,6 +236,7 @@ ending2 (pair (pitch a , (pitch b1 , pitch b2))) (hold (pitch c , pitch d)) | _ 
 ending2 _  _                                                                          = other
  
 -- Ending must be cadence → octave
+-- The second-last bar is either hold or pair
 data EndingCheck2 : Set where
   ok  : EndingCheck2
   bad : PitchInterval2 → PitchInterval2 → EndingCheck2
@@ -217,21 +249,26 @@ endingCheck2 i1 i2 | cadence7h = ok
 endingCheck2 i1 i2 | cadence7p = ok
 endingCheck2 i1 i2 | other     = bad i1 i2
 
--- Type of counterpoint
+-- Type of second-species counterpoint
 Counterpoint2 : ℕ → Set
 Counterpoint2 n = Vec PitchInterval2 (suc (suc n))
 
--- Second-species counterpoint
+-- Correct second-species counterpoint
 data SecondSpecies : {n : ℕ} → Counterpoint2 n → Set where
   ss : {n : ℕ} → (c : Counterpoint2 n) →
        -- beginning is valid
        beginningCheck (lookup c zero) ≡ true →
        -- no rest in bars other than the first one
        (∀ (m : Fin (suc n)) → isRest (lookup (dropFirst c) m) ≡ false) →
-       -- no hold in bars other than the last one
-       (∀ (m : Fin (suc n)) → isRest (lookup (dropLast c) m) ≡ false) →
+       -- no hold in bars other than the last two
+       (∀ (m : Fin n) → isRest (lookup (dropLast (dropLast c)) m) ≡ false) →
        -- strong beats are consonant
        (∀ (m : Fin (suc (suc n))) → strongCheck (lookup c m) ≡ ok) →
+       -- weak beats are dissonant only if they are passing notes
+       (∀ (m : Fin (suc n)) →
+        let i1 = lookup (dropLast c) m in
+        let i2 = lookup c (suc m) in
+        (p1 : isPair i1 ≡ true) → (p2 : isRest i2 ≡ false) → weakCheck i1 p1 i2 p2 ≡ ok) →
        -- all motions across bars are valid
        (∀ (m : Fin (suc n)) → (p : isRest (lookup c (suc m)) ≡ false) →
         motionCheck2 (lookup (dropLast c) m) (lookup c (suc m)) p ≡ ok) →

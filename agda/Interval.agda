@@ -4,7 +4,7 @@ module Interval where
 
 open import Pitch
 
-open import Data.Bool       using (Bool; _∨_; not)
+open import Data.Bool       using (Bool; true; false; _∨_; not)
 open import Data.Integer    using (+_)
 open import Data.Fin        using (toℕ)
 open import Data.Nat        using (ℕ; _≡ᵇ_; _∸_)
@@ -83,3 +83,34 @@ isPerfect iv =
   (i == per5)  ∨
   (i == per8)
   where i = intervalWithinOctave iv
+
+-- Datatypes for second-species counterpoint
+data PitchPair2 : Set where
+  rest : Pitch → Pitch × Pitch → PitchPair2
+  hold : Pitch × Pitch → PitchPair2
+  pair : Pitch × (Pitch × Pitch) → PitchPair2
+
+data PitchInterval2 : Set where
+  rest : Pitch → Pitch × Interval → PitchInterval2
+  hold : Pitch × Interval → PitchInterval2
+  pair : Pitch × (Interval × Interval) → PitchInterval2
+
+isRest : PitchInterval2 → Bool
+isRest (rest _ _) = true
+isRest _          = false
+
+isHold : PitchInterval2 → Bool
+isHold (hold _) = true
+isHold _        = false
+
+isPair : PitchInterval2 → Bool
+isPair (pair _) = true
+isPair _        = false
+
+pitchIntervalToPitchPair2 : PitchInterval2 → PitchPair2
+pitchIntervalToPitchPair2 (rest p (p' , interval n))               =
+  rest p (p' , transposePitch (+ n) p')
+pitchIntervalToPitchPair2 (hold (p , interval n))                  =
+  hold (p , transposePitch (+ n) p)
+pitchIntervalToPitchPair2 (pair (p , (interval n1 , interval n2))) =
+  pair (p , (transposePitch (+ n1) p , transposePitch (+ n2) p))

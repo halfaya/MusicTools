@@ -18,7 +18,7 @@ open import Music
 open import MidiEvent
 open import Pitch
 open import Interval
-open import ScaleDegree
+-- open import ScaleDegree
 open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.
@@ -54,14 +54,14 @@ counterpoint2 =
 firstSpecies : Vec PitchInterval 42
 firstSpecies = zip cantusFirmus counterpoint
 
-isFS1 : IsFirstSpecies (toList firstSpecies)
-isFS1 = refl
+fs1 : FirstSpecies (toList firstSpecies)
+fs1 = refl
   
 firstSpecies2 : Vec PitchInterval 42
 firstSpecies2 = zip cantusFirmus counterpoint2
 
-isFS2 : IsFirstSpecies (toList firstSpecies2)
-isFS2 = refl
+fs2 : FirstSpecies (toList firstSpecies2)
+fs2 = refl
 
 yamanote counterp : List Note
 yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)

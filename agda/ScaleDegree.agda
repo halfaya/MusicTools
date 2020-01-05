@@ -21,6 +21,6 @@ transposeScaleDegree {n} k (scaleDegree d , octave o) =
   let d' = (toℕ d) + k
   in scaleDegree (d' mod (suc n)) , octave (o + (d' div (suc n)))
 
-scaleDegreeToRelativePitch : {n : ℕ} → Scale n → ScaleDegree n → RelativePitch
-scaleDegreeToRelativePitch scale (scaleDegree d) = lookup scale d
+scaleDegreeToPitchClass : {n : ℕ} → Scale n → ScaleDegree n → PitchClass
+scaleDegreeToPitchClass scale (scaleDegree d) = lookup scale d
 

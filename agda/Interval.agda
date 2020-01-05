@@ -7,14 +7,19 @@ open import Pitch
 open import Data.Bool       using (Bool; _∨_; not)
 open import Data.Integer    using (+_)
 open import Data.Fin        using (toℕ)
-open import Data.Nat        using (ℕ; _≡ᵇ_; _∸_)
+open import Data.Nat        using (ℕ; _≡ᵇ_; _+_)
 open import Data.Nat.DivMod using (_mod_)
-open import Data.Product    using (_×_; _,_)
+open import Data.Product    using (_×_; _,_; Σ)
 
 open import Function        using (_∘_)
 
+open import Relation.Binary.PropositionalEquality using (_≡_)
+
 PitchPair : Set
 PitchPair = Pitch × Pitch
+
+OrderedPitchPair : PitchPair → Set
+OrderedPitchPair (pitch a , pitch b) = Σ ℕ (λ n → a + n ≡ b)
 
 data Interval : Set where
   interval : ℕ → Interval
@@ -60,6 +65,14 @@ isConsonant iv =
 isDissonant : Interval → Bool
 isDissonant = not ∘ isConsonant
 
+isPerfect : Interval → Bool
+isPerfect iv =
+  (i == per1)  ∨
+  (i == per4)  ∨
+  (i == per5)  ∨
+  (i == per8)
+  where i = intervalWithinOctave iv
+
 -- Half or whole step; ignores key for now.
 isStep : Interval → Bool
 isStep i =
@@ -72,14 +85,7 @@ PitchInterval = Pitch × Interval
 pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 
--- assume a ≤ b
-pitchPairToInterval : PitchPair → Interval
-pitchPairToInterval (pitch a , pitch b) = interval (b ∸ a)
+-- This may not be the best way to do the conversion.
+pitchPairToInterval : (ab : PitchPair) → {OrderedPitchPair ab} → Interval
+pitchPairToInterval (pitch _ , pitch _) {(n , _)} = interval n
 
-isPerfect : Interval → Bool
-isPerfect iv =
-  (i == per1)  ∨
-  (i == per4)  ∨
-  (i == per5)  ∨
-  (i == per8)
-  where i = intervalWithinOctave iv

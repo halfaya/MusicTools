@@ -10,7 +10,7 @@ open import Data.String  using (String)
 open import Data.Vec     using (toList)
 open import Function     using (_∘_)
 
-open import Music        using (Melody; melody; Music; music; Harmony; melody→notes; harmony→counterpoint)
+open import Music        using (Melody; melody; Counterpoint; cp; Harmony; melody→notes; harmony→counterpoint)
 open import Note         using (Note; tone; rest; duration)
 open import Pitch        using (Pitch)
 
@@ -63,8 +63,8 @@ notes→events v ns = me 0 ns where
 melody→events : {n : ℕ} → Velocity → Melody n → List MidiEvent
 melody→events v = notes→events v ∘ melody→notes
 
-music→events : {v d : ℕ} → Velocity → Music v d → List MidiEvent
-music→events v (music ms) = concat (map (melody→events v) (toList ms))
+counterpoint→events : {v d : ℕ} → Velocity → Counterpoint v d → List MidiEvent
+counterpoint→events v (cp ms) = concat (map (melody→events v) (toList ms))
 
 harmony→events : {v d : ℕ} → Velocity → Harmony v d → List MidiEvent
-harmony→events v = music→events v ∘ harmony→counterpoint
+harmony→events v = counterpoint→events v ∘ harmony→counterpoint

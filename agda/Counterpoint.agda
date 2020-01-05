@@ -2,18 +2,35 @@
 
 module Counterpoint where
 
+open import Data.Bool using (true; false; if_then_else_; _∨_; _∧_)
+open import Data.List using (List; []; _∷_; mapMaybe)
+open import Data.Maybe using (Maybe; just; nothing)
+open import Data.Nat using (suc; _+_; _≡ᵇ_; _<ᵇ_)
+open import Data.Product using (_×_; _,_; proj₂; uncurry)
+open import Data.Vec using ([]; _∷_)
+
+open import Function using (_∘_)
+
+open import Relation.Binary.PropositionalEquality using (_≡_)
+
 open import Music
 open import Note
 open import Pitch
 open import Interval
+open import Util using (pairs)
 
-open import Data.Bool using (true; false)
-open import Data.Nat using (suc; _+_;  _∸_; _≟_; compare; equal; less; greater)
-open import Data.Product using (_,_; proj₂)
-open import Data.Vec using ([]; _∷_)
+------------------------------------------------
 
-open import Function using (_∘_)
-open import Relation.Nullary using (yes; no)
+data IntervalError : Set where
+  dissonant : Interval → IntervalError
+
+intervalCheck : Interval → Maybe IntervalError
+intervalCheck i = if isConsonant i then nothing else just (dissonant i)
+
+checkIntervals : List PitchInterval → List IntervalError
+checkIntervals = mapMaybe (intervalCheck ∘ proj₂)
+
+------------------------------------------------
 
 data Motion : Set where
   contrary : Motion
@@ -21,42 +38,55 @@ data Motion : Set where
   similar  : Motion
   oblique  : Motion
 
--- assume a ≤ b , c ≤ d
-motion : PitchPair → PitchPair → Motion
-motion (pitch a , pitch b) (pitch c , pitch d) with b ∸ a ≟ d ∸ c | compare a c | compare b d
-motion (pitch a , pitch b) (pitch c , pitch d)                           | yes p | y            | z            = parallel
-motion (pitch a , pitch b) (pitch .a , pitch d)                          | no ¬p | equal .a     | z            = oblique
-motion (pitch a , pitch b) (pitch .(suc (a + k)) , pitch .(suc (b + m))) | no ¬p | less .a k    | less .b m    = similar
-motion (pitch a , pitch b) (pitch .(suc (a + k)) , pitch .b)             | no ¬p | less .a k    | equal .b     = oblique
-motion (pitch a , pitch .(suc (d + m))) (pitch .(suc (a + k)) , pitch d) | no ¬p | less .a k    | greater .d m = contrary
-motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .(suc (b + m))) | no ¬p | greater .c k | less .b m    = contrary
-motion (pitch .(suc (c + k)) , pitch b) (pitch c , pitch .b)             | no ¬p | greater .c k | equal .b     = oblique
-motion (pitch .(suc (c + k)) , pitch .(suc (d + m))) (pitch c , pitch d) | no ¬p | greater .c k | greater .d m = similar
+motion : PitchInterval → PitchInterval → Motion
+motion (pitch p , interval i) (pitch q , interval j) =
+  let p' = p + i; q' = q + j
+  in if i ≡ᵇ j then parallel
+     else (if (p ≡ᵇ q) ∨ (p' ≡ᵇ q') then oblique
+           else (if p <ᵇ q then (if p' <ᵇ q' then similar  else contrary)
+                 else           (if p' <ᵇ q' then contrary else similar )))
 
-data MotionCheck : Set where
-  ok       : MotionCheck
-  parallel : PitchInterval → PitchInterval → MotionCheck
-  similar  : PitchInterval → PitchInterval → MotionCheck
+data MotionError : Set where
+  parallel : PitchInterval → PitchInterval → MotionError
+  similar  : PitchInterval → PitchInterval → MotionError
 
-motionCheck : (i1 : PitchInterval) (i2 : PitchInterval) → MotionCheck
-motionCheck i1 i2 with motion (pitchIntervalToPitchPair i1) (pitchIntervalToPitchPair i2) | isPerfect (proj₂ i2)
-motionCheck i1 i2 | contrary | _     = ok
-motionCheck i1 i2 | oblique  | _     = ok
-motionCheck i1 i2 | parallel | false = ok
-motionCheck i1 i2 | parallel | true  = parallel i1 i2
-motionCheck i1 i2 | similar  | false = ok
-motionCheck i1 i2 | similar  | true  = similar i1 i2
+motionCheck : PitchInterval → PitchInterval → Maybe MotionError
+motionCheck i1 i2 with motion i1 i2 | isPerfect (proj₂ i2)
+motionCheck i1 i2 | contrary | _     = nothing
+motionCheck i1 i2 | oblique  | _     = nothing
+motionCheck i1 i2 | parallel | false = nothing
+motionCheck i1 i2 | parallel | true  = just (parallel i1 i2)
+motionCheck i1 i2 | similar  | false = nothing
+motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
 
---pitchToMusic : Pitch → Music
---pitchToMusic = note ∘ tone 8th
+checkMotion : List PitchInterval → List MotionError
+checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs
 
-pitchPairToMusic : (d : Duration) → PitchPair → Music 2 (unduration d)
-pitchPairToMusic d (p , q) = music (note→melody (tone d p) ∷ note→melody (tone d q) ∷ [])
+------------------------------------------------
 
-{-
-pitchIntervalToMusic : PitchInterval → Music
-pitchIntervalToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
+data CadenceError : Set where
+  notOctave : PitchInterval → CadenceError
+  not2and7  : PitchInterval → PitchInterval → CadenceError
 
-pitchIntervalsToMusic : PitchInterval → Music
-pitchIntervalsToMusic = pitchPairToMusic ∘ pitchIntervalToPitchPair
--}
+cadenceCheck : PitchInterval → PitchInterval → Maybe CadenceError
+cadenceCheck pi1@(pitch p , i) pi2@(pitch q , j) =
+  if j == per8
+  then (if ((q + 2 ≡ᵇ p) ∧ (i == maj6) ∨ (p + 1 ≡ᵇ q) ∧ (i == min10))
+        then nothing
+        else just (not2and7 pi1 pi2))
+  else just (notOctave pi2)
+
+-- Perhaps this should give an error if the input list is too short.
+checkCadence : List PitchInterval → Maybe CadenceError
+checkCadence []               = nothing
+checkCadence (_ ∷ [])         = nothing
+checkCadence (p ∷ q ∷ [])     = cadenceCheck p q
+checkCadence (_ ∷ p ∷ q ∷ ps) = checkCadence (p ∷ q ∷ ps)
+
+------------------------------------------------
+
+checkFirstSpecies : List PitchInterval → List IntervalError × List MotionError × Maybe CadenceError
+checkFirstSpecies pis = checkIntervals pis , checkMotion pis , checkCadence pis
+
+IsFirstSpecies : List PitchInterval → Set
+IsFirstSpecies pis = checkFirstSpecies pis ≡ ([] , [] , nothing)

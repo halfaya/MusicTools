@@ -31,14 +31,14 @@ half1scale : List (ScaleDegreeOctave 7)
 half1scale = concat (map tcell (0toN 13))
 
 half1pitches : List Pitch
-half1pitches = map (relativeToAbsolute ∘ map₁ (scaleDegreeToRelativePitch majorScale)) half1scale
+half1pitches = map (relativeToAbsolute ∘ map₁ (scaleDegreeToPitchClass majorScale)) half1scale
 
 half1bot half1top : Melody 224
 half1bot = pitches→melody 8th (fromList half1pitches)
 half1top = transposeMelody (+ 12) half1bot
 
-hanon1 : Music 2 224
-hanon1 = music (fromList (half1bot ∷ half1top ∷ []))
+hanon1 : Counterpoint 2 224
+hanon1 = cp (fromList (half1bot ∷ half1top ∷ []))
 
 ----
 
@@ -52,4 +52,4 @@ tempo : ℕ
 tempo = 180
 
 hanonTrack : List MidiTrack
-hanonTrack = track "Piano" instrument channel tempo (music→events defaultVelocity hanon1) ∷ []
+hanonTrack = track "Piano" instrument channel tempo (counterpoint→events defaultVelocity hanon1) ∷ []

@@ -10,6 +10,8 @@ open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Function using (_∘_)
 open import Data.Vec using (Vec; []; _∷_; zip; toList) renaming (map to vmap)
 
+open import Relation.Binary.PropositionalEquality using (refl)
+
 open import Counterpoint
 open import Note
 open import Music
@@ -51,13 +53,19 @@ counterpoint2 =
 
 firstSpecies : Vec PitchInterval 42
 firstSpecies = zip cantusFirmus counterpoint
+
+isFS1 : IsFirstSpecies (toList firstSpecies)
+isFS1 = refl
   
 firstSpecies2 : Vec PitchInterval 42
 firstSpecies2 = zip cantusFirmus counterpoint2
 
-yamanote cp : List Note
+isFS2 : IsFirstSpecies (toList firstSpecies2)
+isFS2 = refl
+
+yamanote counterp : List Note
 yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
-cp       = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
+counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
 
 ----
 
@@ -80,7 +88,7 @@ yamanoteTrack : MidiTrack
 yamanoteTrack = track "Cantus Firmus" piano channel1 tempo (notes→events yVelocity yamanote)
 
 cpTrack : MidiTrack
-cpTrack = track "Counterpoint" marimba channel2 tempo (notes→events cVelocity cp)
+cpTrack = track "Counterpoint" marimba channel2 tempo (notes→events cVelocity counterp)
 
 ycpTracks : List MidiTrack
 ycpTracks = cpTrack L∷ yamanoteTrack L∷ L[]

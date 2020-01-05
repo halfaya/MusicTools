@@ -11,6 +11,7 @@ open import Function     using (_∘_)
 
 open import Note
 open import Pitch
+open import Interval
 
 -- A point in the music grid, which can either be a tone,
 -- a continuation of a previous tone, or a rest.
@@ -58,13 +59,13 @@ data Chord (n : ℕ) : Set where
 unchord : {n : ℕ} → Chord n → Vec Point n
 unchord (chord ps) = ps
 
--- Music is a v × d grid where v is the number of voices and d is the duration.
+-- Counterpoint is a v × d grid where v is the number of voices and d is the duration.
 -- The primary representation is as parallel melodies (counterpoint).
-data Music (v : ℕ) (d : ℕ): Set where
-  music : Vec (Melody d) v → Music v d
+data Counterpoint (v : ℕ) (d : ℕ): Set where
+  cp : Vec (Melody d) v → Counterpoint v d
 
-unmusic : {v d : ℕ} → Music v d → Vec (Melody d) v
-unmusic (music m) = m
+uncp : {v d : ℕ} → Counterpoint v d → Vec (Melody d) v
+uncp (cp m) = m
 
 -- An alternative representation of music is as a series of chords (harmonic progression).
 data Harmony (v : ℕ) (d : ℕ): Set where
@@ -76,6 +77,17 @@ unharmony (harmony h) = h
 pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n (unduration d)
 pitches→harmony (duration zero)    ps = harmony []
 pitches→harmony (duration (suc d)) ps = harmony (chord (map tone ps) ∷ replicate (chord (map cont ps)))
+
+pitchPair→Harmony : (d : Duration) → PitchPair → Harmony 2 (unduration d)
+pitchPair→Harmony d (p , q) = pitches→harmony d (p ∷ q ∷ [])
+
+pitchInterval→Harmony : (d : Duration) → PitchInterval → Harmony 2 (unduration d)
+pitchInterval→Harmony d = pitchPair→Harmony d ∘ pitchIntervalToPitchPair
+
+{-
+pitchIntervalsToCounterpoint : PitchInterval → Counterpoint
+pitchIntervalsToCounterpoint = pitchPairToCounterpoint ∘ pitchIntervalToPitchPair
+-}
 
 addEmptyVoice : {v d : ℕ} → Harmony v d → Harmony (suc v) d
 addEmptyVoice (harmony h) = harmony (map (chord ∘ (rest ∷_) ∘ unchord) h)
@@ -93,8 +105,8 @@ mtranspose : {A : Set}{m n : ℕ} → Vec (Vec A n) m → Vec (Vec A m) n
 mtranspose []         = replicate []
 mtranspose (xs ∷ xss) = zipWith _∷_ xs (mtranspose xss)
 
-counterpoint→harmony : {v d : ℕ} → Music v d → Harmony v d
-counterpoint→harmony = harmony ∘ map chord ∘ mtranspose ∘ map unmelody ∘ unmusic
+counterpoint→harmony : {v d : ℕ} → Counterpoint v d → Harmony v d
+counterpoint→harmony = harmony ∘ map chord ∘ mtranspose ∘ map unmelody ∘ uncp
 
-harmony→counterpoint : {v d : ℕ} → Harmony v d → Music v d
-harmony→counterpoint = music ∘ map melody ∘ mtranspose ∘ map unchord ∘ unharmony
+harmony→counterpoint : {v d : ℕ} → Harmony v d → Counterpoint v d
+harmony→counterpoint = cp ∘ map melody ∘ mtranspose ∘ map unchord ∘ unharmony

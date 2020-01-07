@@ -86,7 +86,7 @@ pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 
 -- This may not be the best way to do the conversion.
-pitchPairToInterval : (ab : PitchPair) → {OrderedPitchPair ab} → Interval
+pitchPairToInterval : (ab : PitchPair) → {_ : OrderedPitchPair ab} → Interval
 pitchPairToInterval (pitch _ , pitch _) {(n , _)} = interval n
 
 --------------------------------------------------------

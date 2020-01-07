@@ -108,17 +108,20 @@ motionCheck2 (pair (p1 , (i1 , i2))) (rest _ _) ()
 motionCheck2 (pair (p1 , (i1 , i2))) (hold (p2 , i3)) refl        = motionCheck (p1 , i1) (p2 , i3)
 motionCheck2 (pair (p1 , (i1 , i2))) (pair (p2 , (i3 , i4))) refl = motionCheck (p1 , i1) (p2 , i3)
 
--- Strong beats must be consonant
-data StrongCheck : Set where
-  ok  : StrongCheck
-  bad : Interval → StrongCheck
+------------------------------------------------
 
-strongCheck : PitchInterval2 → StrongCheck
-strongCheck (rest _ _)     = ok
-strongCheck (hold (p , i)) = if (isConsonant i) then ok else bad i
-strongCheck (pair (p , (i1 , i2))) with isConsonant i1 | isConsonant i2
-strongCheck (pair (p , (i1 , i2))) | b1 | b2 =
-  if b1 then (if b2 then ok else bad i2) else bad i1
+data IntervalError2 : Set where
+  strongDissonant : Interval → IntervalError2
+  weakDissonant   : Interval → Pitch → Pitch → Pitch → IntervalError2
+  
+-- Strong beats must be consonant
+strongCheck : PitchInterval2 → Maybe IntervalError2
+strongCheck (rest _ _)             = nothing
+strongCheck (hold (p , i))         = if isConsonant i then nothing else just (strongDissonant i)
+strongCheck (pair (p , (i1 , i2))) = if isConsonant i1 then nothing else just (strongDissonant i1)
+
+checkStrong : List PitchInterval2 → List IntervalError2
+checkStrong = mapMaybe strongCheck
 
 -- Step-wise motion
 data StepMotion : Set where
@@ -153,27 +156,25 @@ isPassingNote p1 p2 p3 | down2 | _     = false
 isPassingNote p1 p2 p3 | other | _     = false
 
 -- Weak beats may be dissonant if they are passing notes
-data WeakCheck : Set where
-  ok  : WeakCheck
-  bad : Pitch → Pitch → Pitch → WeakCheck
-
 weakCheck : (i1 : PitchInterval2) → isPair i1 ≡ true →
             (i2 : PitchInterval2) → isRest i2 ≡ false →
-            WeakCheck
+            Maybe IntervalError2
 weakCheck (pair (p1 , interval i1a , interval i1b)) _ (hold (p2 , interval i2)) _ =
   if (not (isConsonant (interval i1b)))
   then (let p1' = transposePitch (+ i1a) p1 in
         let p2' = transposePitch (+ i1b) p1 in
         let p3' = transposePitch (+ i2)  p2 in
-        if (isPassingNote p1' p2' p3') then ok else bad p1' p2' p3')
-  else ok
+        if (isPassingNote p1' p2' p3') then nothing
+        else just (weakDissonant (interval i1b) p1' p2' p3'))
+  else nothing
 weakCheck (pair (p1 , interval i1a , interval i1b)) _ (pair (p2 , (interval i2a , i2b))) _ =
   if (not (isConsonant (interval i1b)))
   then (let p1' = transposePitch (+ i1a) p1 in
         let p2' = transposePitch (+ i1b) p1 in
         let p3' = transposePitch (+ i2a) p2 in
-        if (isPassingNote p1' p2' p3') then ok else bad p1' p2' p3')
-  else ok
+        if (isPassingNote p1' p2' p3') then nothing
+        else just (weakDissonant (interval i1b) p1' p2' p3'))
+  else nothing
 
 -- Possible beginning
 beginningCheck : PitchInterval2 → Bool
@@ -227,7 +228,19 @@ extractEnding : {A : Set} {n : ℕ} → Vec A (suc (suc n)) → A × A
 extractEnding (i1 ∷ i2 ∷ [])  = i1 , i2
 extractEnding {n = suc n} (i ∷ c) = extractEnding {n = n} c
 
--- Correct second-species counterpoint
+------------------------------------------------
+
+-- To be extended
+checkSecondSpecies : List PitchInterval2 → List IntervalError2
+checkSecondSpecies pis = checkStrong pis
+
+SecondSpecies : List PitchInterval2 → Set
+SecondSpecies pis = checkSecondSpecies pis ≡ []
+
+------------------------------------------------
+
+{-
+-- Old definition
 data SecondSpecies : {n : ℕ} → Counterpoint2 n → Set where
   ss : {n : ℕ} → (c : Counterpoint2 n) →
        -- beginning is valid
@@ -237,15 +250,16 @@ data SecondSpecies : {n : ℕ} → Counterpoint2 n → Set where
        -- no hold in bars other than the last two
        (∀ (m : Fin n) → isRest (lookup (dropLast (dropLast c)) m) ≡ false) →
        -- strong beats are consonant
-       (∀ (m : Fin (suc (suc n))) → strongCheck (lookup c m) ≡ ok) →
+       (∀ (m : Fin (suc (suc n))) → strongCheck (lookup c m) ≡ nothing) →
        -- weak beats are dissonant only if they are passing notes
        (∀ (m : Fin (suc n)) →
         let i1 = lookup (dropLast c) m in
         let i2 = lookup c (Fin.suc m) in
-        (p1 : isPair i1 ≡ true) → (p2 : isRest i2 ≡ false) → weakCheck i1 p1 i2 p2 ≡ ok) →
+        (p1 : isPair i1 ≡ true) → (p2 : isRest i2 ≡ false) → weakCheck i1 p1 i2 p2 ≡ nothing) →
        -- all motions across bars are valid
        (∀ (m : Fin (suc n)) → (p : isRest (lookup c (Fin.suc m)) ≡ false) →
         motionCheck2 (lookup (dropLast c) m) (lookup c (Fin.suc m)) p ≡ nothing) →
        -- ending is valid
        let i = extractEnding c in endingCheck2 (proj₁ i) (proj₂ i) ≡ ok →
        SecondSpecies c
+-}

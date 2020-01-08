@@ -124,17 +124,7 @@ strongCheck (pair (p , (i1 , i2))) = if isConsonant i1 then nothing else just (s
 
 checkStrong : List PitchInterval2 → List IntervalError2
 checkStrong = mapMaybe strongCheck
-
-------------------------------------------------
-
-checkCadence2 : List PitchInterval2 → Maybe CadenceError
-checkCadence2 []                                 = just tooShort
-checkCadence2 (_ ∷ [])                           = just tooShort
-checkCadence2 (hold p ∷ hold q ∷ [])             = cadenceCheck p q
-checkCadence2 (pair (p , (i , j)) ∷ hold q ∷ []) = cadenceCheck (p , j) q
-checkCadence2 (_ ∷ _ ∷ [])                       = just invalidForm
-checkCadence2 (_ ∷ p ∷ q ∷ ps)                   = checkCadence2 (p ∷ q ∷ ps)
-
+  
 ------------------------------------------------
 
 -- Step-wise motion
@@ -169,11 +159,9 @@ isPassingNote p1 p2 p3 | down2 | down2 = true
 isPassingNote p1 p2 p3 | down2 | _     = false
 isPassingNote p1 p2 p3 | other | _     = false
 
--- Weak beats may be dissonant if they are passing notes
-weakCheck : (i1 : PitchInterval2) → isPair i1 ≡ true →
-            (i2 : PitchInterval2) → isRest i2 ≡ false →
-            Maybe IntervalError2
-weakCheck (pair (p1 , interval i1a , interval i1b)) _ (hold (p2 , interval i2)) _ =
+-- Weak beats must also be consonant unless they are a passing note
+checkWeak' : (i1 i2 : PitchInterval2) → Maybe IntervalError2
+checkWeak' (pair (p1 , interval i1a , interval i1b)) (hold (p2 , interval i2)) =
   if (not (isConsonant (interval i1b)))
   then (let p1' = transposePitch (+ i1a) p1 in
         let p2' = transposePitch (+ i1b) p1 in
@@ -181,7 +169,7 @@ weakCheck (pair (p1 , interval i1a , interval i1b)) _ (hold (p2 , interval i2)) 
         if (isPassingNote p1' p2' p3') then nothing
         else just (weakDissonant (interval i1b) p1' p2' p3'))
   else nothing
-weakCheck (pair (p1 , interval i1a , interval i1b)) _ (pair (p2 , (interval i2a , i2b))) _ =
+checkWeak' (pair (p1 , interval i1a , interval i1b)) (pair (p2 , (interval i2a , i2b))) =
   if (not (isConsonant (interval i1b)))
   then (let p1' = transposePitch (+ i1a) p1 in
         let p2' = transposePitch (+ i1b) p1 in
@@ -189,6 +177,26 @@ weakCheck (pair (p1 , interval i1a , interval i1b)) _ (pair (p2 , (interval i2a 
         if (isPassingNote p1' p2' p3') then nothing
         else just (weakDissonant (interval i1b) p1' p2' p3'))
   else nothing
+checkWeak' _ _ = nothing  -- this case is ruled out by checkRestHold (to be defined)
+
+checkWeak : List PitchInterval2 → Maybe IntervalError2
+checkWeak []                     = nothing  -- this case is ruled out by checkCadence2
+checkWeak (_ ∷ [])               = nothing  -- same as the above case
+checkWeak (p ∷ q ∷ ps) with checkWeak' p q
+checkWeak (p ∷ q ∷ ps) | nothing = checkWeak (q ∷ ps)  -- this recursive call is problematic
+checkWeak (p ∷ q ∷ ps) | just e  = just e
+
+------------------------------------------------
+
+checkCadence2 : List PitchInterval2 → Maybe CadenceError
+checkCadence2 []                                 = just tooShort
+checkCadence2 (_ ∷ [])                           = just tooShort
+checkCadence2 (hold p ∷ hold q ∷ [])             = cadenceCheck p q
+checkCadence2 (pair (p , (i , j)) ∷ hold q ∷ []) = cadenceCheck (p , j) q
+checkCadence2 (_ ∷ _ ∷ [])                       = just invalidForm
+checkCadence2 (_ ∷ p ∷ q ∷ ps)                   = checkCadence2 (p ∷ q ∷ ps)
+
+------------------------------------------------
 
 -- Possible beginning
 beginningCheck : PitchInterval2 → Bool
@@ -245,11 +253,11 @@ extractEnding {n = suc n} (i ∷ c) = extractEnding {n = n} c
 ------------------------------------------------
 
 -- To be extended
-checkSecondSpecies : List PitchInterval2 → List IntervalError2 × Maybe CadenceError
-checkSecondSpecies pis = checkStrong pis , checkCadence2 pis
+checkSecondSpecies : List PitchInterval2 → List IntervalError2 × Maybe IntervalError2 × Maybe CadenceError
+checkSecondSpecies pis = checkStrong pis , checkWeak pis , checkCadence2 pis
 
 SecondSpecies : List PitchInterval2 → Set
-SecondSpecies pis = checkSecondSpecies pis ≡ ([] , nothing)
+SecondSpecies pis = checkSecondSpecies pis ≡ ([] , nothing , nothing)
 
 ------------------------------------------------
 
@@ -269,7 +277,7 @@ data SecondSpecies : {n : ℕ} → Counterpoint2 n → Set where
        (∀ (m : Fin (suc n)) →
         let i1 = lookup (dropLast c) m in
         let i2 = lookup c (Fin.suc m) in
-        (p1 : isPair i1 ≡ true) → (p2 : isRest i2 ≡ false) → weakCheck i1 p1 i2 p2 ≡ nothing) →
+        (p1 : isPair i1 ≡ true) → (p2 : isRest i2 ≡ false) → checkWeak i1 p1 i2 p2 ≡ nothing) →
        -- all motions across bars are valid
        (∀ (m : Fin (suc n)) → (p : isRest (lookup c (Fin.suc m)) ≡ false) →
         motionCheck2 (lookup (dropLast c) m) (lookup c (Fin.suc m)) p ≡ nothing) →

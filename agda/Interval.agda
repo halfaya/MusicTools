@@ -4,12 +4,13 @@ module Interval where
 
 open import Pitch
 
-open import Data.Bool       using (Bool; true; false; _∨_; not)
-open import Data.Integer    using (+_)
+open import Data.Bool       using (Bool; true; false; _∨_; not; if_then_else_)
+open import Data.Integer    using (+_; _-_; sign; ∣_∣)
 open import Data.Fin        using (toℕ)
 open import Data.Nat        using (ℕ; _≡ᵇ_; _+_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Product    using (_×_; _,_; Σ)
+open import Data.Sign       using (Sign)
 
 open import Function        using (_∘_)
 
@@ -17,9 +18,6 @@ open import Relation.Binary.PropositionalEquality using (_≡_)
 
 PitchPair : Set
 PitchPair = Pitch × Pitch
-
-OrderedPitchPair : PitchPair → Set
-OrderedPitchPair (pitch a , pitch b) = Σ ℕ (λ n → a + n ≡ b)
 
 data Interval : Set where
   interval : ℕ → Interval
@@ -31,6 +29,9 @@ _==_ : Interval → Interval → Bool
 
 intervalWithinOctave : Interval → Interval
 intervalWithinOctave (interval i) = interval (toℕ (i mod chromaticScaleSize))
+
+SignedInterval : Set
+SignedInterval = Sign × Interval
 
 -- Names for intervals
 per1  = interval 0
@@ -85,9 +86,20 @@ PitchInterval = Pitch × Interval
 pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 
--- This may not be the best way to do the conversion.
-pitchPairToInterval : (ab : PitchPair) → {_ : OrderedPitchPair ab} → Interval
-pitchPairToInterval (pitch _ , pitch _) {(n , _)} = interval n
+pitchPairToSignedInterval : (ab : PitchPair) → SignedInterval
+pitchPairToSignedInterval (pitch p , pitch q) =
+  let d = (+ q) - (+ p)
+  in sign d , interval ∣ d ∣
+
+stepUp : Pitch → Pitch → Bool
+stepUp p q with pitchPairToSignedInterval (p , q)
+... | Sign.- , _ = false
+... | Sign.+ , i = isStep i
+
+stepDown : Pitch → Pitch → Bool
+stepDown p q with pitchPairToSignedInterval (p , q)
+... | Sign.- , i = isStep i
+... | Sign.+ , _ = false
 
 --------------------------------------------------------
 

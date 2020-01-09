@@ -127,37 +127,9 @@ checkStrong = mapMaybe strongCheck
   
 ------------------------------------------------
 
--- Step-wise motion
-data StepMotion : Set where
-  up1   : StepMotion
-  up2   : StepMotion
-  down1 : StepMotion
-  down2 : StepMotion
-  other : StepMotion
-
-stepMotion : Pitch → Pitch → StepMotion
-stepMotion (pitch p1) (pitch p2) =
-  if p1 + 1 ≡ᵇ p2 then up1
-  else (if p1 + 2 ≡ᵇ p2 then up2
-        else (if p2 + 1 ≡ᵇ p1 then down1
-              else (if p2 + 2 ≡ᵇ p1 then down2 else other)))
-
--- Check if p2 is a passing note
+-- Check if q is a passing note between p and r
 isPassingNote : Pitch → Pitch → Pitch → Bool
-isPassingNote p1 p2 p3 with stepMotion p1 p2 | stepMotion p2 p3
-isPassingNote p1 p2 p3 | up1   | up1   = true
-isPassingNote p1 p2 p3 | up1   | up2   = true
-isPassingNote p1 p2 p3 | up1   | _     = false
-isPassingNote p1 p2 p3 | up2   | up1   = true
-isPassingNote p1 p2 p3 | up2   | up2   = true
-isPassingNote p1 p2 p3 | up2   | _     = false
-isPassingNote p1 p2 p3 | down1 | down1 = true
-isPassingNote p1 p2 p3 | down1 | down2 = true
-isPassingNote p1 p2 p3 | down1 | _     = false
-isPassingNote p1 p2 p3 | down2 | down1 = true
-isPassingNote p1 p2 p3 | down2 | down2 = true
-isPassingNote p1 p2 p3 | down2 | _     = false
-isPassingNote p1 p2 p3 | other | _     = false
+isPassingNote p q r = (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)
 
 -- Weak beats must also be consonant unless they are a passing note
 checkWeak' : (i1 i2 : PitchInterval2) → Maybe IntervalError2
@@ -179,6 +151,7 @@ checkWeak' (pair (p1 , interval i1a , interval i1b)) (pair (p2 , (interval i2a ,
   else nothing
 checkWeak' _ _ = nothing  -- this case is ruled out by checkRestHold (to be defined)
 
+{-# TERMINATING #-}
 checkWeak : List PitchInterval2 → Maybe IntervalError2
 checkWeak []                     = nothing  -- this case is ruled out by checkCadence2
 checkWeak (_ ∷ [])               = nothing  -- same as the above case

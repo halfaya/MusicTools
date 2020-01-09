@@ -17,7 +17,7 @@ open import Interval
 -- a continuation of a previous tone, or a rest.
 data Point : Set where
   tone : Pitch → Point
-  cont : Pitch → Point
+  hold : Pitch → Point
   rest : Point
 
 data Melody (n : ℕ) : Set where
@@ -28,18 +28,18 @@ unmelody (melody ps) = ps
 
 note→melody : (n : Note) → Melody (noteDuration n)
 note→melody (tone (duration zero)    p) = melody []
-note→melody (tone (duration (suc d)) p) = melody (tone p ∷ replicate (cont p))
+note→melody (tone (duration (suc d)) p) = melody (tone p ∷ replicate (hold p))
 note→melody (rest _)                    = melody (replicate rest)
 
--- Assumes melody is well-formed in that a continuation note has the
+-- Assumes melody is well-formed in that a held note has the
 -- same pitch as the note before it.
 -- Does not consolidate rests.
 melody→notes : {n : ℕ} → Melody n → List Note
 melody→notes (melody m) = (reverse ∘ mn 0 ∘ reverse ∘ toList) m
-  where mn : ℕ → List Point → List Note -- c is the number of continuations
+  where mn : ℕ → List Point → List Note -- c is the number of held points
         mn c []            = []
         mn c (tone p ∷ ps) = tone (duration (suc c)) p ∷ mn 0 ps
-        mn c (cont _ ∷ ps) = mn (suc c) ps
+        mn c (hold _ ∷ ps) = mn (suc c) ps
         mn c (rest ∷ ps)   = rest (duration 1) ∷ mn 0 ps
 
 pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * unduration d)
@@ -47,7 +47,7 @@ pitches→melody d ps = melody (concat (map (unmelody ∘ note→melody ∘ tone
 
 transposePoint : ℤ → Point → Point
 transposePoint k (tone p) = tone (transposePitch k p)
-transposePoint k (cont p) = cont (transposePitch k p)
+transposePoint k (hold p) = hold (transposePitch k p)
 transposePoint k rest     = rest
 
 transposeMelody : {n : ℕ} → ℤ → Melody n → Melody n
@@ -59,7 +59,7 @@ data Chord (n : ℕ) : Set where
 unchord : {n : ℕ} → Chord n → Vec Point n
 unchord (chord ps) = ps
 
--- Counterpoint is a v × d grid where v is the number of voices and d is the duration.
+-- We represent music as a v × d grid where v is the number of voices and d is the duration.
 -- The primary representation is as parallel melodies (counterpoint).
 data Counterpoint (v : ℕ) (d : ℕ): Set where
   cp : Vec (Melody d) v → Counterpoint v d
@@ -76,7 +76,7 @@ unharmony (harmony h) = h
 
 pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n (unduration d)
 pitches→harmony (duration zero)    ps = harmony []
-pitches→harmony (duration (suc d)) ps = harmony (chord (map tone ps) ∷ replicate (chord (map cont ps)))
+pitches→harmony (duration (suc d)) ps = harmony (chord (map tone ps) ∷ replicate (chord (map hold ps)))
 
 pitchPair→Harmony : (d : Duration) → PitchPair → Harmony 2 (unduration d)
 pitchPair→Harmony d (p , q) = pitches→harmony d (p ∷ q ∷ [])

@@ -69,7 +69,7 @@ checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs
 data CadenceError : Set where
   notOctave   : PitchInterval → CadenceError
   not2and7    : PitchInterval → PitchInterval → CadenceError
-  tooShort    : CadenceError
+  tooShort    : List PitchInterval → CadenceError
   invalidForm : CadenceError
 
 cadenceCheck : PitchInterval → PitchInterval → Maybe CadenceError
@@ -80,10 +80,9 @@ cadenceCheck pi1@(pitch p , i) pi2@(pitch q , j) =
         else just (not2and7 pi1 pi2))
   else just (notOctave pi2)
 
--- Give an error if the input list is too short
 checkCadence : List PitchInterval → Maybe CadenceError
-checkCadence []               = just tooShort
-checkCadence (_ ∷ [])         = just tooShort
+checkCadence []               = just (tooShort [])
+checkCadence (p ∷ [])         = just (tooShort (p ∷ []))
 checkCadence (p ∷ q ∷ [])     = cadenceCheck p q
 checkCadence (_ ∷ p ∷ q ∷ ps) = checkCadence (p ∷ q ∷ ps)
 
@@ -127,10 +126,6 @@ checkStrong = mapMaybe strongCheck
   
 ------------------------------------------------
 
--- Check if q is a passing note between p and r
-isPassingNote : Pitch → Pitch → Pitch → Bool
-isPassingNote p q r = (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)
-
 -- Weak beats must also be consonant unless they are a passing note
 checkWeak' : (i1 i2 : PitchInterval2) → Maybe IntervalError2
 checkWeak' (pair (p1 , interval i1a , interval i1b)) (hold (p2 , interval i2)) =
@@ -162,8 +157,8 @@ checkWeak (p ∷ q ∷ ps) | just e  = just e
 ------------------------------------------------
 
 checkCadence2 : List PitchInterval2 → Maybe CadenceError
-checkCadence2 []                                 = just tooShort
-checkCadence2 (_ ∷ [])                           = just tooShort
+checkCadence2 []                                 = just (tooShort [])
+checkCadence2 (_ ∷ [])                           = just (tooShort []) -- TODO: Fix this
 checkCadence2 (hold p ∷ hold q ∷ [])             = cadenceCheck p q
 checkCadence2 (pair (p , (i , j)) ∷ hold q ∷ []) = cadenceCheck (p , j) q
 checkCadence2 (_ ∷ _ ∷ [])                       = just invalidForm

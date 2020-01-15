@@ -4,12 +4,12 @@ module Interval where
 
 open import Pitch
 
-open import Data.Bool       using (Bool; true; false; _∨_; not; if_then_else_)
+open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
 open import Data.Integer    using (+_; _-_; sign; ∣_∣)
 open import Data.Fin        using (toℕ)
-open import Data.Nat        using (ℕ; _≡ᵇ_; _+_)
+open import Data.Nat        using (ℕ; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_)
-open import Data.Product    using (_×_; _,_; Σ)
+open import Data.Product    using (_×_; _,_; Σ; proj₂)
 open import Data.Sign       using (Sign)
 
 open import Function        using (_∘_)
@@ -86,6 +86,9 @@ PitchInterval = Pitch × Interval
 pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 
+secondPitch : PitchInterval → Pitch
+secondPitch = proj₂ ∘ pitchIntervalToPitchPair
+
 pitchPairToSignedInterval : (ab : PitchPair) → SignedInterval
 pitchPairToSignedInterval (pitch p , pitch q) =
   let d = (+ q) - (+ p)
@@ -100,6 +103,11 @@ stepDown : Pitch → Pitch → Bool
 stepDown p q with pitchPairToSignedInterval (p , q)
 ... | Sign.- , i = isStep i
 ... | Sign.+ , _ = false
+
+-- Check if q is a passing note between p and r
+-- Double-check this: The interval between end points might need to be a 3rd.
+isPassingNote : Pitch → Pitch → Pitch → Bool
+isPassingNote p q r = (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)
 
 --------------------------------------------------------
 

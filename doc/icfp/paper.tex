@@ -1,0 +1,51 @@
+\documentclass[acmsmall]{acmart}
+
+\AtBeginDocument{%
+  \providecommand\BibTeX{{%
+    \normalfont B\kern-0.5em{\scshape i\kern-0.25em b}\kern-0.8em\TeX}}}
+
+\setcopyright{acmcopyright}
+\copyrightyear{2020}
+\acmYear{2020}
+\acmDOI{}
+
+\acmJournal{PACMPL}
+\acmVolume{4}
+\acmNumber{ICFP}
+\acmArticle{42}
+\acmMonth{8}
+
+\begin{document}
+
+\title{Some Cool Title}
+
+\author{John Leo}
+\affiliation{
+  \institution{Halfaya Research}
+  \city{Bellvue}
+  \state{WA}
+  \country{USA}}
+\email{leo@halfaya.org}
+
+\author{Youyou Cong}
+\affiliation{
+  \institution{Tokyo Institute of Technology}
+  \city{Tokyo}
+  \country{Japan}}
+\email{cong@c.titech.ac.jp}
+
+\renewcommand{\shortauthors}{Leo and Cong}
+
+\begin{abstract}
+  We love Agda.
+\end{abstract}
+
+\keywords{dependent types, harmony, counterpoint}
+
+\maketitle
+
+\bibliographystyle{ACM-Reference-Format}
+\bibliography{sample-base}
+
+\end{document}
+\endinput

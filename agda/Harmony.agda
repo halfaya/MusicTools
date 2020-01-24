@@ -14,7 +14,7 @@ open import Pitch
 -- either 0 or 1 pitch class
 pointToPitchClass : Point → List PitchClass
 pointToPitchClass (tone p) = pitchToClass p ∷ []
-pointToPitchClass (cont p) = pitchToClass p ∷ []
+pointToPitchClass (hold p) = pitchToClass p ∷ []
 pointToPitchClass rest     = []
 
 chordToPitchClasses : {n : ℕ} → Chord n → List PitchClass
@@ -38,3 +38,30 @@ I-maj  = pitchClassListToSet (map pitchClass (# 0 ∷ # 4 ∷ # 7  ∷ []))
 I-min  = pitchClassListToSet (map pitchClass (# 0 ∷ # 3 ∷ # 7  ∷ []))
 IV-maj = pitchClassListToSet (map pitchClass (# 0 ∷ # 5 ∷ # 9  ∷ []))
 V-maj  = pitchClassListToSet (map pitchClass (# 2 ∷ # 7 ∷ # 11 ∷ []))
+
+-- Triads, without quality
+data Triad : Set where
+  I   : Triad
+  II  : Triad
+  III : Triad
+  IV  : Triad
+  V   : Triad
+  VI  : Triad
+  VII : Triad
+
+-- from Table of Usual Root Progressions (Major Mode), Harmony (Piston 5e), page 23
+record NextTriad : Set where
+  constructor nextTriad
+  field
+    usual     : List Triad
+    sometimes : List Triad
+    rare      : List Triad
+
+rootProgression : Triad → NextTriad
+rootProgression I   = nextTriad (IV ∷ V   ∷ []) (VI       ∷ []) (II  ∷ III     ∷ [])
+rootProgression II  = nextTriad (V        ∷ []) (IV  ∷ VI ∷ []) (I   ∷ III     ∷ [])
+rootProgression III = nextTriad (VI       ∷ []) (IV       ∷ []) (I   ∷ II  ∷ V ∷ [])
+rootProgression IV  = nextTriad (V        ∷ []) (I   ∷ II ∷ []) (III ∷ VI      ∷ [])
+rootProgression V   = nextTriad (I        ∷ []) (IV  ∷ VI ∷ []) (II  ∷ III     ∷ [])
+rootProgression VI  = nextTriad (II ∷ V   ∷ []) (III ∷ IV ∷ []) (I             ∷ [])
+rootProgression VII = nextTriad (I  ∷ III ∷ []) (VI       ∷ []) (II  ∷ IV  ∷ V ∷ [])

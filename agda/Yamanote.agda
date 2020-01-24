@@ -51,21 +51,21 @@ counterpoint2 =
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
 
-firstSpecies : Vec PitchInterval 42
-firstSpecies = zip cantusFirmus counterpoint
+firstSpecies1 : Vec PitchInterval 42
+firstSpecies1 = zip cantusFirmus counterpoint
 
-fs1 : FirstSpecies (toList firstSpecies)
-fs1 = refl
+fs1 : FirstSpecies
+fs1 = firstSpecies (toList firstSpecies1) refl refl refl
   
 firstSpecies2 : Vec PitchInterval 42
 firstSpecies2 = zip cantusFirmus counterpoint2
 
-fs2 : FirstSpecies (toList firstSpecies2)
-fs2 = refl
+fs2 : FirstSpecies
+fs2 = firstSpecies (toList firstSpecies2) refl refl refl
 
 yamanote counterp : List Note
-yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
-counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (toList firstSpecies2)
+yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs2)
+counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs2)
 
 ----
 

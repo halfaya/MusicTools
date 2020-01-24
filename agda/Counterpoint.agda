@@ -23,6 +23,22 @@ open import Util using (pairs)
 
 ------------------------------------------------
 
+data BeginningError : Set where
+  not158   : PitchInterval → BeginningError
+  tooShort : BeginningError
+
+beginningCheck : PitchInterval → Maybe BeginningError
+beginningCheck pi@(_ , i) =
+  if ((i == per1) ∨ (i == per5) ∨ (i == per8))
+  then nothing
+  else just (not158 pi)
+
+checkBeginning : List PitchInterval → Maybe BeginningError
+checkBeginning []       = just tooShort
+checkBeginning (p ∷ ps) = beginningCheck p
+
+------------------------------------------------
+
 data IntervalError : Set where
   dissonant : Interval → IntervalError
 
@@ -66,6 +82,28 @@ checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs
 
 ------------------------------------------------
 
+data UnisonError : Set where
+  unison : Pitch → UnisonError
+
+unisonCheck : PitchInterval → Maybe UnisonError
+unisonCheck (p , i) =
+  if (i == per1) then just (unison p) else nothing
+
+-- ignore the last interval
+checkUnison' : List PitchInterval → List UnisonError
+checkUnison' []       = []
+checkUnison' (p ∷ []) = []
+checkUnison' (p ∷ ps) with unisonCheck p
+... | nothing         = checkUnison' ps
+... | just e          = e ∷ checkUnison' ps
+
+-- ignore the first interval
+checkUnison : List PitchInterval → List UnisonError
+checkUnison []       = []
+checkUnison (p ∷ ps) = checkUnison ps
+
+------------------------------------------------
+
 data CadenceError : Set where
   notOctave   : PitchInterval → CadenceError
   not2and7    : PitchInterval → PitchInterval → CadenceError
@@ -92,8 +130,10 @@ record FirstSpecies : Set where
   constructor firstSpecies
   field
     notes       : List PitchInterval
+    beginningOk : checkBeginning notes ≡ nothing
     intervalsOk : checkIntervals notes ≡ []
     motionOk    : checkMotion notes ≡ []
+    unisonOK    : checkUnison notes ≡ []
     cadenceOk   : checkCadence notes ≡ nothing
 
 ------------------------------------------------

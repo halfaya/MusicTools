@@ -154,6 +154,15 @@ expandPitchInterval2 (p , i , j) = (p , i) ∷ (p , j) ∷ []
 expandPitchIntervals2 : List PitchInterval2 → List PitchInterval
 expandPitchIntervals2 = concatMap expandPitchInterval2
 
+data BeginningError2 : Set where
+  not58    : PitchInterval → BeginningError2
+
+checkBeginning2 : PitchInterval → Maybe BeginningError2
+checkBeginning2 pi@(_ , i) =
+  if ((i == per5) ∨ (i == per8))
+  then nothing
+  else just (not58 pi)
+
 checkCadence2 : List PitchInterval2 → PitchInterval → Maybe CadenceError
 checkCadence2 []           _   = just (tooShort [])
 checkCadence2 (p ∷ [])     q   = cadenceCheck (weakBeat p) q
@@ -183,6 +192,20 @@ checkMotion2 []               = []
 checkMotion2 (_ ∷ [])         = []
 checkMotion2 (p ∷ q ∷ ps)     = checkMotion (p ∷ q ∷ []) ++ checkMotion2 ps
 
+-- allow unisons on weak beats in the main body
+-- if they are left by step in the opposite direction from their approach
+checkUnison2' : PitchInterval2 → Pitch → Maybe UnisonError
+checkUnison2' (p , i , j) q =
+  if i == per1 then just (unison p)
+  else if isOpposite (secondPitch (p , i)) (secondPitch (p , j)) q
+       then nothing
+       else unisonCheck (p , j)
+
+checkUnison2 : List PitchInterval2 → Pitch → List UnisonError
+checkUnison2 [] p            = []
+checkUnison2 pis@(_ ∷ qis) p =
+  mapMaybe (uncurry checkUnison2') (zip pis (map proj₁ qis ++ (p ∷ [])))
+
 -- Still more conditions to be added, but these are the main points.
 record SecondSpecies : Set where
   constructor secondSpecies
@@ -190,7 +213,9 @@ record SecondSpecies : Set where
     firstBar      : PitchInterval -- for now require counterpont to start with a rest, which is preferred
     middleBars    : List PitchInterval2
     lastBar       : PitchInterval -- for now require counterpoint to end with only a single whole note, which is preferred
+    beginningOk   : checkBeginning2 firstBar ≡ nothing
     strongBeatsOk : checkStrongBeats middleBars ≡ []
     weakBeatsOk   : checkWeakBeats   middleBars (secondPitch lastBar) ≡ []
     motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
+    unisonOk      : checkUnison2 middleBars (secondPitch lastBar) ≡ []
     cadenceOk     : checkCadence2 middleBars lastBar ≡ nothing

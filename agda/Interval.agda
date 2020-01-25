@@ -108,3 +108,17 @@ stepDown p q with pitchPairToSignedInterval (p , q)
 -- Double-check this: The interval between end points might need to be a 3rd.
 isPassingNote : Pitch → Pitch → Pitch → Bool
 isPassingNote p q r = (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)
+
+moveUp : Pitch → Pitch → Bool
+moveUp p q with pitchPairToSignedInterval (p , q)
+... | Sign.- , _ = false
+... | Sign.+ , i = true
+
+moveDown : Pitch → Pitch → Bool
+moveDown p q with pitchPairToSignedInterval (p , q)
+... | Sign.- , i = true
+... | Sign.+ , _ = false
+
+-- Check if q is left by step in the opposite direction from its approach
+isOpposite : Pitch → Pitch → Pitch → Bool
+isOpposite p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)

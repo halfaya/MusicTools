@@ -31,19 +31,9 @@ cantusFirmus =
   g 4 ∷ e 4  ∷ g 4 ∷ c 5 ∷ c 5 ∷ c 5 ∷ e 5 ∷ g 5 ∷
   d 6 ∷ c 6 ∷ []
 
--- Counterpoint by Youyou Cong
+-- Counterpoint (composed on Aug 2, 2019)
 counterpoint : Vec Interval 42
 counterpoint =
-  per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
-  maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
-  maj3 ∷ maj10 ∷ per8 ∷ maj10 ∷ min6 ∷ per8 ∷ maj6 ∷ maj10 ∷
-  maj3 ∷ maj10 ∷ min6 ∷ per8 ∷ min3 ∷ per8 ∷ min3 ∷ per8 ∷
-  maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
-  maj6 ∷ per8 ∷ []
-  
--- this one sounds slightly better
-counterpoint2 : Vec Interval 42
-counterpoint2 =
   per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj3 ∷ maj10 ∷ per8 ∷ maj10 ∷ min6 ∷ per8 ∷ maj6 ∷ maj10 ∷
@@ -51,21 +41,25 @@ counterpoint2 =
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
   maj6 ∷ per8 ∷ []
 
-firstSpecies1 : Vec PitchInterval 42
-firstSpecies1 = zip cantusFirmus counterpoint
+-- Counterpoint (composed on March 18, 2019)
+counterpoint0 : Vec Interval 42
+counterpoint0 =
+  per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
+  maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
+  maj3 ∷ maj10 ∷ per8 ∷ maj10 ∷ min6 ∷ per8 ∷ maj6 ∷ maj10 ∷
+  maj3 ∷ maj10 ∷ min6 ∷ per8 ∷ min3 ∷ per8 ∷ min3 ∷ per8 ∷
+  maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
+  maj6 ∷ per8 ∷ []
 
-fs1 : FirstSpecies
-fs1 = firstSpecies (toList firstSpecies1) refl refl refl
-  
-firstSpecies2 : Vec PitchInterval 42
-firstSpecies2 = zip cantusFirmus counterpoint2
+CFCP : Vec PitchInterval 42
+CFCP = zip cantusFirmus counterpoint
 
-fs2 : FirstSpecies
-fs2 = firstSpecies (toList firstSpecies2) refl refl refl
+fs : FirstSpecies
+fs = firstSpecies (toList CFCP) refl refl refl refl refl 
 
 yamanote counterp : List Note
-yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs2)
-counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs2)
+yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
+counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
 
 ----
 

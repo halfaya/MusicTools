@@ -1,0 +1,51 @@
+\section{Counterpoint}
+\label{sec:cp}
+
+Counterpoint is a technique for combining multiple lines of melodies.
+Composing counterpoint is like arranging a song for a choir:
+we start with a \emph{cantus firmus}, which serves as a base melody,
+and compose counterpoint lines above or below the cantus firmus.
+When doing this, we must make sure that the counterpoint lines sound
+harmonically pleasing when played with the cantus firmus,
+and that the individual melodic lines are distinguishable to the listener.
+
+In this section, we show a dependently typed formalization of
+two-voice counterpoint, more specifically,
+those variants called the first and second species.
+Here we restrict ourselves to \emph{upper} counterpoint
+(i.e., composing a counterpoint line above the cantus firmus);
+lower counterpoint can be formalized in the exactly same way.
+
+\subsection{First Species Counterpoint}
+\label{sec:cp:fs}
+
+In the first species counterpoint, we start with a cantus firmus
+consisting only of whole notes,
+and set one note against each note in the cantus firmus.
+To write good counterpoint, we must follow five rules explained below:
+
+\paragraph{Beginning}
+The beginning of the music must be a perfect consonance.
+In the case of upper counterpoint, there are three ways to start the music:
+using a unison, a 5th, or an 8th.
+
+\paragraph{Intervals}
+All intervals appearing in the main body must be consonant.
+That is, the body should consist only of 3rds, 5ths, 6ths, and 8ths.
+
+\paragraph{Motion}
+For every pair of two adjacent intervals, the cantus firmus and counterpoint
+lines must not move in the same direction if the second interval is a perfect one.
+This is because such motion would draw too much attention
+to the resulting interval.
+
+\paragraph{Unisons}
+Unisons should not occur in the main body of the music.
+The reason is that they make it harder to distinguish between
+the two melodic lines.
+
+\paragraph{Ending}
+The ending of the music must be a \emph{cadence}, a progression
+of two intervals that induces a sense of resolution.
+In our formalization, we fix the last interval to be an 8th,
+hence the preceding interval should be either a major 6th or a minor 10th.

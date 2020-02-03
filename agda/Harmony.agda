@@ -1,3 +1,5 @@
+{-# OPTIONS --without-K #-}
+
 module Harmony where
 
 open import Data.Bool       using (Bool; true; false)

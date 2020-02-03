@@ -31,6 +31,10 @@ unpitch (pitch p) = p
 chromaticScaleSize : ℕ
 chromaticScaleSize = 12
 
+-- Number of notes in the diatonic scale.
+diatonicScaleSize : ℕ
+diatonicScaleSize = 7
+
 -- Position of a pitch within an octave, in the range [0..chromaticScaleSize-1].
 data PitchClass : Set where
   pitchClass : Fin chromaticScaleSize → PitchClass
@@ -56,9 +60,21 @@ absoluteToRelative (pitch  n) =
 pitchToClass : Pitch → PitchClass
 pitchToClass = proj₁ ∘ absoluteToRelative
 
-majorScale harmonicMinorScale : Scale 7
+majorScale harmonicMinorScale : Scale diatonicScaleSize
 majorScale         = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
 harmonicMinorScale = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
+
+data DiatonicDegree : Set where
+  diatonicDegree : Fin diatonicScaleSize → DiatonicDegree
+
+I II III IV V VI VII : DiatonicDegree
+I   = diatonicDegree (# 0)
+II  = diatonicDegree (# 1)
+III = diatonicDegree (# 2)
+IV  = diatonicDegree (# 3)
+V   = diatonicDegree (# 4)
+VI  = diatonicDegree (# 5)
+VII = diatonicDegree (# 6)
 
 scaleSize : {n : ℕ} → Scale n → ℕ
 scaleSize {n} _ = n
@@ -96,4 +112,3 @@ g  = standardMidiPitch (# 7)
 g# = standardMidiPitch (# 8)
 a  = standardMidiPitch (# 9)
 b  = standardMidiPitch (# 11)
-

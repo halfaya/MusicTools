@@ -12,13 +12,16 @@ open import Hanon
 --open import Montuno
 open import LookVsTime
 open import Yamanote
+open import Frog
 
 main : IO Unit
 main =
   let channel      = 0
       ticksPerBeat = 4 -- 16th notes
-      file         = "/Users/leo/Music/MusicTools/test.mid"
+      file         = "/Users/youyou/Music/test.mid"
+--    file         = "/Users/leo/Music/MusicTools/test.mid"
+      song         = fcpTracks2
 --      song         = ycpTracks
 --      song         = hanonTrack
-      song         = lookVsTime
+--      song         = lookVsTime
   in exportTracks file ticksPerBeat (map track→htrack song)

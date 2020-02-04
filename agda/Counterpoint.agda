@@ -215,7 +215,7 @@ record SecondSpecies : Set where
     lastBar       : PitchInterval -- for now require counterpoint to end with only a single whole note, which is preferred
     beginningOk   : checkBeginning2 firstBar ≡ nothing
     strongBeatsOk : checkStrongBeats middleBars ≡ []
-    weakBeatsOk   : checkWeakBeats   middleBars (secondPitch lastBar) ≡ []
+    weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []
     motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
     unisonOk      : checkUnison2 middleBars (secondPitch lastBar) ≡ []
     cadenceOk     : checkCadence2 middleBars lastBar ≡ nothing

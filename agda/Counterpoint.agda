@@ -176,7 +176,7 @@ checkStrongBeats = checkIntervals ∘ map strongBeat
 
 checkWeakBeat : PitchInterval2 → Pitch → Maybe IntervalError
 checkWeakBeat (p , i , j) q =
-  if isPassingNote (secondPitch (p , i)) (secondPitch (p , j)) q
+  if isPassingTone (secondPitch (p , i)) (secondPitch (p , j)) q
   then nothing
   else intervalCheck j
 

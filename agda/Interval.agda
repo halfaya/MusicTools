@@ -104,10 +104,15 @@ stepDown p q with pitchPairToSignedInterval (p , q)
 ... | Sign.- , i = isStep i
 ... | Sign.+ , _ = false
 
--- Check if q is a passing note between p and r
--- Double-check this: The interval between end points might need to be a 3rd.
-isPassingNote : Pitch → Pitch → Pitch → Bool
-isPassingNote p q r = (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)
+isThird : Interval → Bool
+isThird i = (i == min3) ∨ (i == maj3)
+
+-- Check if q is a passing tone between p and r
+-- The interval between end points need to be a 3rd
+isPassingTone : Pitch → Pitch → Pitch → Bool
+isPassingTone p q r =
+  (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r) ∨
+  (isThird (proj₂ (pitchPairToSignedInterval (p , r))))
 
 moveUp : Pitch → Pitch → Bool
 moveUp p q with pitchPairToSignedInterval (p , q)

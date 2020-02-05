@@ -2,19 +2,19 @@
 \label{sec:cp}
 
 Counterpoint is a technique for combining multiple lines of melodies.
-Composing counterpoint is like arranging a song for a choir:
-we start with a \emph{cantus firmus}, which serves as a base melody,
+Composing counterpoint is like arranging a song for choir:
+we start with a \emph{cantus firmus}, which serves as the base melody,
 and compose counterpoint lines above or below the cantus firmus.
 When doing this, we must make sure that the counterpoint lines sound
 harmonically pleasing when played with the cantus firmus,
 and that the individual melodic lines are distinguishable to the listener.
 
-In this section, we show a dependently typed formalization of
-two-voice counterpoint, more specifically,
-those variants called the first and second species.
-Here we restrict ourselves to \emph{upper} counterpoint
-(i.e., composing a counterpoint line above the cantus firmus);
-lower counterpoint can be formalized in the exactly same way.
+In this section, we show an implementation of species counterpoint, 
+based on the formulation given by Fux~\cite{fux-cp}.
+The idea is to represent rules for composing ``good'' counterpoint
+using dependent types.
+Here we describe two variants of species counterpoint;
+other variants can be formalized in a similar way.
 
 \subsection{First Species Counterpoint}
 \label{sec:cp:fs}

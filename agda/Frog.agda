@@ -37,9 +37,13 @@ counterpoint1 =
 
 -- Second species counterpoint (main body only)
 counterpoint2 : Vec (Interval × Interval) 5
-counterpoint2 = 
+counterpoint2 =
+  -- with dissonant interval
   (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
   (min6 , min3) ∷ (min3 , maj6) ∷ []
+  -- with unison
+  -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , per1) ∷
+  -- (min3 , min6) ∷ (min3 , maj6) ∷ []
 
 zipped1 : Vec PitchInterval 7
 zipped1 = zip cantusFirmus counterpoint1
@@ -50,7 +54,6 @@ zipped2 = zip cantusFirmusBody counterpoint2
 fs : FirstSpecies
 fs = firstSpecies (toList zipped1) refl refl refl refl refl
 
--- This should type check! Something is wrong with checkWeakBeats?
 ss : SecondSpecies
 ss = secondSpecies (c 5 , per5) (toList zipped2) (c 5 , per8) refl refl refl refl refl refl
 

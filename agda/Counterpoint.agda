@@ -183,7 +183,9 @@ checkWeakBeat (p , i , j) q =
 checkWeakBeats : List PitchInterval2 → Pitch → List IntervalError
 checkWeakBeats []            p = []
 checkWeakBeats pis@(_ ∷ qis) p =
-  mapMaybe (uncurry checkWeakBeat) (zip pis (map proj₁ qis ++ (p ∷ [])))
+  mapMaybe (uncurry checkWeakBeat)
+           (zip pis
+                (map (λ {(q , i , j) → proj₂ (pitchIntervalToPitchPair (q , i))}) qis ++ (p ∷ [])))
 
 -- no parallel or similar motion to a perfect interval across bars
 -- assumes a bar after the first PitchInterval, and then after every other PitchInterval
@@ -204,7 +206,9 @@ checkUnison2' (p , i , j) q =
 checkUnison2 : List PitchInterval2 → Pitch → List UnisonError
 checkUnison2 [] p            = []
 checkUnison2 pis@(_ ∷ qis) p =
-  mapMaybe (uncurry checkUnison2') (zip pis (map proj₁ qis ++ (p ∷ [])))
+  mapMaybe (uncurry checkUnison2')
+           (zip pis
+                (map (λ {(q , i , j) → proj₂ (pitchIntervalToPitchPair (q , i))}) qis ++ (p ∷ [])))
 
 -- Still more conditions to be added, but these are the main points.
 record SecondSpecies : Set where

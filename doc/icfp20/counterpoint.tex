@@ -9,35 +9,92 @@ When doing this, we must make sure that the counterpoint lines sound
 harmonically pleasing when played with the cantus firmus,
 and that the individual melodic lines are distinguishable to the listener.
 
-In this section, we show an implementation of species counterpoint, 
-based on the formulation given by Fux~\cite{fux-cp}.
+In this section, we present an implementation of species counterpoint,
+based on the formulation given by Fux~\citep{fux-cp}.
 The idea is to represent rules for composing ``good'' counterpoint
 using dependent types.
-Here we describe two variants of species counterpoint;
-other variants can be formalized in a similar way.
+[One more sentence here.]
 
 \subsection{First Species Counterpoint}
 \label{sec:cp:fs}
 
-In the first species counterpoint, we start with a cantus firmus
-consisting only of whole notes,
-and set one note against each note in the cantus firmus.
-To write good counterpoint, we must follow five rules explained below:
+The simplest variant of counterpoint is called the first species
+counterpoint.
+In first species, we set one note against each note in the cantus
+firmus, as in the following example:
+
+[Frog]
+
+In our implementation, we represent each bar as a pitch-interval
+pair, and the whole music as a list of such pairs.
+
+\begin{alltt}
+PitchInterval : Set
+PitchInterval = Pitch \(\times\) Interval
+\end{alltt}
+
+First species counterpoint comes with five mandatory rules, 
+constraining the beginning, the main body, and the ending of
+the music.
+Below, we describe these rules one by one, showing the
+corresponding Agda code.
 
 \paragraph{Beginning}
-The beginning of the music must be a perfect consonance.
-In the case of upper counterpoint, there are three ways to start the music:
-using a unison, a 5th, or an 8th.
+The beginning of the music must be a perfect consonance,
+that is, it must be a unison, a 5th, or an 8th.
+In our implementation, this is checked by the predicate
+\texttt{checkBeginning}, which is defined as follows:
+
+\begin{alltt}
+data BeginningError : Set where
+  not158   : PitchInterval \(\rightarrow\) BeginningError
+  tooShort : BeginningError
+  
+beginningCheck : PitchInterval \(\rightarrow\) Maybe BeginningError
+beginningCheck pi@(_ , i) =
+  if ((i == per1) \(\vee\) (i == per5) \(\vee\) (i == per8))
+  then nothing
+  else just (not158 pi)
+
+checkBeginning : List PitchInterval \(\rightarrow\) Maybe BeginningError
+checkBeginning []       = just tooShort
+checkBeginning (p :: ps) = beginningCheck p  
+\end{alltt}
+
+\noindent The datatype \texttt{BeginningError} is a kind of
+``type error'' designed specifically for counterpoint.
+The first constructor \texttt{not158} tells us that the music
+begins with a wrong interval, whereas the second constructor
+\texttt{tooShort} says that the whole music is empty.
+With this datatype, we can obtain an informative error message
+when we accidentally break the rule at the beginning of the music.
+Thus, what we are doing here can be seen as writing a
+customized typechecker.
 
 \paragraph{Intervals}
-All intervals appearing in the main body must be consonant.
-That is, the body should consist only of 3rds, 5ths, 6ths, and 8ths.
+In the main body of the music, all intervals must be consonant.
+That is, we should only use 3rds, 5ths, 6ths, and 8ths.
+This rule can be encoded as the \texttt{checkIntervals} predicate,
+which again uses a new datatype \texttt{IntervalError} representing
+the presence of a dissonant interval:
+
+\begin{alltt}
+data IntervalError : Set where
+  dissonant : Interval \(\rightarrow\) IntervalError
+
+intervalCheck : Interval \(\rightarrow\) Maybe IntervalError
+intervalCheck i = if isConsonant i then nothing else just (dissonant i)
+
+checkIntervals : List PitchInterval \(\rightarrow\) List IntervalError
+checkIntervals = mapMaybe (intervalCheck \(\circ\) proj\(\sb{\mathtt{2}}\))
+\end{alltt}
 
 \paragraph{Motion}
-For every pair of two adjacent intervals, the cantus firmus and counterpoint
-lines must not move in the same direction if the second interval is a perfect one.
-This is because such motion would draw too much attention
-to the resulting interval.
+For every pair of two adjacent intervals, the cantus firmus and
+counterpoint lines must not move in the same direction if the second
+interval is a perfect one (i.e., unison, 5th, or 8th).
+This is because such motion would draw too much attention to the
+resulting interval.
 
 \paragraph{Unisons}
 Unisons should not occur in the main body of the music.
@@ -46,6 +103,4 @@ the two melodic lines.
 
 \paragraph{Ending}
 The ending of the music must be a \emph{cadence}, a progression
-of two intervals that induces a sense of resolution.
-In our formalization, we fix the last interval to be an 8th,
-hence the preceding interval should be either a major 6th or a minor 10th.
+of two intervals that gives rise to a sense of resolution.

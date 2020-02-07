@@ -11,33 +11,42 @@ and that the individual melodic lines are distinguishable to the listener.
 
 In this section, we present an implementation of species counterpoint,
 based on the formulation given by Fux~\citep{fux-cp}.
-The idea is to represent rules for composing ``good'' counterpoint
-using dependent types.
-[One more sentence here.]
+The idea is to represent ``good'' counterpoint  as a dependent record,
+whose fields are the proofs that the counterpoint follows certain rules.
+For space reason, we only describe two variants of species counterpoint;
+other variants can be formalized in an analogous way.
 
 \subsection{First Species Counterpoint}
 \label{sec:cp:fs}
 
-The simplest variant of counterpoint is called the first species
-counterpoint.
-In first species, we set one note against each note in the cantus
-firmus, as in the following example:
+First species counterpoint is the simplest variant of counterpoint.
+In first species, we set one note against each note in the cantus firmus,
+which starts with a tonic and consists only of whole notes.
+Here is an example of first species counterpoint, where the lower line
+stands for the cantus firmus and the upper line represents the
+counterpoint\footnote{The cantus firmus is part of a German song
+  called ``Froschgesang'' (Frog's song).}:
 
-[Frog]
+[Frog score]
 
-In our implementation, we represent each bar as a pitch-interval
-pair, and the whole music as a list of such pairs.
+We represent such music as a vector of pitch-interval pairs \texttt{(p , i)},
+where \texttt{p} is a note in the cantus firmus, and \texttt{i} is the
+distance between \texttt{p} and the corresponding counterpoint note.
 
 \begin{alltt}
 PitchInterval : Set
 PitchInterval = Pitch \(\times\) Interval
+
+frog-cp1 : Vector PitchInterval 7
+frog-cp1 = (c 5 , per8) :: (d 5 , maj6) :: (e 5 , min6) :: (f 5 , maj3) :: (e 5 , min3) :: (d 5 , maj6) :: (c 5 , per8) :: []
 \end{alltt}
 
-First species counterpoint comes with five mandatory rules, 
-constraining the beginning, the main body, and the ending of
-the music.
-Below, we describe these rules one by one, showing the
-corresponding Agda code.
+Note that the vector representation does not carry any correctness
+guarantee of the music;
+it requires extrinsic proofs stating that the music follows all the
+rules for being good counterpoint.
+Below, we discuss five such rules, showing what role they play
+and how they can be represented using dependent types.
 
 \paragraph{Beginning}
 The beginning of the music must be a perfect consonance,
@@ -72,7 +81,9 @@ Thus, what we are doing here can be seen as writing a
 customized typechecker.
 
 \paragraph{Intervals}
-In the main body of the music, all intervals must be consonant.
+In the main body of the music, we must ensure that vertical intervals
+are harmonically pleasing.
+all intervals must be consonant.
 That is, we should only use 3rds, 5ths, 6ths, and 8ths.
 This rule can be encoded as the \texttt{checkIntervals} predicate,
 which again uses a new datatype \texttt{IntervalError} representing
@@ -90,16 +101,51 @@ checkIntervals = mapMaybe (intervalCheck \(\circ\) proj\(\sb{\mathtt{2}}\))
 \end{alltt}
 
 \paragraph{Motion}
+
+\begin{alltt}
+data Motion : Set where
+contrary : Motion
+parallel : Motion
+similar  : Motion
+oblique  : Motion
+\end{alltt}
+
 For every pair of two adjacent intervals, the cantus firmus and
 counterpoint lines must not move in the same direction if the second
 interval is a perfect one (i.e., unison, 5th, or 8th).
 This is because such motion would draw too much attention to the
 resulting interval.
 
+\begin{alltt}
+data MotionError : Set where
+  parallel : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) MotionError
+  similar  : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) MotionError
+
+motionCheck : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) Maybe MotionError
+motionCheck i1 i2 with motion i1 i2 | isPerfect (proj\(\sb{\mathtt{2}}\) i2)
+motionCheck i1 i2 | contrary | \_     = nothing
+motionCheck i1 i2 | oblique  | \_     = nothing
+motionCheck i1 i2 | parallel | false = nothing
+motionCheck i1 i2 | parallel | true  = just (parallel i1 i2)
+motionCheck i1 i2 | similar  | false = nothing
+motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
+
+checkMotion : List PitchInterval → List MotionError
+checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs  
+\end{alltt}
+
 \paragraph{Unisons}
 Unisons should not occur in the main body of the music.
 The reason is that they make it harder to distinguish between
 the two melodic lines.
+
+\begin{alltt}
+data UnisonError : Set where
+  unison : Pitch \(\rightarrow\) UnisonError
+
+unisonCheck : PitchInterval \(\rightarrow\) Maybe UnisonError
+unisonCheck (p , i) = if (i == per1) then just (unison p) else nothing  
+\end{alltt}
 
 \paragraph{Ending}
 The ending of the music must be a \emph{cadence}, a progression

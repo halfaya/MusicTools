@@ -100,7 +100,7 @@ checkUnison' (p ∷ ps) with unisonCheck p
 -- ignore the first interval
 checkUnison : List PitchInterval → List UnisonError
 checkUnison []       = []
-checkUnison (p ∷ ps) = checkUnison ps
+checkUnison (p ∷ ps) = checkUnison' ps
 
 ------------------------------------------------
 

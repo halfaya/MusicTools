@@ -3,7 +3,7 @@
 module Yamanote where
 
 open import Data.Fin
-open import Data.List using (List; map) renaming (_∷_ to _L∷_; [] to L[])
+open import Data.List using (List; map) renaming (_∷_ to _L∷_; _++_ to _L++_; [] to L[])
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
@@ -22,44 +22,53 @@ open import Interval
 open import Util
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.
-cantusFirmus : Vec Pitch 42
+cantusFirmus : Vec Pitch 40
 cantusFirmus =
-  g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
+        g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ c 5 ∷ g 4 ∷ e 5 ∷ g 4 ∷
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ b 4 ∷ g 4 ∷ d 5 ∷ g 4 ∷
   g 5 ∷ g 4  ∷ a 4 ∷ g 4 ∷ b 4 ∷ g 4 ∷ d 5 ∷ g 4 ∷
   g 4 ∷ e 4  ∷ g 4 ∷ c 5 ∷ c 5 ∷ c 5 ∷ e 5 ∷ g 5 ∷
-  d 6 ∷ c 6 ∷ []
+  d 6 ∷ []
 
 -- Counterpoint (composed on Aug 2, 2019)
-counterpoint : Vec Interval 42
+counterpoint : Vec Interval 40
 counterpoint =
-  per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
+         maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj3 ∷ maj10 ∷ per8 ∷ maj10 ∷ min6 ∷ per8 ∷ maj6 ∷ maj10 ∷
   maj3 ∷ maj3 ∷ min3 ∷ per5 ∷ min6 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
-  maj6 ∷ per8 ∷ []
+  maj6 ∷ []
 
 -- Counterpoint (composed on March 18, 2019)
-counterpoint0 : Vec Interval 42
+counterpoint0 : Vec Interval 40
 counterpoint0 =
-  per8 ∷ maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
+         maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
   maj3 ∷ maj10 ∷ per8 ∷ maj10 ∷ min6 ∷ per8 ∷ maj6 ∷ maj10 ∷
   maj3 ∷ maj10 ∷ min6 ∷ per8 ∷ min3 ∷ per8 ∷ min3 ∷ per8 ∷
   maj6 ∷ min10 ∷ per8 ∷ maj10 ∷ per8 ∷ maj10 ∷ min10 ∷ per8 ∷
-  maj6 ∷ per8 ∷ []
+  maj6 ∷ []
 
-CFCP : Vec PitchInterval 42
-CFCP = zip cantusFirmus counterpoint
+yamanote-cfcp : Vec PitchInterval 40
+yamanote-cfcp = zip cantusFirmus counterpoint
 
 fs : FirstSpecies
-fs = firstSpecies (toList CFCP) refl refl refl refl refl 
+fs = firstSpecies (g 5 , per8) (toList yamanote-cfcp) (c 6 , per8) refl refl refl refl refl 
 
 yamanote counterp : List Note
-yamanote = map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
-counterp = map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
+yamanote =
+  tone 8th (g 5) L∷
+  map (tone 8th ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
+  tone 8th (g 5) L∷
+  L[]
+  
+counterp =
+  tone 8th (g 6) L∷
+  map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
+  tone 8th (c 7) L∷
+  L[]
 
 ----
 

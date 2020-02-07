@@ -25,18 +25,13 @@ open import Util using (pairs)
 
 data BeginningError : Set where
   not158   : PitchInterval → BeginningError
-  tooShort : BeginningError
 
-beginningCheck : PitchInterval → Maybe BeginningError
-beginningCheck pi@(_ , i) =
+checkBeginning : PitchInterval → Maybe BeginningError
+checkBeginning pi@(_ , i) =
   if ((i == per1) ∨ (i == per5) ∨ (i == per8))
   then nothing
   else just (not158 pi)
-
-checkBeginning : List PitchInterval → Maybe BeginningError
-checkBeginning []       = just tooShort
-checkBeginning (p ∷ ps) = beginningCheck p
-
+  
 ------------------------------------------------
 
 data IntervalError : Set where
@@ -89,52 +84,47 @@ unisonCheck : PitchInterval → Maybe UnisonError
 unisonCheck (p , i) =
   if (i == per1) then just (unison p) else nothing
 
--- ignore the last interval
-checkUnison' : List PitchInterval → List UnisonError
-checkUnison' []       = []
-checkUnison' (p ∷ []) = []
-checkUnison' (p ∷ ps) with unisonCheck p
-... | nothing         = checkUnison' ps
-... | just e          = e ∷ checkUnison' ps
-
 -- ignore the first interval
 checkUnison : List PitchInterval → List UnisonError
-checkUnison []       = []
-checkUnison (p ∷ ps) = checkUnison' ps
+checkUnison = mapMaybe unisonCheck
 
 ------------------------------------------------
 
-data CadenceError : Set where
-  notOctave   : PitchInterval → CadenceError
-  not2and7    : PitchInterval → PitchInterval → CadenceError
-  tooShort    : List PitchInterval → CadenceError
-  invalidForm : CadenceError
+data EndingError : Set where
+  not18       : PitchInterval → EndingError
+  not27       : PitchInterval → EndingError
+  tooShort    : List PitchInterval → EndingError
 
-cadenceCheck : PitchInterval → PitchInterval → Maybe CadenceError
-cadenceCheck pi1@(pitch p , i) pi2@(pitch q , j) =
-  if j == per8
+endingCheck : PitchInterval → PitchInterval → Maybe EndingError
+endingCheck pi1@(pitch p , i) pi2@(pitch q , j) =
+  if j == per1
+  then (if ((p + 1 ≡ᵇ q) ∧ (i == min3))
+        then nothing
+        else just (not27 pi1))
+  else if j == per8
   then (if ((q + 2 ≡ᵇ p) ∧ (i == maj6) ∨ (p + 1 ≡ᵇ q) ∧ (i == min10))
         then nothing
-        else just (not2and7 pi1 pi2))
-  else just (notOctave pi2)
+        else just (not27 pi1))
+  else just (not18 pi2)
 
-checkCadence : List PitchInterval → Maybe CadenceError
-checkCadence []               = just (tooShort [])
-checkCadence (p ∷ [])         = just (tooShort (p ∷ []))
-checkCadence (p ∷ q ∷ [])     = cadenceCheck p q
-checkCadence (_ ∷ p ∷ q ∷ ps) = checkCadence (p ∷ q ∷ ps)
+checkEnding : List PitchInterval → PitchInterval → Maybe EndingError
+checkEnding [] _       = just (tooShort [])
+checkEnding (p ∷ []) q = endingCheck p q
+checkEnding (p ∷ ps) q = checkEnding ps q
 
 ------------------------------------------------
 
 record FirstSpecies : Set where
   constructor firstSpecies
   field
-    notes       : List PitchInterval
-    beginningOk : checkBeginning notes ≡ nothing
-    intervalsOk : checkIntervals notes ≡ []
-    motionOk    : checkMotion notes ≡ []
-    unisonOK    : checkUnison notes ≡ []
-    cadenceOk   : checkCadence notes ≡ nothing
+    firstBar    : PitchInterval
+    middleBars  : List PitchInterval
+    lastBar     : PitchInterval
+    beginningOk : checkBeginning firstBar ≡ nothing
+    intervalsOk : checkIntervals middleBars ≡ []
+    motionOk    : checkMotion middleBars ≡ []
+    unisonOK    : checkUnison middleBars ≡ []
+    endingOk    : checkEnding middleBars lastBar ≡ nothing
 
 ------------------------------------------------
 -- Second Species
@@ -163,10 +153,10 @@ checkBeginning2 pi@(_ , i) =
   then nothing
   else just (not58 pi)
 
-checkCadence2 : List PitchInterval2 → PitchInterval → Maybe CadenceError
-checkCadence2 []           _   = just (tooShort [])
-checkCadence2 (p ∷ [])     q   = cadenceCheck (weakBeat p) q
-checkCadence2 (_ ∷ p ∷ ps) q   = checkCadence2 (p ∷ ps) q
+checkEnding2 : List PitchInterval2 → PitchInterval → Maybe EndingError
+checkEnding2 []           _   = just (tooShort [])
+checkEnding2 (p ∷ [])     q   = endingCheck (weakBeat p) q
+checkEnding2 (_ ∷ p ∷ ps) q   = checkEnding2 (p ∷ ps) q
 
 -- We might want to lift the ordinary interval error to one involving PitchInterval2
 -- to give the user more context, but for now keep it simple.
@@ -222,4 +212,4 @@ record SecondSpecies : Set where
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []
     motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
     unisonOk      : checkUnison2 middleBars (secondPitch lastBar) ≡ []
-    cadenceOk     : checkCadence2 middleBars lastBar ≡ nothing
+    cadenceOk     : checkEnding2 middleBars lastBar ≡ nothing

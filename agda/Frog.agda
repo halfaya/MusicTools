@@ -30,10 +30,10 @@ cantusFirmusBody : Vec Pitch 5
 cantusFirmusBody =
   d 5 ∷ e 5 ∷ f 5 ∷ e 5 ∷ d 5 ∷ []
 
--- First species counterpoint 
-counterpoint1 : Vec Interval 7
+-- First species counterpoint (main body only)
+counterpoint1 : Vec Interval 5
 counterpoint1 =
-  per8 ∷ maj6 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ per8 ∷ []
+  maj6 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
 
 -- Second species counterpoint (main body only)
 counterpoint2 : Vec (Interval × Interval) 5
@@ -45,21 +45,31 @@ counterpoint2 =
   -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , per1) ∷
   -- (min3 , min6) ∷ (min3 , maj6) ∷ []
 
-zipped1 : Vec PitchInterval 7
-zipped1 = zip cantusFirmus counterpoint1
+frog-cfcp1 : Vec PitchInterval 5
+frog-cfcp1 = zip cantusFirmusBody counterpoint1
 
-zipped2 : Vec PitchInterval2 5
-zipped2 = zip cantusFirmusBody counterpoint2
+frog-cfcp2 : Vec PitchInterval2 5
+frog-cfcp2 = zip cantusFirmusBody counterpoint2
 
 fs : FirstSpecies
-fs = firstSpecies (toList zipped1) refl refl refl refl refl
+fs = firstSpecies (c 5 , per8) (toList frog-cfcp1) (c 5 , per8) refl refl refl refl refl
 
 ss : SecondSpecies
-ss = secondSpecies (c 5 , per5) (toList zipped2) (c 5 , per8) refl refl refl refl refl refl
+ss = secondSpecies (c 5 , per5) (toList frog-cfcp2) (c 5 , per8) refl refl refl refl refl refl
 
 frog counterp1 counterp2 : List Note
-frog = map (tone half ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
-counterp1 = map (tone half ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.notes fs)
+frog =
+  tone half (c 5) L∷
+  map (tone half ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
+  tone half (c 5) L∷
+  L[]
+  
+counterp1 =
+  tone half (c 6) L∷
+  map (tone half ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
+  tone half (c 6) L∷
+  L[]
+
 counterp2 =
   rest qtr L∷
   (tone qtr ((proj₂ ∘ pitchIntervalToPitchPair) (SecondSpecies.firstBar ss))) L∷

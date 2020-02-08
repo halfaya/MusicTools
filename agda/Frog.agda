@@ -20,24 +20,19 @@ open import Pitch
 open import Interval
 open import Util
 
--- Frog's song
-cantusFirmus : Vec Pitch 7
-cantusFirmus =
-  c 5 ∷ d 5 ∷ e 5 ∷ f 5 ∷ e 5 ∷ d 5 ∷ c 5 ∷ []
-
--- Main body only
-cantusFirmusBody : Vec Pitch 5
-cantusFirmusBody =
+-- Frog's song (main body)
+cfBody : Vec Pitch 5
+cfBody =
   d 5 ∷ e 5 ∷ f 5 ∷ e 5 ∷ d 5 ∷ []
 
 -- First species counterpoint (main body only)
-counterpoint1 : Vec Interval 5
-counterpoint1 =
+cpBody1 : Vec Interval 5
+cpBody1 =
   maj6 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
 
 -- Second species counterpoint (main body only)
-counterpoint2 : Vec (Interval × Interval) 5
-counterpoint2 =
+cpBody2 : Vec (Interval × Interval) 5
+cpBody2 =
   -- with dissonant interval
   (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
   (min6 , min3) ∷ (min3 , maj6) ∷ []
@@ -45,32 +40,32 @@ counterpoint2 =
   -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , per1) ∷
   -- (min3 , min6) ∷ (min3 , maj6) ∷ []
 
-frog-cfcp1 : Vec PitchInterval 5
-frog-cfcp1 = zip cantusFirmusBody counterpoint1
+cfcp1 : Vec PitchInterval 5
+cfcp1 = zip cfBody cpBody1
 
-frog-cfcp2 : Vec PitchInterval2 5
-frog-cfcp2 = zip cantusFirmusBody counterpoint2
+cfcp2 : Vec PitchInterval2 5
+cfcp2 = zip cfBody cpBody2
 
 fs : FirstSpecies
-fs = firstSpecies (c 5 , per8) (toList frog-cfcp1) (c 5 , per8) refl refl refl refl refl
+fs = firstSpecies (c 5 , per8) (toList cfcp1) (c 5 , per8) refl refl refl refl refl
 
 ss : SecondSpecies
-ss = secondSpecies (c 5 , per5) (toList frog-cfcp2) (c 5 , per8) refl refl refl refl refl refl
+ss = secondSpecies (c 5 , per5) (toList cfcp2) (c 5 , per8) refl refl refl refl refl refl
 
-frog counterp1 counterp2 : List Note
-frog =
+cf cp1 cp2 : List Note
+cf =
   tone half (c 5) L∷
   map (tone half ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
   tone half (c 5) L∷
   L[]
   
-counterp1 =
+cp1 =
   tone half (c 6) L∷
   map (tone half ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
   tone half (c 6) L∷
   L[]
 
-counterp2 =
+cp2 =
   rest qtr L∷
   (tone qtr ((proj₂ ∘ pitchIntervalToPitchPair) (SecondSpecies.firstBar ss))) L∷
   -- yellow highlight when writing (tone qtr ∘ proj₂ ∘ pitchIntervalToPitchPair) (SecondSpecies.firstBar ss)
@@ -91,21 +86,21 @@ channel2 = # 1
 tempo : ℕ
 tempo = 120
 
-fVelocity cVelocity : Velocity
-fVelocity = # 60
-cVelocity = # 30
+cfVelocity cpVelocity : Velocity
+cfVelocity = # 60
+cpVelocity = # 30
 
-frogTrack : MidiTrack
-frogTrack = track "Cantus Firmus" piano channel1 tempo (notes→events fVelocity frog)
+cfTrack : MidiTrack
+cfTrack = track "Cantus Firmus" piano channel1 tempo (notes→events cfVelocity cf)
 
 cpTrack1 : MidiTrack
-cpTrack1 = track "Counterpoint 1" piano channel2 tempo (notes→events cVelocity counterp1)
+cpTrack1 = track "Counterpoint 1" piano channel2 tempo (notes→events cpVelocity cp1)
 
-fcpTracks1 : List MidiTrack
-fcpTracks1 = cpTrack1 L∷ frogTrack L∷ L[]
+cfcpTracks1 : List MidiTrack
+cfcpTracks1 = cpTrack1 L∷ cfTrack L∷ L[]
 
 cpTrack2 : MidiTrack
-cpTrack2 = track "Counterpoint 2" piano channel2 tempo (notes→events cVelocity counterp2)
+cpTrack2 = track "Counterpoint 2" piano channel2 tempo (notes→events cpVelocity cp2)
 
-fcpTracks2 : List MidiTrack
-fcpTracks2 = cpTrack2 L∷ frogTrack L∷ L[]
+cfcpTracks2 : List MidiTrack
+cfcpTracks2 = cpTrack2 L∷ cfTrack L∷ L[]

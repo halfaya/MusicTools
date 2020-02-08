@@ -84,7 +84,6 @@ unisonCheck : PitchInterval → Maybe UnisonError
 unisonCheck (p , i) =
   if (i == per1) then just (unison p) else nothing
 
--- ignore the first interval
 checkUnison : List PitchInterval → List UnisonError
 checkUnison = mapMaybe unisonCheck
 

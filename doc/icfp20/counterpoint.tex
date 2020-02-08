@@ -12,7 +12,8 @@ and that the individual melodic lines are distinguishable to the listener.
 In this section, we present an implementation of species counterpoint,
 based on the formulation given by Fux~\citep{fux-cp}.
 The idea is to represent ``good'' counterpoint  as a dependent record,
-whose fields are the proofs that the counterpoint follows certain rules.
+whose fields encode the musical content as well as proofs that the
+counterpoint follows certain rules.
 For space reason, we only describe two variants of species counterpoint;
 other variants can be formalized in an analogous way.
 
@@ -29,24 +30,25 @@ counterpoint\footnote{The cantus firmus is part of a German song
 
 [Frog score]
 
-We represent such music as a vector of pitch-interval pairs \texttt{(p , i)},
-where \texttt{p} is a note in the cantus firmus, and \texttt{i} is the
-distance between \texttt{p} and the corresponding counterpoint note.
+We represent such music in the following way: we keep the first and
+last bars as separate elements, and encode the middle bars as a vector
+of pitch-interval pairs \texttt{(p , i)}, where \texttt{p} is a note in the
+cantus firmus, and \texttt{i} is the distance between \texttt{p} and the
+corresponding counterpoint note.
+For instance, the main body of the above example is represented as
+follows:
 
 \begin{alltt}
 PitchInterval : Set
 PitchInterval = Pitch \(\times\) Interval
 
-frog-cp1 : Vector PitchInterval 7
-frog-cp1 = (c 5 , per8) :: (d 5 , maj6) :: (e 5 , min6) :: (f 5 , maj3) :: (e 5 , min3) :: (d 5 , maj6) :: (c 5 , per8) :: []
+cfcp1 : List PitchInterval
+cfcp1 = (d 5 , maj6) :: (e 5 , min6) :: (f 5 , maj3) :: (e 5 , min3) :: (d 5 , maj6) :: []
 \end{alltt}
 
-Note that the vector representation does not carry any correctness
-guarantee of the music;
-it requires extrinsic proofs stating that the music follows all the
-rules for being good counterpoint.
-Below, we discuss five such rules, showing what role they play
-and how they can be represented using dependent types.
+The reason we separate different parts of the music is that they are
+subject to different rules.
+In the reminder of this section, we elaborate these rules one by one.
 
 \paragraph{Beginning}
 The beginning of the music must be a perfect consonance,
@@ -57,17 +59,12 @@ In our implementation, this is checked by the predicate
 \begin{alltt}
 data BeginningError : Set where
   not158   : PitchInterval \(\rightarrow\) BeginningError
-  tooShort : BeginningError
   
-beginningCheck : PitchInterval \(\rightarrow\) Maybe BeginningError
-beginningCheck pi@(_ , i) =
+checkBeginning : PitchInterval \(\rightarrow\) Maybe BeginningError
+checkBeginning pi@(_ , i) =
   if ((i == per1) \(\vee\) (i == per5) \(\vee\) (i == per8))
   then nothing
   else just (not158 pi)
-
-checkBeginning : List PitchInterval \(\rightarrow\) Maybe BeginningError
-checkBeginning []       = just tooShort
-checkBeginning (p :: ps) = beginningCheck p  
 \end{alltt}
 
 \noindent The datatype \texttt{BeginningError} is a kind of
@@ -144,7 +141,10 @@ data UnisonError : Set where
   unison : Pitch \(\rightarrow\) UnisonError
 
 unisonCheck : PitchInterval \(\rightarrow\) Maybe UnisonError
-unisonCheck (p , i) = if (i == per1) then just (unison p) else nothing  
+unisonCheck (p , i) = if (i == per1) then just (unison p) else nothing
+
+checkUnison : List PitchInterval \(\rightarrow\) List UnisonError
+checkUnison = mapMaybe unisonCheck
 \end{alltt}
 
 \paragraph{Ending}

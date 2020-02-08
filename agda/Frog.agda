@@ -47,10 +47,10 @@ cfcp2 : Vec PitchInterval2 5
 cfcp2 = zip cfBody cpBody2
 
 fs : FirstSpecies
-fs = firstSpecies (c 5 , per8) (toList cfcp1) (c 5 , per8) refl refl refl refl refl
+fs = firstSpecies (c 5 , per8) (toList cfcp1) (c 5 , per8) refl refl refl refl
 
 ss : SecondSpecies
-ss = secondSpecies (c 5 , per5) (toList cfcp2) (c 5 , per8) refl refl refl refl refl refl
+ss = secondSpecies (c 5 , per5) (toList cfcp2) (c 5 , per8) refl refl refl refl refl
 
 cf cp1 cp2 : List Note
 cf =

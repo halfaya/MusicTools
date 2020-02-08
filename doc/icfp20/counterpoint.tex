@@ -23,18 +23,19 @@ other variants can be formalized in an analogous way.
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
 which starts with a tonic and consists only of whole notes.
-Here is an example of first species counterpoint, where the lower line
-stands for the cantus firmus and the upper line represents the
-counterpoint\footnote{The cantus firmus is part of a German song
-  called ``Froschgesang'' (Frog's song).}:
+Figure~\ref{fig:frog} is an example of first species counterpoint,
+where the lower line stands for the cantus firmus and the upper line
+represents the counterpoint\footnote{The cantus firmus is part of a
+  German song called ``Froschgesang'' (Frog's song).}:
 
-[Frog score]
-
-We represent such music in the following way: we keep the first and
-last bars as separate elements, and encode the middle bars as a vector
-of pitch-interval pairs \texttt{(p , i)}, where \texttt{p} is a note in the
-cantus firmus, and \texttt{i} is the distance between \texttt{p} and the
-corresponding counterpoint note.
+Among different options of how to encode such music, we adopt
+the following strategy.
+First, we represent each bar as a pitch-interval pair \texttt{(p ,  i)},
+where \texttt{p} is a note in the cantus firmus, and \texttt{i} is the
+distance between \texttt{p} and the corresponding counterpoint note.
+Second, we keep the first and last bars as separate elements, and
+represent the middle bars (often referred to as the \emph{main body})
+as a list of pitch-interval pairs.
 For instance, the main body of the above example is represented as
 follows:
 
@@ -51,10 +52,11 @@ subject to different rules.
 In the reminder of this section, we elaborate these rules one by one.
 
 \paragraph{Beginning}
-The beginning of the music must be a perfect consonance,
-that is, it must be a unison, a 5th, or an 8th.
-In our implementation, this is checked by the predicate
-\texttt{checkBeginning}, which is defined as follows:
+The beginning of the music should express perfection.
+Therefore, the first interval must be a unison, a 5th, or an 8th.
+In our formalization, we implement this rule as a function
+\texttt{checkBeginning}, which reports an error \texttt{not158 i}
+when the first interval \texttt{i} is an invalid one.
 
 \begin{alltt}
 data BeginningError : Set where
@@ -67,51 +69,39 @@ checkBeginning pi@(_ , i) =
   else just (not158 pi)
 \end{alltt}
 
-\noindent The datatype \texttt{BeginningError} is a kind of
-``type error'' designed specifically for counterpoint.
-The first constructor \texttt{not158} tells us that the music
-begins with a wrong interval, whereas the second constructor
-\texttt{tooShort} says that the whole music is empty.
-With this datatype, we can obtain an informative error message
-when we accidentally break the rule at the beginning of the music.
-Thus, what we are doing here can be seen as writing a
-customized typechecker.
-
 \paragraph{Intervals}
-In the main body of the music, we must ensure that vertical intervals
-are harmonically pleasing.
-all intervals must be consonant.
-That is, we should only use 3rds, 5ths, 6ths, and 8ths.
-This rule can be encoded as the \texttt{checkIntervals} predicate,
-which again uses a new datatype \texttt{IntervalError} representing
-the presence of a dissonant interval:
+The main body of the music should maintain harmonical consonance
+and independence of melodic lines.
+This means, all constituent intervals must be chosen from the 3rd,
+5th, 6th, and 8th.
+We encode this rule as the \texttt{checkIntervals} function,
+which returns a list of errors correponding to the occurrences of
+dissonant intervals and unisons.
 
 \begin{alltt}
 data IntervalError : Set where
   dissonant : Interval \(\rightarrow\) IntervalError
+  unison    : Pitch \(\rightarrow\) IntervalError
 
-intervalCheck : Interval \(\rightarrow\) Maybe IntervalError
-intervalCheck i = if isConsonant i then nothing else just (dissonant i)
+intervalCheck : PitchInterval \(\rightarrow\) Maybe IntervalError
+intervalCheck (p , i) with isConsonant i | isUnison i
+... | false | _    = just (dissonant i)
+... | _     | true = just (unison p)
+... | _     | _    = nothing
 
 checkIntervals : List PitchInterval \(\rightarrow\) List IntervalError
-checkIntervals = mapMaybe (intervalCheck \(\circ\) proj\(\sb{\mathtt{2}}\))
+checkIntervals = mapMaybe intervalCheck
 \end{alltt}
 
 \paragraph{Motion}
-
-\begin{alltt}
-data Motion : Set where
-contrary : Motion
-parallel : Motion
-similar  : Motion
-oblique  : Motion
-\end{alltt}
-
-For every pair of two adjacent intervals, the cantus firmus and
-counterpoint lines must not move in the same direction if the second
-interval is a perfect one (i.e., unison, 5th, or 8th).
-This is because such motion would draw too much attention to the
-resulting interval.
+The independence of melodic lines is also affected by \emph{motion},
+i.e., the way one interval moves to another interval.
+As shown in Figure~\ref{fig:motion}, there are four kinds of motion,
+and among them, parallel and similar motion makes it harder to
+distinguish between two voices, especially when the second interval
+is a perfect one.
+To avoid this problematic motion, we define the \texttt{checkMotion}
+function, which lists all invalid motion approaching a perfect interval.
 
 \begin{alltt}
 data MotionError : Set where
@@ -127,26 +117,38 @@ motionCheck i1 i2 | parallel | true  = just (parallel i1 i2)
 motionCheck i1 i2 | similar  | false = nothing
 motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
 
-checkMotion : List PitchInterval → List MotionError
-checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs  
-\end{alltt}
-
-\paragraph{Unisons}
-Unisons should not occur in the main body of the music.
-The reason is that they make it harder to distinguish between
-the two melodic lines.
-
-\begin{alltt}
-data UnisonError : Set where
-  unison : Pitch \(\rightarrow\) UnisonError
-
-unisonCheck : PitchInterval \(\rightarrow\) Maybe UnisonError
-unisonCheck (p , i) = if (i == per1) then just (unison p) else nothing
-
-checkUnison : List PitchInterval \(\rightarrow\) List UnisonError
-checkUnison = mapMaybe unisonCheck
+checkMotion : List PitchInterval \(\rightarrow\) List MotionError
+checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs  
 \end{alltt}
 
 \paragraph{Ending}
-The ending of the music must be a \emph{cadence}, a progression
-of two intervals that gives rise to a sense of resolution.
+The ending of the music should express relaxation.
+This means, the last interval must be chosen from the unison and
+the 8th, which are both considered very stable.
+The last interval should also be approached by a \emph{cadence},
+a progression that gives rise to a sense of resolution.
+We encode these rules as the \texttt{checkEnding} function;
+note that it returns the \texttt{tooShort} error when the music does
+not have enough number of bars to form a valid ending.
+
+\begin{alltt}
+data EndingError : Set where
+  not18    : PitchInterval \(\rightarrow\) EndingError
+  not27    : PitchInterval \(\rightarrow\) EndingError
+  tooShort : List PitchInterval \(\rightarrow\) EndingError
+
+endingCheck : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) Maybe EndingError
+endingCheck pi1@(pitch p , i) (pitch q , interval 0)  = 
+  if ((p + 1 \(\equiv\sp{\mathtt{b}}\) q) \(\wedge\) (i == min3)) then nothing else just (not27 pi1)
+endingCheck pi1@(pitch p , i) (pitch q , interval 12) =
+  if ((q + 2 \(\equiv\sp{\mathtt{b}}\) p) \(\wedge\) (i == maj6) \(\vee\) (p + 1 \(\equiv\sp{\mathtt{b}}\) q) \(\wedge\) (i == min10))
+  then nothing
+  else just (not27 pi1)
+endingCheck pi1               pi2                     =
+  just (not18 pi2)
+
+checkEnding : List PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) Maybe EndingError
+checkEnding []        \_ = just (tooShort [])
+checkEnding (p :: []) q = endingCheck p q
+checkEnding (p :: ps) q = checkEnding ps q
+\end{alltt}

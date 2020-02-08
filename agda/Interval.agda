@@ -74,6 +74,12 @@ isPerfect iv =
   (i == per8)
   where i = intervalWithinOctave iv
 
+isUnison : Interval → Bool
+isUnison i = i == per1
+
+isThird : Interval → Bool
+isThird i = (i == min3) ∨ (i == maj3)
+
 -- Half or whole step; ignores key for now.
 isStep : Interval → Bool
 isStep i =
@@ -104,9 +110,6 @@ stepDown p q with pitchPairToSignedInterval (p , q)
 ... | Sign.- , i = isStep i
 ... | Sign.+ , _ = false
 
-isThird : Interval → Bool
-isThird i = (i == min3) ∨ (i == maj3)
-
 -- Check if q is a passing tone between p and r
 -- The interval between end points need to be a 3rd
 isPassingTone : Pitch → Pitch → Pitch → Bool
@@ -125,5 +128,5 @@ moveDown p q with pitchPairToSignedInterval (p , q)
 ... | Sign.+ , _ = false
 
 -- Check if q is left by step in the opposite direction from its approach
-isOpposite : Pitch → Pitch → Pitch → Bool
-isOpposite p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)
+isOppositeStep : Pitch → Pitch → Pitch → Bool
+isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)

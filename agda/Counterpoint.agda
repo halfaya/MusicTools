@@ -36,12 +36,16 @@ checkBeginning pi@(_ , i) =
 
 data IntervalError : Set where
   dissonant : Interval → IntervalError
+  unison    : Pitch    → IntervalError
 
-intervalCheck : Interval → Maybe IntervalError
-intervalCheck i = if isConsonant i then nothing else just (dissonant i)
+intervalCheck : PitchInterval → Maybe IntervalError
+intervalCheck (p , i) with isConsonant i | isUnison i
+... | false | _    = just (dissonant i)
+... | _     | true = just (unison p)
+... | _     | _    = nothing
 
 checkIntervals : List PitchInterval → List IntervalError
-checkIntervals = mapMaybe (intervalCheck ∘ proj₂)
+checkIntervals = mapMaybe intervalCheck
 
 ------------------------------------------------
 
@@ -57,7 +61,7 @@ motion (pitch p , interval i) (pitch q , interval j) =
   in if i ≡ᵇ j then parallel
      else (if (p ≡ᵇ q) ∨ (p' ≡ᵇ q') then oblique
            else (if p <ᵇ q then (if p' <ᵇ q' then similar  else contrary)
-                 else           (if p' <ᵇ q' then contrary else similar )))
+                 else           (if p' <ᵇ q' then contrary else similar)))
 
 data MotionError : Set where
   parallel : PitchInterval → PitchInterval → MotionError
@@ -77,37 +81,23 @@ checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs
 
 ------------------------------------------------
 
-data UnisonError : Set where
-  unison : Pitch → UnisonError
-
-unisonCheck : PitchInterval → Maybe UnisonError
-unisonCheck (p , i) =
-  if (i == per1) then just (unison p) else nothing
-
-checkUnison : List PitchInterval → List UnisonError
-checkUnison = mapMaybe unisonCheck
-
-------------------------------------------------
-
 data EndingError : Set where
-  not18       : PitchInterval → EndingError
-  not27       : PitchInterval → EndingError
-  tooShort    : List PitchInterval → EndingError
+  not18    : PitchInterval → EndingError
+  not27    : PitchInterval → EndingError
+  tooShort : List PitchInterval → EndingError
 
 endingCheck : PitchInterval → PitchInterval → Maybe EndingError
-endingCheck pi1@(pitch p , i) pi2@(pitch q , j) =
-  if j == per1
-  then (if ((p + 1 ≡ᵇ q) ∧ (i == min3))
-        then nothing
-        else just (not27 pi1))
-  else if j == per8
-  then (if ((q + 2 ≡ᵇ p) ∧ (i == maj6) ∨ (p + 1 ≡ᵇ q) ∧ (i == min10))
-        then nothing
-        else just (not27 pi1))
-  else just (not18 pi2)
+endingCheck pi1@(pitch p , i) (pitch q , interval 0)  = 
+  if ((p + 1 ≡ᵇ q) ∧ (i == min3)) then nothing else just (not27 pi1)
+endingCheck pi1@(pitch p , i) (pitch q , interval 12) =
+  if ((q + 2 ≡ᵇ p) ∧ (i == maj6) ∨ (p + 1 ≡ᵇ q) ∧ (i == min10))
+  then nothing
+  else just (not27 pi1)
+endingCheck pi1               pi2                     =
+  just (not18 pi2)
 
 checkEnding : List PitchInterval → PitchInterval → Maybe EndingError
-checkEnding [] _       = just (tooShort [])
+checkEnding []       _ = just (tooShort [])
 checkEnding (p ∷ []) q = endingCheck p q
 checkEnding (p ∷ ps) q = checkEnding ps q
 
@@ -122,7 +112,6 @@ record FirstSpecies : Set where
     beginningOk : checkBeginning firstBar ≡ nothing
     intervalsOk : checkIntervals middleBars ≡ []
     motionOk    : checkMotion middleBars ≡ []
-    unisonOK    : checkUnison middleBars ≡ []
     endingOk    : checkEnding middleBars lastBar ≡ nothing
 
 ------------------------------------------------
@@ -164,11 +153,15 @@ checkStrongBeats : List PitchInterval2 → List IntervalError
 checkStrongBeats = checkIntervals ∘ map strongBeat
 
 checkWeakBeat : PitchInterval2 → Pitch → Maybe IntervalError
-checkWeakBeat (p , i , j) q =
-  if isPassingTone (secondPitch (p , i)) (secondPitch (p , j)) q
-  then nothing
-  else intervalCheck j
-
+checkWeakBeat (p , i , j) q with isConsonant j | isUnison j 
+... | false | _ = if isPassingTone (secondPitch (p , i)) (secondPitch (p , j)) q
+                  then nothing
+                  else just (dissonant j)
+... | _ | true = if isOppositeStep (secondPitch (p , i)) (secondPitch (p , j)) q
+                 then nothing
+                 else just (unison p)
+... | _ | _    = nothing
+ 
 checkWeakBeats : List PitchInterval2 → Pitch → List IntervalError
 checkWeakBeats []            p = []
 checkWeakBeats pis@(_ ∷ qis) p =
@@ -179,25 +172,9 @@ checkWeakBeats pis@(_ ∷ qis) p =
 -- no parallel or similar motion to a perfect interval across bars
 -- assumes a bar after the first PitchInterval, and then after every other PitchInterval
 checkMotion2 : List PitchInterval → List MotionError
-checkMotion2 []               = []
-checkMotion2 (_ ∷ [])         = []
-checkMotion2 (p ∷ q ∷ ps)     = checkMotion (p ∷ q ∷ []) ++ checkMotion2 ps
-
--- allow unisons on weak beats in the main body
--- if they are left by step in the opposite direction from their approach
-checkUnison2' : PitchInterval2 → Pitch → Maybe UnisonError
-checkUnison2' (p , i , j) q =
-  if i == per1 then just (unison p)
-  else if isOpposite (secondPitch (p , i)) (secondPitch (p , j)) q
-       then nothing
-       else unisonCheck (p , j)
-
-checkUnison2 : List PitchInterval2 → Pitch → List UnisonError
-checkUnison2 [] p            = []
-checkUnison2 pis@(_ ∷ qis) p =
-  mapMaybe (uncurry checkUnison2')
-           (zip pis
-                (map (λ {(q , i , j) → proj₂ (pitchIntervalToPitchPair (q , i))}) qis ++ (p ∷ [])))
+checkMotion2 []           = []
+checkMotion2 (_ ∷ [])     = []
+checkMotion2 (p ∷ q ∷ ps) = checkMotion (p ∷ q ∷ []) ++ checkMotion2 ps
 
 -- Still more conditions to be added, but these are the main points.
 record SecondSpecies : Set where
@@ -210,5 +187,4 @@ record SecondSpecies : Set where
     strongBeatsOk : checkStrongBeats middleBars ≡ []
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []
     motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
-    unisonOk      : checkUnison2 middleBars (secondPitch lastBar) ≡ []
     cadenceOk     : checkEnding2 middleBars lastBar ≡ nothing

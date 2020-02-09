@@ -55,7 +55,7 @@ yamanote-cfcp : Vec PitchInterval 40
 yamanote-cfcp = zip cantusFirmus counterpoint
 
 fs : FirstSpecies
-fs = firstSpecies (g 5 , per8) (toList yamanote-cfcp) (c 6 , per8) refl refl refl refl refl 
+fs = firstSpecies (g 5 , per8) (toList yamanote-cfcp) (c 6 , per8) refl refl refl refl
 
 yamanote counterp : List Note
 yamanote =

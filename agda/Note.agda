@@ -30,8 +30,11 @@ transposeNote k (rest d)   = rest d
 -- duration in 16th notes
 -- assume duration of a 16th note is 1
 16th 8th qtr half whole : Duration
-16th  = duration 1
-8th   = duration 2
-qtr   = duration 4
-half  = duration 8
-whole = duration 16
+16th   = duration 1
+8th    = duration 2
+dqtr   = duration 3
+qtr    = duration 4
+half   = duration 8
+dhalf  = duration 12
+whole  = duration 16
+dwhole = duration 24

@@ -103,12 +103,16 @@ showPitchClassSet = fromList ∘ toList ∘ map (λ {true → '1' ; false → '0
 standardMidiPitch : Fin chromaticScaleSize → ℕ → Pitch
 standardMidiPitch p o = relativeToAbsolute (pitchClass p , octave o)
 
-c d e f g g# a b : ℕ → Pitch
+c c♯ d d♯ e f f♯ g g♯ a b♭ b : ℕ → Pitch
 c  = standardMidiPitch (# 0)
+c♯ = standardMidiPitch (# 1)
 d  = standardMidiPitch (# 2)
+d♯ = standardMidiPitch (# 3)
 e  = standardMidiPitch (# 4)
 f  = standardMidiPitch (# 5)
+f♯ = standardMidiPitch (# 6)
 g  = standardMidiPitch (# 7)
-g# = standardMidiPitch (# 8)
+g♯ = standardMidiPitch (# 8)
 a  = standardMidiPitch (# 9)
+b♭ = standardMidiPitch (# 10)
 b  = standardMidiPitch (# 11)

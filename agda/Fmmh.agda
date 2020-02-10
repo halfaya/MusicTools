@@ -24,21 +24,21 @@ data Chord : DiatonicDegree → ChordQuality → Set where
   chord : (d : DiatonicDegree) → (q : ChordQuality) → Chord d q
 
 data Ton : Mode → Set where
-  maj : Chord I maj → Ton maj
-  min : Chord I min → Ton min
+  maj : Chord d1 maj → Ton maj
+  min : Chord d1 min → Ton min
 
 data SDom : Mode → Set where
-  ii     : Chord II min → SDom maj
-  iv-maj : Chord IV maj → SDom maj
-  iii-iv : Chord III min → Chord IV maj → SDom maj
-  iv-min : Chord IV min → SDom min
+  ii     : Chord d2 min → SDom maj
+  iv-maj : Chord d4 maj → SDom maj
+  iii-iv : Chord d3 min → Chord d4 maj → SDom maj
+  iv-min : Chord d4 min → SDom min
 
 data Dom (m : Mode) : Set where
-  v7   : Chord V dom7 → Dom m
-  v    : Chord V maj → Dom m
-  vii  : Chord VII dim → Dom m
+  v7   : Chord d5 dom7 → Dom m
+  v    : Chord d5 maj → Dom m
+  vii  : Chord d7 dim → Dom m
   sdom : SDom m → Dom m → Dom m
-  ii-v : Chord II dom7 → Chord V dom7 → Dom m
+  ii-v : Chord d2 dom7 → Chord d5 dom7 → Dom m
 
 data Phrase (m : Mode) : Set where
   i-v-i : Ton m → Dom m → Ton m → Phrase m

@@ -4,13 +4,16 @@ module Pitch where
 
 open import Data.Bool       using (Bool; false; true)
 open import Data.Integer    using (ℤ; +_; -[1+_])
-open import Data.Fin        using (Fin; toℕ; #_)
+open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
+open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.String     using (String; fromList)
 open import Data.Product    using (_×_; _,_; proj₁)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
 open import Function        using (_∘_)
+
+open import Relation.Nullary using (yes; no)
 
 open import Lemmas          using (revMod; -_mod_; -_div_)
 open import Util            using (findIndex)
@@ -39,6 +42,9 @@ diatonicScaleSize = 7
 data PitchClass : Set where
   pitchClass : Fin chromaticScaleSize → PitchClass
 
+unPitchClass : PitchClass → Fin chromaticScaleSize
+unPitchClass (pitchClass p) = p
+
 Scale : ℕ → Set
 Scale = Vec PitchClass
 
@@ -64,17 +70,36 @@ majorScale harmonicMinorScale : Scale diatonicScaleSize
 majorScale         = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
 harmonicMinorScale = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
 
+indexInScale : {n : ℕ} → Vec PitchClass n → Fin chromaticScaleSize → Maybe (Fin n)
+indexInScale []         p = nothing
+indexInScale (pc ∷ pcs) p with (unPitchClass pc ≟ p)
+... | yes _ = just fz
+... | no  _ = mmap fs (indexInScale pcs p)
+
 data DiatonicDegree : Set where
   diatonicDegree : Fin diatonicScaleSize → DiatonicDegree
 
-I II III IV V VI VII : DiatonicDegree
-I   = diatonicDegree (# 0)
-II  = diatonicDegree (# 1)
-III = diatonicDegree (# 2)
-IV  = diatonicDegree (# 3)
-V   = diatonicDegree (# 4)
-VI  = diatonicDegree (# 5)
-VII = diatonicDegree (# 6)
+{-
+-- first argument is the key
+pitchToDegree : PitchClass → Pitch → DiatonicDegree
+pitchToDegree (pitchClass pc) p =
+  let (pc' , _) = absoluteToRelative p
+      m         = toℕ pc
+      n         = toℕ (unPitchClass pc')
+  in {!!}
+-}
+
+d1 d2 d3 d4 d5 d6 d7 : DiatonicDegree
+d1 = diatonicDegree (# 0)
+d2 = diatonicDegree (# 1)
+d3 = diatonicDegree (# 2)
+d4 = diatonicDegree (# 3)
+d5 = diatonicDegree (# 4)
+d6 = diatonicDegree (# 5)
+d7 = diatonicDegree (# 6)
+
+thirdUp : DiatonicDegree → DiatonicDegree
+thirdUp (diatonicDegree d) = diatonicDegree ((toℕ d + 2) mod diatonicScaleSize)
 
 scaleSize : {n : ℕ} → Scale n → ℕ
 scaleSize {n} _ = n

@@ -1,3 +1,19 @@
+\newcommand{\FS}{
+  \begin{figure}
+    \includegraphics[width=10cm]{fs.png}
+    \caption{First Species Counterpoint}
+    \label{fig:fs}
+  \end{figure}
+}
+
+\newcommand{\SS}{
+  \begin{figure}
+    \includegraphics[width=10cm]{ss.png}
+    \caption{Second Species Counterpoint}
+    \label{fig:ss}
+  \end{figure}
+}
+
 \section{Counterpoint}
 \label{sec:cp}
 
@@ -5,9 +21,9 @@ Counterpoint is a technique for combining multiple lines of melodies.
 Composing counterpoint is like arranging a song for choir:
 we start with a \emph{cantus firmus}, which serves as the base melody,
 and compose counterpoint lines above or below the cantus firmus.
-When doing this, we must make sure that the counterpoint lines sound
-harmonically pleasing when played with the cantus firmus,
-and that the individual melodic lines are distinguishable to the listener.
+When doing this, we must make sure that the whole music sounds
+harmonically pleasing, and that the individual melodic lines are
+distinguishable to the listener.
 
 In this section, we present an implementation of species counterpoint,
 based on the formulation given by Fux~\citep{fux-cp}.
@@ -20,10 +36,12 @@ other variants can be formalized in an analogous way.
 \subsection{First Species Counterpoint}
 \label{sec:cp:fs}
 
+\FS
+
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
 which starts with a tonic and consists only of whole notes.
-Figure~\ref{fig:frog} is an example of first species counterpoint.
+Figure~\ref{fig:fs} is an example of first species counterpoint.
 The lower line is the cantus firmus, which we take from a famous
 German song called ``Froschgesang'' (Frog's song).
 The upper line is the counterpoint composed by the second author.
@@ -34,10 +52,10 @@ In our implementation, we represent each bar as a pitch-interval
 pair \texttt{(p ,  i)}, where \texttt{p} is a note in the cantus firmus,
 and \texttt{i} is the distance between \texttt{p} and the corresponding
 counterpoint note.
-We then represent the sequence of bars as a list of pitch-interval pairs,
+We then represent a sequence of bars as a list of pitch-interval pairs,
 but with one proviso: we separate the first and last bars from the
 middle bars.
-Therefore, the Frog's song in Figure~\ref{fig:frog} is represented as a
+Therefore, the Frog's song in Figure~\ref{fig:fs} is represented as a
 compound of the following three elements:
 
 \begin{alltt}
@@ -56,9 +74,9 @@ last = (c 5 , per8)
 
 \subsubsection{Representing Rules}
 
-The reason why we separate different parts of music is that
-they are subject to different rules.
-Below, we elaborate these rules one by one.
+The reason behind our three-part representation of music is that
+different parts are subject to different rules.
+Let us go through the 
 
 \paragraph{Beginning}
 
@@ -67,6 +85,8 @@ Therefore, the first interval must be a unison, a 5th, or an 8th.
 In our formalization, we implement this rule as a function
 \texttt{checkBeginning}, which reports an error \texttt{not158 i}
 when the first interval \texttt{i} is an invalid one.
+Since Agda does not have exceptions, we wrap this error around
+the \texttt{just} constructor for option values.
 
 \begin{alltt}
 data BeginningError : Set where
@@ -184,6 +204,11 @@ all the required properties, that is:
   \item The ending is a unison or an octave approached by a cadence
 \end{itemize}
 
+\noindent Recall that the functions representing these rules return
+either an option value or a list of found errors.
+Therefore, the correctness proofs either take the form
+\texttt{func args $\equiv$ nothing}, or look like \texttt{func args $\equiv$ []}.
+
 \begin{alltt}
 record FirstSpecies : Set where
   constructor firstSpecies
@@ -205,3 +230,32 @@ for the Frog's song is correct, since the music inhabits the
 fs : FirstSpecies
 fs = firstSpecies first1 middle1 last1 refl refl refl refl
 \end{alltt}
+
+\subsection{Second Species Counterpoint}
+\label{sec:cp:ss}
+
+\SS
+
+We next discuss a more complex variant of counterpoint, called the
+second species.
+In second species, we set \emph{two} half notes against every cantus
+firmus note.
+Figure~\ref{fig:ss} shows an example of such two-against-one
+counterpoint, again composed for the Frog's song.
+To represent second species counterpoint, we define a new type
+\texttt{PitchInterval2} as a triple of a pitch and two intervals:
+
+\begin{alltt}
+PitchInterval2 : Set
+PitchInterval2 = Pitch \(\times\) Interval \(\times\) Interval
+\end{alltt}
+
+The rhythmic structure of secound species counterpoint gives rise to
+the distinction between \emph{strong beats} (the first interval in a bar)
+and \emph{weak beats} (the second interval).
+Roughly speaking, strong beats in middle bars are constrained by the
+same rules as in first species.
+That is, they must all be consonant, non-unison intervals, and in the 
+case of perfect intervals, the motion from the preceding interval (on
+the weak beat) must be either contrary or oblique.
+Weak beats, on the other hand, ...

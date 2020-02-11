@@ -187,4 +187,4 @@ record SecondSpecies : Set where
     strongBeatsOk : checkStrongBeats middleBars ≡ []
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []
     motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
-    cadenceOk     : checkEnding2 middleBars lastBar ≡ nothing
+    endingOk      : checkEnding2 middleBars lastBar ≡ nothing

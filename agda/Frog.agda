@@ -33,9 +33,12 @@ cpMiddle1 =
 -- Second species counterpoint (middle bars)
 cpMiddle2 : Vec (Interval × Interval) 5
 cpMiddle2 =
-  -- with dissonant interval
+  -- with dissonant interval and unison
   (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
-  (min6 , min3) ∷ (min3 , maj6) ∷ []
+  (min6 , per1) ∷ (min3 , maj6) ∷ []
+  -- with dissonant interval
+  -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
+  -- (min6 , min3) ∷ (min3 , maj6) ∷ []
   -- with unison
   -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , per1) ∷
   -- (min3 , min6) ∷ (min3 , maj6) ∷ []

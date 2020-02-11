@@ -1,12 +1,12 @@
 \newcommand{\FS}{
   \begin{figure}
-    \includegraphics[width=10cm]{fs.png}
+    \includegraphics[width=11cm]{fs.png}
     \caption{First Species Counterpoint}
     \label{fig:fs}
   \end{figure}
 }
 
-\newcommand{\SS}{
+\renewcommand{\SS}{
   \begin{figure}
     \includegraphics[width=10cm]{ss.png}
     \caption{Second Species Counterpoint}
@@ -66,7 +66,8 @@ first : PitchInterval
 first = (c 5 , per8)
 
 middle : List PitchInterval
-middle = (d 5 , maj6) :: (e 5 , min6) :: (f 5 , maj3) :: (e 5 , min3) :: (d 5 , maj6) :: []
+middle = (d 5 , maj6) :: (e 5 , min6) :: (f 5 , maj3) ::
+         (e 5 , min3) :: (d 5 , maj6) :: []
 
 last : PitchInterval
 last = (c 5 , per8)
@@ -242,12 +243,28 @@ In second species, we set \emph{two} half notes against every cantus
 firmus note.
 Figure~\ref{fig:ss} shows an example of such two-against-one
 counterpoint, again composed for the Frog's song.
-To represent second species counterpoint, we define a new type
-\texttt{PitchInterval2} as a triple of a pitch and two intervals:
+As can be seen from this example, the first and last bars may have
+a different structure from middle bars.
+More specifically, it is encouraged to begin the counterpoint line with
+a half rest and end with a whole note.
+Therefore, in our implementation, we reuse the \texttt{PitchInterval} 
+type for the first and last bars, and define a new type
+\texttt{PitchInterval2} for middle bars:
 
 \begin{alltt}
 PitchInterval2 : Set
 PitchInterval2 = Pitch \(\times\) Interval \(\times\) Interval
+
+first2 : PitchInterval
+first2 = (c 5 , per5)
+
+middle2 : List PitchInterval2
+middle2 =
+  (d 5 , min3 , per5) :: (e 5 , min3 , min6) :: (f 5 , maj3 , aug4) ::
+  (e 5 , min6 , min3) :: (d 5 , min3 , maj6) :: []
+
+last2 : PitchInterval
+last2 = (c 5 , per8)
 \end{alltt}
 
 The rhythmic structure of secound species counterpoint gives rise to
@@ -258,4 +275,53 @@ same rules as in first species.
 That is, they must all be consonant, non-unison intervals, and in the 
 case of perfect intervals, the motion from the preceding interval (on
 the weak beat) must be either contrary or oblique.
-Weak beats, on the other hand, ...
+Weak beats, on the other hand, are constrained in a looser manner.
+First, they are allowed to be dissonant if they are created by a
+\emph{passing tone}, i.e., a note in the middle of two step-wise
+motions in the same direction (as in bars 4-5 of Figure~\ref{fig:ss}).
+Second, they are allowed to be a unison if they are left by step in the
+opposite direction from their approach (as in bars 5-6 of Figure~\ref{fig:ss}).
+
+With these rules in mind, let us look at the definition of
+\texttt{SecondSpecies}, a record type inhabited by correct second
+species counterpoint:
+
+\begin{alltt}
+record SecondSpecies : Set where
+  constructor secondSpecies
+  field
+    firstBar      : PitchInterval 
+    middleBars    : List PitchInterval2
+    lastBar       : PitchInterval 
+    beginningOk   : checkBeginning2 firstBar \(\equiv\) nothing
+    strongBeatsOk : checkStrongBeats middleBars \(\equiv\) []
+    weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) \(\equiv\) []
+    motionOk      : checkMotion2 (firstBar ::
+                                  (expandPitchIntervals2 middleBars) ++
+                                  (lastBar :: [])) \(\equiv\) []
+    endingOk      : checkEnding2 middleBars lastBar \(\equiv\) nothing
+\end{alltt}
+
+\noindent As in \texttt{FirstSpecies}, we have three fields holding
+the musical content, followed by five fields carrying the proofs of
+various properties.
+Among the latter group of fields, \texttt{beginningOK} is defined
+analogously to the corresponding field of \texttt{FirstSpecies};
+the only difference is that the interval must not be a unison,
+as it prevents the listener from recognizing the beginning of the
+counterpoint line.
+The next two fields, \texttt{strongBeatsOK} and \texttt{weakBeatsOK},
+guarantee the correctness of strong and weak beats, respectively.
+What follows is \texttt{motionOK}, which converts a list of
+\texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and checks
+motion accross bars.
+Lastly, we have \texttt{endingOK}, which forces the last two intervals
+to have a cadence structure.
+
+Using \texttt{SecondSpecies}, we can show that our second species
+counterpoint for the Frog's song is correct.
+
+\begin{alltt}
+ss : SecondSpecies
+ss = SecondSpecies first2 middle2 last2 refl refl refl refl refl
+\end{alltt}

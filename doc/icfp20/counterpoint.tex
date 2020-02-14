@@ -40,9 +40,9 @@ other variants can be formalized in an analogous way.
 
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
-which starts with a tonic and consists only of whole notes.
-Figure~\ref{fig:fs} is an example of first species counterpoint.
-The lower line is the cantus firmus, which we take from a famous
+which is required to start with a tonic and consist only of whole notes.
+Figure~\ref{fig:fs} shows an example of first species counterpoint.
+The lower line is the cantus firmus, which we excerpt from a famous
 German song called ``Froschgesang'' (Frog's song).
 The upper line is the counterpoint composed by the second author.
 
@@ -76,18 +76,19 @@ last = (c 5 , per8)
 \subsubsection{Representing Rules}
 
 The reason behind our three-part representation of music is that
-different parts are subject to different rules.
-Let us go through the 
+different parts are subject to different rules, as we detail below.
 
 \paragraph{Beginning}
 
 The beginning of the music should express perfection.
-Therefore, the first interval must be a unison, a 5th, or an 8th.
-In our formalization, we implement this rule as a function
-\texttt{checkBeginning}, which reports an error \texttt{not158 i}
-when the first interval \texttt{i} is an invalid one.
-Since Agda does not have exceptions, we wrap this error around
-the \texttt{just} constructor for option values.
+As we saw in Section~\ref{sec:music}, there are three intervals that
+are classified as perfect: the unison, the 5th, and the 8th.
+The first interval of the music must then be one of these intervals.
+In our formalization, we implement this rule as the
+\texttt{checkBeginning} function, which reports an error
+\texttt{not158 i} when the first interval \texttt{i} is an invalid one.
+Since Agda does not have exceptions, we turn the error into an option
+value by wrapping it around the \texttt{just} constructor.
 
 \begin{alltt}
 data BeginningError : Set where
@@ -102,13 +103,15 @@ checkBeginning pi@(_ , i) =
 
 \paragraph{Intervals}
 
-The middle bars of the music should maintain harmonical
-consonance and independence of melodic lines.
-This means, all constituent intervals must be chosen from the 3rd,
-5th, 6th, and 8th.
-We encode this rule as the \texttt{checkIntervals} function,
-which returns a list of errors correponding to the occurrences of
-dissonant intervals and unisons.
+The middle bars of the music should maintain harmonical consonance
+and independence of melodic lines.
+As we saw before, consonant intervals include the unison, 3rd, 5th,
+6th, and 8th, and among these, the unison is clearly an obstacle to
+distinguish between the two lines of music.
+Therefore, the middle bars must consist of the latter four intervals.
+We encode this rule as the \texttt{checkIntervals} function, which
+returns a list of errors correponding to the occurrences of dissonant
+intervals and unisons.
 
 \begin{alltt}
 data IntervalError : Set where
@@ -151,18 +154,20 @@ motionCheck i1 i2 | similar  | false = nothing
 motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
 
 checkMotion : List PitchInterval \(\rightarrow\) List MotionError
-checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs  
+checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs
+-- where pairs returns a list of all adjacent pairs in a given list
 \end{alltt}
 
 \paragraph{Ending}
 
 The ending of the music should express relaxation.
-This means, the last interval must be chosen from the unison and
-the 8th, which are both considered very stable.
+Among different intervals, the unison and the 8th are considered
+most stable, hence the last interval of the music must be either of
+these intervals.
 The last interval should also be approached by a \emph{cadence},
 a progression that gives rise to a sense of resolution.
-We encode these rules as the \texttt{checkEnding} function;
-note that it returns the \texttt{tooShort} error when the music does
+We encode these rules as the \texttt{checkEnding} function.
+Note that it returns the \texttt{tooShort} error when the music does
 not have enough number of bars to form a valid ending.
 
 \begin{alltt}
@@ -189,13 +194,12 @@ checkEnding (p :: ps) q = checkEnding ps q
 
 \subsubsection{Putting Things Together}
 
-Using the encoding of music and rules we have seen so far,
-we define \texttt{FirstSpecies}, a record type inhabited by correct
-counterpoint.
+Using the encoding of music and rules we have seen so far, we define
+\texttt{FirstSpecies}, a record type inhabited by correct counterpoint.
 The first three fields of this record type represent the first, middle,
 and last bars, respectively.
-The last four fields stand for the proofs that the music satisfies
-all the required properties, that is:
+The last four fields stand for the proofs that the music satisfies all
+the required properties, that is:
 
 \begin{itemize}
   \item The beginning is a perfect consonance
@@ -208,7 +212,8 @@ all the required properties, that is:
 \noindent Recall that the functions representing these rules return
 either an option value or a list of found errors.
 Therefore, the correctness proofs either take the form
-\texttt{func args $\equiv$ nothing}, or look like \texttt{func args $\equiv$ []}.
+\texttt{func args $\equiv$ nothing}, or look like
+\texttt{func args $\equiv$ []}.
 
 \begin{alltt}
 record FirstSpecies : Set where
@@ -275,6 +280,7 @@ same rules as in first species.
 That is, they must all be consonant, non-unison intervals, and in the 
 case of perfect intervals, the motion from the preceding interval (on
 the weak beat) must be either contrary or oblique.
+
 Weak beats, on the other hand, are constrained in a looser manner.
 First, they are allowed to be dissonant if they are created by a
 \emph{passing tone}, i.e., a note in the middle of two step-wise

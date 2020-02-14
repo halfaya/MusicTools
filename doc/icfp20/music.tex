@@ -3,11 +3,11 @@
 
 \paragraph{Pitches}
 In music, a \emph{pitch} is a value denoting how high or low a sound is.
-Pitches can either be represented either as an absolute value or as a
-relative value paired with the octave the sound belongs to.
+Pitches can be represented either as an absolute value or as a relative
+value paired with the octave the sound belongs to.
 In our implementation, the two representations of pitches are defined
-as \texttt{Pitch} and \texttt{PitchOctave}, respectively, with the proof
-that converting back and forth between the two is an identity.
+as \texttt{Pitch} and \texttt{PitchOctave}, respectively, accompagnied
+by a proof that converting back and forth between them is an identity.
 
 \begin{alltt}
 data Pitch : Set where
@@ -50,6 +50,9 @@ may be classified from several different perspectives: (i) major or minor;
 (ii) consonant or dissonant; and (iii) perfect or imperfect.
 For convenience, we let the names of intervals carry the information
 about the first and third classifications.
+As a convention, we refer to \texttt{min2} and \texttt{maj2}  uniformly
+as ``2nd'', and similarly for other intervals.
+We also call \texttt{per1} the \emph{unison} in the rest of this section.
 
 \begin{alltt}
 data Interval : Set where

@@ -43,6 +43,7 @@ data Note : Set where
 \end{alltt}
 
 \paragraph{Intervals}
+
 \emph{Intervals} are yet another key concept in music.
 An interval denotes the difference in pitch between two notes.
 There are 13 kinds of interval within an octave, and these intervals
@@ -54,6 +55,16 @@ As a convention, we refer to \texttt{min2} and \texttt{maj2}  uniformly
 as ``2nd'', and similarly for other intervals.
 We also call \texttt{per1} the \emph{unison} in the rest of this section.
 
+\begin{figure}[h]
+  \includegraphics[width=12cm]{interval.png} \\
+  \begin{flushleft}
+    \begin{small}
+      \hspace{1.45cm} per1 \ \ \ min2 \ \ \ \ maj2 \ \ \ min3 \ \ maj3
+      \ \ per4 \ \ aug4 \ \ \,per5 \ \ min6 \ \,maj6 \ \,min7 \ \,maj7 \ \,per8
+    \end{small}
+  \end{flushleft}
+\end{figure}
+  
 \begin{alltt}
 data Interval : Set where
 interval : \(\mathbb{N}\) \(\rightarrow\) Interval

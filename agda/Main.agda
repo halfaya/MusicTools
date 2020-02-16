@@ -19,10 +19,10 @@ main : IO Unit
 main =
   let channel      = 0
       ticksPerBeat = 4 -- 16th notes
-      file         = "/Users/youyou/Music/test.mid"
+      file         = "/Users/youyoucong/Music/test.mid"
 --      file         = "/Users/leo/Music/MusicTools/test.mid"
 --      song         = melody117Tracks
-      song         = cfcpTracks2
+      song         = cfcpTracks1
 --      song         = ycpTracks
 --      song         = hanonTrack
 --      song         = lookVsTime

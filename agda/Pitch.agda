@@ -8,13 +8,13 @@ open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; 
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
-open import Data.String     using (String; fromList)
 open import Data.Product    using (_×_; _,_; proj₁)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
 open import Function        using (_∘_)
 
 open import Relation.Nullary using (yes; no)
 
+open import BitVec          using (BitVec; insert)
 open import Lemmas          using (revMod; -_mod_; -_div_)
 open import Util            using (findIndex)
 
@@ -79,6 +79,13 @@ indexInScale (pc ∷ pcs) p with (unPitchClass pc ≟ p)
 data DiatonicDegree : Set where
   diatonicDegree : Fin diatonicScaleSize → DiatonicDegree
 
+undd : DiatonicDegree → Fin diatonicScaleSize
+undd (diatonicDegree d) = d
+
+infix 4 _≡ᵈ_
+_≡ᵈ_ : DiatonicDegree → DiatonicDegree → Bool
+diatonicDegree d ≡ᵈ diatonicDegree e = toℕ d ≡ᵇ toℕ e
+
 {-
 -- first argument is the key
 pitchToDegree : PitchClass → Pitch → DiatonicDegree
@@ -110,16 +117,10 @@ transposePitch (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
 
 -- Set of pitch classes represented as a bit vector.
 PitchClassSet : Set
-PitchClassSet = Vec Bool chromaticScaleSize
-
-emptyPitchClassSet : PitchClassSet
-emptyPitchClassSet = replicate false
+PitchClassSet = BitVec chromaticScaleSize
 
 addToPitchClassSet : PitchClass → PitchClassSet → PitchClassSet
-addToPitchClassSet (pitchClass p) ps = ps [ p ]%= (λ _ → true)
-
-showPitchClassSet : PitchClassSet → String
-showPitchClassSet = fromList ∘ toList ∘ map (λ {true → '1' ; false → '0'})
+addToPitchClassSet (pitchClass p) ps = insert p ps
 
 -- Standard Midi pitches
 

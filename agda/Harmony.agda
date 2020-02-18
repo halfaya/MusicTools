@@ -7,8 +7,10 @@ open import Data.Fin        using (#_) renaming (zero to fz; suc to fs)
 open import Data.List       using (List; map; []; _∷_; concatMap; foldr)
 open import Data.Nat        using (ℕ; suc)
 open import Data.Nat.DivMod using (_mod_; _div_)
-open import Data.Vec        using (toList)
+open import Data.Vec        using (Vec; toList)
+open import Function        using (_∘_)
 
+open import BitVec          using (BitVec; empty; insert; elements; _∩_)
 open import Music
 open import Note
 open import Pitch
@@ -23,7 +25,7 @@ chordToPitchClasses : {n : ℕ} → Chord n → List PitchClass
 chordToPitchClasses (chord ps) = concatMap pointToPitchClass (toList ps) 
 
 pitchClassListToSet : List PitchClass → PitchClassSet
-pitchClassListToSet = foldr addToPitchClassSet emptyPitchClassSet
+pitchClassListToSet = foldr addToPitchClassSet empty
 
 pitchClassSetToList : PitchClassSet → List PitchClass
 pitchClassSetToList ps = fn 0 (toList ps)
@@ -63,12 +65,35 @@ triadRoot V   = diatonicDegree (# 4)
 triadRoot VI  = diatonicDegree (# 5)
 triadRoot VII = diatonicDegree (# 6)
 
+rootTriad : DiatonicDegree → Triad
+rootTriad (diatonicDegree fz)                               = I
+rootTriad (diatonicDegree (fs fz))                          = II
+rootTriad (diatonicDegree (fs (fs fz)))                     = III
+rootTriad (diatonicDegree (fs (fs (fs fz))))                = IV
+rootTriad (diatonicDegree (fs (fs (fs (fs fz)))))           = V
+rootTriad (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = VI
+rootTriad (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = VII
+
 triadDegrees : Triad → List DiatonicDegree
 triadDegrees t =
   let root = triadRoot t
       third = thirdUp root
       fifth = thirdUp third
   in root ∷ third ∷ fifth ∷ []
+
+infix 4 _≡ᵗ_
+_≡ᵗ_ : Triad → Triad → Bool
+t ≡ᵗ u = triadRoot t ≡ᵈ triadRoot u
+
+TriadSet : Set
+TriadSet = BitVec diatonicScaleSize
+
+triadListToSet : List Triad → TriadSet
+triadListToSet []       = empty
+triadListToSet (t ∷ ts) = insert (undd (triadRoot t)) (triadListToSet ts)
+
+triadSetToList : TriadSet → List Triad
+triadSetToList ts = map (rootTriad ∘ diatonicDegree) (elements ts)
 
 containingTriads : DiatonicDegree → List Triad
 containingTriads (diatonicDegree fz)                               = I   ∷ IV  ∷ VI  ∷ []
@@ -100,8 +125,18 @@ rootProgression VII = nextTriad (I  ∷ III ∷ []) (VI       ∷ []) (II  ∷ I
 previousTriads : Triad → List Triad
 previousTriads I   = V ∷ IV ∷ [] -- omit VII since you'll get stuck
 previousTriads II  = VI ∷ IV ∷ []
-previousTriads III = VI ∷ [] -- omit VII since you'll get stuck
+previousTriads III = VI ∷ []     -- omit VII since you'll get stuck
 previousTriads IV  = I ∷ []
 previousTriads V   = I ∷ IV ∷ II ∷ VI ∷ []
 previousTriads VI  = III ∷ I ∷ II ∷ V ∷ []
 previousTriads VII = []
+
+harmonizations : List DiatonicDegree → List TriadSet
+harmonizations []       = []
+harmonizations (d ∷ []) = triadListToSet (containingTriads d) ∷ []
+harmonizations (d ∷ d' ∷ ds) with harmonizations (d' ∷ ds)
+... | []       = []
+... | ts ∷ tss =
+  let us = triadListToSet (concatMap previousTriads (triadSetToList ts))
+      vs = triadListToSet (containingTriads d)
+  in (us ∩ vs) ∷ ts ∷ tss

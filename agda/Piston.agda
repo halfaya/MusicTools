@@ -12,6 +12,7 @@ open import Function using (_∘_)
 
 open import Relation.Binary.PropositionalEquality using (refl)
 
+open import Harmony
 open import Note
 open import Music
 open import MidiEvent
@@ -135,3 +136,9 @@ melody117bTrack = track "Melody 117 B" piano channel1 tempo (notes→events mVel
 melody117Tracks : List MidiTrack
 melody117Tracks =  melody117sTrack ∷ melody117aTrack ∷ melody117tTrack ∷ melody117bTrack ∷ []
 
+-----
+
+-- test
+
+aaa = map triadSetToList (harmonizations (map diatonicDegree (# 6 ∷ # 5 ∷ # 4 ∷ [])))
+--- (III ∷ V ∷ []) ∷ (II ∷ IV ∷ VI ∷ []) ∷ (I ∷ III ∷ V ∷ []) ∷ []

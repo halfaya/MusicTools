@@ -86,15 +86,23 @@ infix 4 _≡ᵈ_
 _≡ᵈ_ : DiatonicDegree → DiatonicDegree → Bool
 diatonicDegree d ≡ᵈ diatonicDegree e = toℕ d ≡ᵇ toℕ e
 
-{-
--- first argument is the key
-pitchToDegree : PitchClass → Pitch → DiatonicDegree
-pitchToDegree (pitchClass pc) p =
-  let (pc' , _) = absoluteToRelative p
-      m         = toℕ pc
-      n         = toℕ (unPitchClass pc')
-  in {!!}
--}
+-- round down
+pitchClassToDegreeMajor : PitchClass → DiatonicDegree
+pitchClassToDegreeMajor (pitchClass fz)                                                        = diatonicDegree (# 0)
+pitchClassToDegreeMajor (pitchClass (fs fz))                                                   = diatonicDegree (# 0)
+pitchClassToDegreeMajor (pitchClass (fs (fs fz)))                                              = diatonicDegree (# 1)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs fz))))                                         = diatonicDegree (# 1)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs fz)))))                                    = diatonicDegree (# 2)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs fz))))))                               = diatonicDegree (# 3)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs fz)))))))                          = diatonicDegree (# 3)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs fz))))))))                     = diatonicDegree (# 4)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))                = diatonicDegree (# 4)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))))           = diatonicDegree (# 5)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))      = diatonicDegree (# 5)
+pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))) = diatonicDegree (# 6)
+
+pitchToDegreeCMajor : Pitch → DiatonicDegree
+pitchToDegreeCMajor = pitchClassToDegreeMajor ∘ pitchToClass
 
 d1 d2 d3 d4 d5 d6 d7 : DiatonicDegree
 d1 = diatonicDegree (# 0)

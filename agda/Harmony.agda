@@ -123,7 +123,7 @@ rootProgression VI  = nextTriad (II ∷ V   ∷ []) (III ∷ IV ∷ []) (I      
 rootProgression VII = nextTriad (I  ∷ III ∷ []) (VI       ∷ []) (II  ∷ IV  ∷ V ∷ [])
 
 previousTriads : Triad → List Triad
-previousTriads I   = V ∷ IV ∷ [] -- omit VII since you'll get stuck
+previousTriads I   = V ∷ IV ∷ I ∷ [] -- omit VII since you'll get stuck -- TODO: Remove I
 previousTriads II  = VI ∷ IV ∷ []
 previousTriads III = VI ∷ []     -- omit VII since you'll get stuck
 previousTriads IV  = I ∷ []

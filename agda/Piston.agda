@@ -3,7 +3,7 @@
 module Piston where
 
 open import Data.Fin
-open import Data.List using (List; map; _∷_; [])
+open import Data.List using (List; map; _∷_; []; concatMap)
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
@@ -140,5 +140,18 @@ melody117Tracks =  melody117sTrack ∷ melody117aTrack ∷ melody117tTrack ∷ m
 
 -- test
 
-aaa = map triadSetToList (harmonizations (map diatonicDegree (# 6 ∷ # 5 ∷ # 4 ∷ [])))
---- (III ∷ V ∷ []) ∷ (II ∷ IV ∷ VI ∷ []) ∷ (I ∷ III ∷ V ∷ []) ∷ []
+mDegrees = concatMap fff melody117s
+  where fff : Note → List DiatonicDegree
+        fff (tone _ p) = pitchToDegreeCMajor p ∷ []
+        fff (rest _)   = []
+aaa = map triadSetToList (harmonizations mDegrees)
+{-
+(I ∷ V ∷ []) ∷
+(I ∷ []) ∷
+(I ∷ []) ∷
+(II ∷ IV ∷ []) ∷
+(I ∷ IV ∷ VI ∷ []) ∷
+(III ∷ V ∷ []) ∷
+(II ∷ IV ∷ VI ∷ []) ∷
+(I ∷ III ∷ V ∷ []) ∷ []
+-}

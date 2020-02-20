@@ -15,7 +15,6 @@
 *.xcp
 *.bbl
 *.blg
-*.pdf
 *.synctex.gz
 MAlonzo
 Main

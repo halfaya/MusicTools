@@ -11,7 +11,6 @@
     \includegraphics[width=6cm]{fig/motion.png}
     \hspace{1cm}
     \includegraphics[width=3cm]{fig/badmotion.png} \\
-    %\vspace{-1cm}
     \begin{flushleft}
     \begin{small}
       \hspace{1.95cm} contrary \ \ \ \ parallel \ \ \ \ \ \ \ similar \ \ \ \ \ \ oblique
@@ -53,26 +52,21 @@ other variants can be formalized in an analogous way.
 \subsection{First Species Counterpoint}
 \label{sec:cp:fs}
 
+\FS
+
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
 which is required to start with a tonic and consist only of whole notes.
-Figure~\ref{fig:fs} shows an example of first species counterpoint:
-
-\begin{figure}[h]
-  \includegraphics[width=6cm]{fig/fs.png}
-  \caption{First Species Counterpoint}
-  \label{fig:fs}
-\end{figure}
-
-\noindent The lower line is the cantus firmus, which we excerpt from
-a famous German song called ``Froschgesang'' (Frog's song).
+Figure~\ref{fig:fs} shows an example of first species counterpoint.
+The lower line is the cantus firmus, which we excerpt from a famous
+German song called ``Froschgesang'' (Frog's song).
 The upper line is the counterpoint composed by the second author.
 
 \subsubsection{Representing Music}
 
-In our implementation, we represent each bar as a pitch-interval
-pair \texttt{(p ,  i)}, where \texttt{p} is a note in the cantus firmus,
-and \texttt{i} is the distance between \texttt{p} and the corresponding
+In our implementation, we represent each bar as a pitch-interval pair
+\texttt{(p ,  i)}, where \texttt{p} is the pitch of a cantus firmus note,
+and \texttt{i} is the interval between \texttt{p} and the corresponding
 counterpoint note.
 We then represent a sequence of bars as a list of pitch-interval pairs,
 but with one proviso: we separate the first and last bars from the
@@ -152,31 +146,18 @@ checkIntervals = mapMaybe intervalCheck
 
 \paragraph{Motion}
 
+\Motion
+
 The independence of melodic lines is also affected by \emph{motion},
 i.e., the way one interval moves to another interval.
-
-\begin{figure}
-    \includegraphics[width=6cm]{fig/motion.png}
-    \hspace{1cm}
-    \includegraphics[width=3cm]{fig/badmotion.png} \\
-    \begin{flushleft}
-    \begin{small}
-      \hspace{1.95cm} contrary \ \ \ \ parallel \ \ \ \ \ \ \ similar \ \ \ \ \ \ oblique
-      \hspace{2.2cm} 5th \hspace{9.5mm} 8th
-    \end{small}
-    \end{flushleft}
-    \caption{Four Kinds of Motion (left) and Bad Motion (right)}
-    \label{fig:motion}
-  \end{figure}
-
-As can be seen from the figure on the left, there are four kinds of
-motion: \emph{contrary} (two lines go in different directions),
+As can be seen from Figure~\ref{fig:motion} (left), there are four
+kinds of motion: \emph{contrary} (two lines go in different directions),
 \emph{parallel} (two lines go in the same direction by the same
 distance), \emph{similar} (two lines go in the same direction),
 and \emph{oblique} (one line plays the same note).
 Among these variants, parallel and similar motion makes it harder
 to distinguish between two voices, especially when the second
-interval is a perfect one, as in the figure on the right.
+interval is a perfect one, as in Figure~\ref{fig:motion} (right).
 To avoid problematic motion, we define the \texttt{checkMotion}
 function, which lists all invalid motion approaching a perfect interval.
 
@@ -281,19 +262,14 @@ fs = firstSpecies first1 middle1 last1 refl refl refl refl
 \subsection{Second Species Counterpoint}
 \label{sec:cp:ss}
 
+\SS
+
 We next discuss a more complex variant of counterpoint, called the
 second species.
 In second species, we set \emph{two} half notes against every cantus
 firmus note.
 Figure~\ref{fig:ss} is an example of such two-against-one counterpoint,
-again composed for the Frog's song:
-
-\begin{figure}[h]
-  \includegraphics[width=7cm]{fig/ss.png}
-  \caption{Second Species Counterpoint}
-  \label{fig:ss}
-\end{figure}
-  
+again composed for the Frog's song.
 As we can see from this example, the first and last bars may have
 a different structure from middle bars.
 More specifically, it is encouraged to begin the counterpoint line with

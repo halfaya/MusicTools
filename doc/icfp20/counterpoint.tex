@@ -75,9 +75,9 @@ Therefore, the Frog's song in Figure~\ref{fig:fs} is represented as a
 compound of the following three elements:
 
 \begin{alltt}
-PitchInterval : Set
-PitchInterval = Pitch \(\times\) Interval
-
+ PitchInterval : Set
+ PitchInterval = Pitch \(\times\) Interval
+  
 first : PitchInterval
 first = (c 5 , per8)
 
@@ -98,7 +98,8 @@ different parts are subject to different rules, as we detail below.
 
 The beginning of the music should express perfection.
 As we saw in Section~\ref{sec:music}, there are three intervals that
-are classified as perfect: the unison, the 5th, and the 8th.
+are classified as perfect: the 1st (more commonly called the
+\emph{unison}), the 5th, and the 8th.
 The first interval of the music must then be one of these intervals.
 In our formalization, we implement this rule as the
 \texttt{checkBeginning} function, which reports an error
@@ -121,9 +122,11 @@ checkBeginning pi@(_ , i) =
 
 The middle bars of the music should maintain harmonical consonance
 and independence of melodic lines.
-As we saw before, consonant intervals include the unison, 3rd, 5th,
-6th, and 8th, and among these, the unison is clearly an obstacle to
-distinguish between the two lines of music.
+As we saw before, consonant intervals include the unison,
+3rd\footnote{We use ``3rd'' to mean both the major and minor variants
+of the 3rd interval, and similarly for the 6th.}, 5th, 6th, and 8th,
+and among these, the unison is clearly an obstacle to distinguishing
+between the two lines of music.
 Therefore, the middle bars must consist of the latter four intervals.
 We encode this rule as the \texttt{checkIntervals} function, which
 returns a list of errors correponding to the occurrences of dissonant
@@ -150,16 +153,16 @@ checkIntervals = mapMaybe intervalCheck
 
 The independence of melodic lines is also affected by \emph{motion},
 i.e., the way one interval moves to another interval.
-As can be seen from Figure~\ref{fig:motion} (left), there are four
+As can be seen from Figure~\ref{fig:motion} left, there are four
 kinds of motion: \emph{contrary} (two lines go in different directions),
 \emph{parallel} (two lines go in the same direction by the same
 distance), \emph{similar} (two lines go in the same direction),
 and \emph{oblique} (one line plays the same note).
-Among these variants, parallel and similar motion makes it harder
-to distinguish between two voices, especially when the second
-interval is a perfect one, as in Figure~\ref{fig:motion} (right).
-To avoid problematic motion, we define the \texttt{checkMotion}
-function, which lists all invalid motion approaching a perfect interval.
+There is a consensus that approaching a perfect interval by parallel
+or similar motion (as in Figure~\ref{fig:motion} right) destroys the
+independence of lines.
+To rule out this, we define the \texttt{checkMotion} function, which
+lists all occurrences of such invalid motion.
 
 \begin{alltt}
 data MotionError : Set where
@@ -250,9 +253,9 @@ record FirstSpecies : Set where
     endingOk    : checkEnding middleBars lastBar \(\equiv\) nothing
 \end{alltt}
 
-With this record type, we can show that the counterpoint composed
-for the Frog's song is correct, since the music inhabits the
-\texttt{FIrstSpecies} type.
+With this record type, we can show that the counterpoint in
+Figure~\ref{fig:fs} is correct, since the music is an inhabitant of
+the \texttt{FIrstSpecies} type.
 
 \begin{alltt}
 fs : FirstSpecies
@@ -270,8 +273,11 @@ In second species, we set \emph{two} half notes against every cantus
 firmus note.
 Figure~\ref{fig:ss} is an example of such two-against-one counterpoint,
 again composed for the Frog's song.
-As we can see from this example, the first and last bars may have
-a different structure from middle bars.
+
+\subsubsection{Representing Music}
+
+In second species, the first and last bars may have a different structure
+from middle bars.
 More specifically, it is encouraged to begin the counterpoint line with
 a half rest and end with a whole note.
 Therefore, in our implementation, we reuse the \texttt{PitchInterval} 
@@ -294,25 +300,65 @@ last2 : PitchInterval
 last2 = (c 5 , per8)
 \end{alltt}
 
+\subsubsection{Representing Rules}
+
+In second species counterpoint, some parts of the music are applied
+the same rules as first species, while other parts are constrained by
+new rules.
+
+\paragraph{Beginning}
+
+The beginning of the music is \emph{not} allowed to be the unison,
+as it prevents the listener from recognizing the beginning of the
+counterpoint line.
+We restrict the first interval by defining a new error
+\texttt{BeginningError2} and a function \texttt{checkBeginning2}
+that works analogously to \texttt{checkBeginning} for first species.
+
+\paragraph{Strong Beats}
+
 The rhythmic structure of secound species counterpoint gives rise to
 the distinction between \emph{strong beats} (the first interval in a bar)
 and \emph{weak beats} (the second interval).
-Roughly speaking, strong beats in middle bars are constrained by the
-same rules as in first species.
+Strong beats in middle bars are constrained by the same rules as in
+first species.
 That is, they must all be consonant, non-unison intervals, and in the 
 case of perfect intervals, the motion from the preceding interval (on
 the weak beat) must be either contrary or oblique.
+We encode these restrictions as the \texttt{checkStrongBeats}
+function, which, as the \texttt{checkIntervals} function for first
+species, returns a list of found errors.
 
-Weak beats, on the other hand, are constrained in a looser manner.
+\paragraph{Weak Beats}
+
+Compared to strong beasts, weak beats are constrained in a looser
+manner.
 First, they are allowed to be dissonant if they are created by a
 \emph{passing tone}, i.e., a note in the middle of two step-wise
 motions in the same direction (as in bars 4-5 of Figure~\ref{fig:ss}).
-Second, they are allowed to be a unison if they are left by step in the
-opposite direction from their approach (as in bars 5-6 of Figure~\ref{fig:ss}).
+Second, they are allowed to be the unison if they are left by step in
+the opposite direction from their approach (as in bars 5-6 of
+Figure~\ref{fig:ss}).
+We implement these rules as the \texttt{checkWeakBeats} function,
+which checks the validity of every three successive beats in the
+middle bars.
 
-With these rules in mind, let us look at the definition of
-\texttt{SecondSpecies}, a record type inhabited by correct second
-species counterpoint:
+\paragraph{Motion}
+
+Parallel and similar motion towards a perfect interval is prohibited
+across bars.
+We enforce this rule using the \texttt{checkMotion2} function,
+which uses \texttt{expandPitchIntervals2} to convert a list of
+\texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and
+checks every pair of weak beat and strong beat intervals.
+
+\subsubsection{Putting Things Together}
+
+Now we define \texttt{SecondSpecies}, a record type inhabited by
+correct second species counterpoint.
+As in \texttt{FirstSpecies}, we have three fields holding the musical
+content, followed by five fields carrying the proofs of various
+properties.
 
 \begin{alltt}
 record SecondSpecies : Set where
@@ -330,24 +376,8 @@ record SecondSpecies : Set where
     endingOk      : checkEnding2 middleBars lastBar \(\equiv\) nothing
 \end{alltt}
 
-\noindent As in \texttt{FirstSpecies}, we have three fields holding
-the musical content, followed by five fields carrying the proofs of
-various properties.
-Among the latter group of fields, \texttt{beginningOK} is defined
-analogously to the corresponding field of \texttt{FirstSpecies};
-the only difference is that the interval must not be a unison,
-as it prevents the listener from recognizing the beginning of the
-counterpoint line.
-The next two fields, \texttt{strongBeatsOK} and \texttt{weakBeatsOK},
-guarantee the correctness of strong and weak beats, respectively.
-What follows is \texttt{motionOK}, which converts a list of
-\texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and checks
-motion accross bars.
-Lastly, we have \texttt{endingOK}, which forces the last two intervals
-to have a cadence structure.
-
-Using \texttt{SecondSpecies}, we can show that our second species
-counterpoint for the Frog's song is correct.
+Using \texttt{SecondSpecies}, we can show that the second species
+counterpoint in Figure~\ref{fig:ss} is correct.
 
 \begin{alltt}
 ss : SecondSpecies

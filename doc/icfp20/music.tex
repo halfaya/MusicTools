@@ -2,13 +2,12 @@
 \label{sec:music}
 
 \paragraph{Pitches}
-In music, a \emph{pitch} is a value denoting how high or low a sound is.
-Pitches can be represented either as an absolute value or as a relative
-value paired with the octave the sound belongs to.
-In our implementation, the two representations of pitches are defined
-as the \texttt{Pitch} and \texttt{PitchOctave} datatypes, respectively,
-accompanied by a proof that converting back and forth between them
-is an identity.
+A \emph{pitch} is a value denoting how high or low a sound is.
+In our implementation, pitches have type \texttt{Pitch} and take the
+form \texttt{name octave}, where \texttt{name} is a name ranging
+over \texttt{c}, \texttt{d}, \texttt{e}, etc. and \texttt{octave} is a
+natural number denoting which octave the pitch belongs to.
+For instance, the middle C is represented as \texttt{c 5}.
 
 % \begin{alltt}
 % data Pitch : Set where
@@ -22,10 +21,13 @@ is an identity.
 % \end{alltt}
 
 \paragraph{Duration}
-\emph{Duration} denotes a certain unit of time during which a sound
-or silence lasts.
-The unit is unspecified at the composition time; it is instantiated to
-a concrete value when the music is played at a specific tempo.
+\emph{Duration} denotes an unspecified unit of time during which a
+sound or silence lasts.
+In our implementation, duration (of type \texttt{Duration} is simply
+a natural number, denoting the relative length within a bar (such as
+whole and half).
+When the music is played at a specific tempo, the number is 
+multiplied by a velocity and turned into an absolute length.
 
 % \begin{alltt}
 % data Duration : Set where
@@ -46,14 +48,13 @@ with two constructors: \texttt{tone} for notes with sound and
 
 \paragraph{Intervals}
 
-\emph{Intervals} are yet another key concept in music.
-An interval denotes the difference in pitch between two notes.
+\emph{Intervals} are a concept denoting the difference in pitch
+between two notes.
 There are 13 kinds of interval within an octave, and these intervals
-may be classified from several different perspectives: (i) major or minor;
-(ii) consonant or dissonant; and (iii) perfect or imperfect.
-As a convention, we refer to \texttt{min2} and \texttt{maj2}  uniformly
-as ``2nd'', and similarly for other intervals.
-We also call \texttt{per1} the \emph{unison} in the rest of this section.
+can be classified from several different perspectives: (i) major or
+minor; (ii) consonant or dissonant; and (iii) perfect or imperfect.
+We define intervals as a datatype \texttt{Interval}, where each
+constructor represents one of the 13 intervals.
 
 \begin{figure}[h]
   \includegraphics[width=12cm]{fig/interval.png} \\

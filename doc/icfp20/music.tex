@@ -2,11 +2,14 @@
 \label{sec:music}
 
 \paragraph{Pitches}
-A \emph{pitch} is a value denoting how high or low a sound is.
-In our implementation, pitches have type \texttt{Pitch} and take the
-form \texttt{name octave}, where \texttt{name} is a name ranging
-over \texttt{c}, \texttt{d}, \texttt{e}, etc. and \texttt{octave} is a
-natural number denoting which octave the pitch belongs to.
+A \emph{pitch} tells us how high or low a sound is.
+This notion is represented as natural numbers (of type
+\texttt{Pitch}) in our implementation, with zero representing the
+lowest possible sound.
+Throughout the paper, we use the notation \texttt{name octave}
+for pitches, where \texttt{name} ranges over \texttt{c}, \texttt{d},
+\texttt{e}, etc., and \texttt{octave} denotes which octave the pitch
+belongs to.
 For instance, the middle C is represented as \texttt{c 5}.
 
 % \begin{alltt}
@@ -21,13 +24,15 @@ For instance, the middle C is represented as \texttt{c 5}.
 % \end{alltt}
 
 \paragraph{Duration}
-\emph{Duration} denotes an unspecified unit of time during which a
-sound or silence lasts.
-In our implementation, duration (of type \texttt{Duration} is simply
-a natural number, denoting the relative length within a bar (such as
-whole and half).
-When the music is played at a specific tempo, the number is 
-multiplied by a velocity and turned into an absolute length.
+\emph{Duration} denotes an unspecified unit of time during which
+a sound or silence lasts.
+In our implementation, duration is again a natural number (of type
+\texttt{Duration}), with names such as \texttt{whole}, \texttt{half},
+and \texttt{quarter}.
+These values are turned into an absolute length when the music is
+played at a specific tempo.
+As an example, \texttt{whole} has value \texttt{16} and corresponds
+to 4 seconds if the tempo is 60 beats per minute.
 
 % \begin{alltt}
 % data Duration : Set where
@@ -36,9 +41,10 @@ multiplied by a velocity and turned into an absolute length.
 
 \paragraph{Notes}
 Combining pitches and duration gives us \emph{notes}.
-In our implementation, we represent notes as a datatype \texttt{Note}
-with two constructors: \texttt{tone} for notes with sound and
-\texttt{rest} for those without.
+We construct notes (of type \texttt{Note}) with the \texttt{tone}
+and \texttt{rest} constructors.
+For example, \texttt{tone whole (c 5)} is a whole note whose
+sound is the middle C, and \texttt{rest half} is a half rest.
 
 % \begin{alltt}
 % data Note : Set where
@@ -48,11 +54,12 @@ with two constructors: \texttt{tone} for notes with sound and
 
 \paragraph{Intervals}
 
-\emph{Intervals} are a concept denoting the difference in pitch
-between two notes.
-There are 13 kinds of interval within an octave, and these intervals
-can be classified from several different perspectives: (i) major or
-minor; (ii) consonant or dissonant; and (iii) perfect or imperfect.
+An \emph{interval} represents the difference in pitch between
+two notes.
+There are 13 kinds of interval within an octave, and these
+intervals can be classified from several different perspectives:
+(i) major or minor; (ii) consonant or dissonant; and (iii) perfect
+or imperfect.
 We define intervals as a datatype \texttt{Interval}, where each
 constructor represents one of the 13 intervals.
 

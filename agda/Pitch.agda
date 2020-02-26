@@ -52,6 +52,9 @@ Scale = Vec PitchClass
 data Octave : Set where
   octave : ℕ → Octave
 
+unoctave : Octave → ℕ
+unoctave (octave n) = n
+
 PitchOctave : Set
 PitchOctave = PitchClass × Octave
 
@@ -100,6 +103,15 @@ pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))) 
 pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))))           = diatonicDegree (# 5)
 pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))      = diatonicDegree (# 5)
 pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))) = diatonicDegree (# 6)
+
+degreeToPitchClassMajor : DiatonicDegree → PitchClass
+degreeToPitchClassMajor (diatonicDegree fz)                               = pitchClass (# 0)
+degreeToPitchClassMajor (diatonicDegree (fs fz))                          = pitchClass (# 2)
+degreeToPitchClassMajor (diatonicDegree (fs (fs fz)))                     = pitchClass (# 4)
+degreeToPitchClassMajor (diatonicDegree (fs (fs (fs fz))))                = pitchClass (# 5)
+degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs fz)))))           = pitchClass (# 7)
+degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = pitchClass (# 9)
+degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = pitchClass (# 11)
 
 pitchToDegreeCMajor : Pitch → DiatonicDegree
 pitchToDegreeCMajor = pitchClassToDegreeMajor ∘ pitchToClass

@@ -2,9 +2,10 @@
 
 module Piston where
 
+open import Data.Bool using (Bool; not; _∨_)
 open import Data.Fin
-open import Data.List using (List; map; _∷_; []; concatMap)
-open import Data.Maybe using (fromMaybe)
+open import Data.List using (List; map; _∷_; []; concatMap; zip; drop)
+open import Data.Maybe using (fromMaybe; is-nothing)
 open import Data.Nat
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
 open import Function using (_∘_)
@@ -12,6 +13,7 @@ open import Function using (_∘_)
 
 open import Relation.Binary.PropositionalEquality using (refl)
 
+open import Counterpoint
 open import Harmony
 open import Note
 open import Music
@@ -155,3 +157,60 @@ aaa = map triadSetToList (harmonizations mDegrees)
 (II ∷ IV ∷ VI ∷ []) ∷
 (I ∷ III ∷ V ∷ []) ∷ []
 -}
+
+------
+
+-- Code to generate B given S
+
+-- Given a pitch p and a diatontic degree d, return a pitch that
+-- has degree d and is 1-2 octaves lower than p.
+pitchLower : Pitch → DiatonicDegree → Pitch
+pitchLower p d =
+  let (c , o) = absoluteToRelative p
+      c'      = degreeToPitchClassMajor d
+  in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
+
+-- assume pitch is in triad
+bassNotes : Pitch → Triad → List Pitch
+bassNotes p t =
+  let sop  = pitchToDegreeCMajor p
+      root = triadRoot t
+      ds   = triadDegrees t
+      ds'  = filter (λ d → (sop ≡ᵈ root) ∨ not (sop ≡ᵈ d)) ds
+  in map (pitchLower p) ds'
+
+bassLines : List (Pitch × Triad) → List (List Pitch)
+bassLines [] = []
+bassLines ((p , t) ∷ []) =
+  let ps = bassNotes p t
+      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
+      goodBs = map proj₁ pis
+  in map (_∷ []) goodBs
+bassLines ((p , t) ∷ pt ∷ pts) =
+  let pss = bassLines (pt ∷ pts)
+      ps  = bassNotes p t
+      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
+      goodBs = map proj₁ pis
+  in concatMap (λ ps → (map (_∷ ps) goodBs)) pss
+
+pitches117s : List Pitch
+pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []
+
+triads117 : List Triad
+triads117 = V ∷ V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []
+
+pts117 : List (Pitch × Triad)
+pts117 = zip pitches117s triads117
+
+bbb = bassLines (drop 5 pts117)
+ccc = pitch 43 ∷ pitch 47 ∷ pitch 38 ∷ []
+ddd = (map (pitchPairToPitchInterval ∘ (_, g 5)) ccc)
+eee = filter (is-nothing ∘ intervalCheck) ddd
+
+-- 36 : c 3
+-- 40 : e 3
+-- 41 : f 3
+-- 43 : g 3
+-- 47 : b 3
+-- 52 : e 4
+-- 57 : a 4

@@ -9,7 +9,7 @@ open import Data.Integer    using (+_; _-_; sign; ∣_∣)
 open import Data.Fin        using (toℕ)
 open import Data.Nat        using (ℕ; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_)
-open import Data.Product    using (_×_; _,_; Σ; proj₂)
+open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
 open import Data.Sign       using (Sign)
 
 open import Function        using (_∘_)
@@ -95,10 +95,14 @@ pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
 secondPitch : PitchInterval → Pitch
 secondPitch = proj₂ ∘ pitchIntervalToPitchPair
 
-pitchPairToSignedInterval : (ab : PitchPair) → SignedInterval
+pitchPairToSignedInterval : PitchPair → SignedInterval
 pitchPairToSignedInterval (pitch p , pitch q) =
   let d = (+ q) - (+ p)
   in sign d , interval ∣ d ∣
+
+-- Assumes p ≤ q
+pitchPairToPitchInterval : PitchPair → PitchInterval
+pitchPairToPitchInterval pq = proj₁ pq , proj₂ (pitchPairToSignedInterval pq)
 
 stepUp : Pitch → Pitch → Bool
 stepUp p q with pitchPairToSignedInterval (p , q)

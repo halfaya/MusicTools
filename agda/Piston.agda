@@ -2,12 +2,12 @@
 
 module Piston where
 
-open import Data.Bool using (Bool; not; _∨_)
+open import Data.Bool using (Bool; true; not; _∨_)
 open import Data.Fin
 open import Data.List using (List; map; _∷_; []; concatMap; zip; drop)
 open import Data.Maybe using (fromMaybe; is-nothing)
 open import Data.Nat
-open import Data.Product using (_×_; _,_; proj₁; proj₂)
+open import Data.Product using (_×_; _,_; proj₁; proj₂; uncurry)
 open import Function using (_∘_)
 --open import Data.Vec using (Vec; []; _∷_; zip; toList) renaming (map to vmap)
 
@@ -186,12 +186,22 @@ bassLines ((p , t) ∷ []) =
       pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
       goodBs = map proj₁ pis
   in map (_∷ []) goodBs
-bassLines ((p , t) ∷ pt ∷ pts) =
-  let pss = bassLines (pt ∷ pts)
-      ps  = bassNotes p t
-      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
-      goodBs = map proj₁ pis
-  in concatMap (λ ps → (map (_∷ ps) goodBs)) pss
+bassLines ((p1 , t1) ∷ pt2@(p2 , t2) ∷ pts) =
+  let pss = bassLines (pt2 ∷ pts)
+      ps  = bassNotes p1 t1
+      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p1)) ps)
+      intervalOkBs = map proj₁ pis
+      intervalOkLs = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
+  in filter mCheck intervalOkLs
+  where
+  -- assume argument has at least 2 elements
+  mCheck : List Pitch → Bool
+  mCheck []             = true -- unreachable
+  mCheck (b ∷ [])       = true -- unreachable
+  mCheck (b1 ∷ b2 ∷ bs) =
+    let pi1 = pitchPairToPitchInterval (b1 , p1)
+        pi2 = pitchPairToPitchInterval (b2 , p2)
+    in (is-nothing ∘ uncurry motionCheck) (pi1 , pi2)
 
 pitches117s : List Pitch
 pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []

@@ -2,18 +2,23 @@
 
 module Harmony where
 
-open import Data.Bool       using (Bool; true; false; if_then_else_)
+open import Data.Bool       using (Bool; true; false; if_then_else_; _∨_; not)
 open import Data.Fin        using (#_) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; map; []; _∷_; concatMap; foldr)
-open import Data.Nat        using (ℕ; suc)
+open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head)
+open import Data.Maybe      using (fromMaybe; is-nothing; Maybe; just; nothing)
+open import Data.Nat        using (ℕ; suc; _∸_)
 open import Data.Nat.DivMod using (_mod_; _div_)
+open import Data.Product    using (_×_; _,_; proj₁; proj₂; uncurry)
 open import Data.Vec        using (Vec; toList)
 open import Function        using (_∘_)
 
 open import BitVec          using (BitVec; empty; insert; elements; _∩_)
+open import Counterpoint
+open import Interval
 open import Music
 open import Note
 open import Pitch
+open import Util            using (filter)
 
 -- either 0 or 1 pitch class
 pointToPitchClass : Point → List PitchClass
@@ -140,3 +145,58 @@ harmonizations (d ∷ d' ∷ ds) with harmonizations (d' ∷ ds)
   let us = triadListToSet (concatMap previousTriads (triadSetToList ts))
       vs = triadListToSet (containingTriads d)
   in (us ∩ vs) ∷ ts ∷ tss
+
+-- Code to generate B given S
+
+-- Given a pitch p and a diatontic degree d, return a pitch that
+-- has degree d and is 1-2 octaves lower than p.
+-- TODO: Fix the range to be within 1-2 octaves.
+pitchLower : Pitch → DiatonicDegree → Pitch
+pitchLower p d =
+  let (c , o) = absoluteToRelative p
+      c'      = degreeToPitchClassMajor d
+  in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
+
+-- Given a soprano pitch p and a triad harmonization t,
+-- generate a list of possible bass notes.
+-- Assumes p is in t. Only the root of the triad is
+-- allowed to be doubled.
+-- Each bass note is pitched 1-2 octaves below p.
+bassNotes : Pitch → Triad → List Pitch
+bassNotes p t =
+  let sop  = pitchToDegreeCMajor p
+      root = triadRoot t
+      ds   = triadDegrees t
+      ds'  = filter (λ d → (sop ≡ᵈ root) ∨ not (sop ≡ᵈ d)) ds
+  in map (pitchLower p) ds'
+
+-- Given a soprano line with harmonization, generate
+-- a list of possible bass lines 1-1 with soprano notes.
+-- The SB counterpoint must satisfy 1st species
+-- interval and motion rules.
+bassLines : List (Pitch × Triad) → List (List Pitch)
+-- We need to make the base case a singleton list of an empty list for
+-- the general case to work. Possibly look into modifying the general
+-- case to handle a base case of an empty list.
+bassLines [] = [] ∷ []
+bassLines ((sop , triad) ∷ pts) =
+  let pss = bassLines pts
+      basses  = bassNotes sop triad
+      intervalOkSBs : List PitchInterval -- list of bass notes with interval up to the corresponding soproano note that pass intervalCheck
+      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
+      intervalOkBs = map proj₁ intervalOkSBs
+      intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
+  in filter (mCheck sop (Data.Maybe.map proj₁ (head pts))) intervalOkBassLines
+  where
+  -- Given a soprano pitch, possibly a second soprano pitch and a list of
+  -- bass pitches, if the second soprano pitch exists and there are at
+  -- least two bass pitches, check that the motion from the first SB pair to
+  -- the second is allowed. If there aren't two SB pairs, return true.
+    mCheck : Pitch → Maybe Pitch → List Pitch → Bool
+    mCheck _ nothing  _               = true
+    mCheck _ (just _) []              = true
+    mCheck _ (just _) (_ ∷ [])        = true
+    mCheck s₁ (just s₂) (b₁ ∷ b₂ ∷ _) =
+      let sb₁ = pitchPairToPitchInterval (b₁ , s₁)
+          sb₂ = pitchPairToPitchInterval (b₂ , s₂)
+      in (is-nothing ∘ uncurry motionCheck) (sb₁ , sb₂)

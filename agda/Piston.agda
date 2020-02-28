@@ -5,7 +5,9 @@ module Piston where
 open import Data.Fin     using (#_)
 open import Data.List    using (List; map; _∷_; []; concatMap; zip; drop; length; replicate; intercalate)
 open import Data.Nat     using (ℕ)
-open import Data.Product using (_×_)
+open import Data.Product using (_×_; proj₁; proj₂)
+open import Data.Vec     using (Vec; fromList; _∷_; [])
+open import Function     using (_∘_)
 
 open import Counterpoint
 open import Harmony
@@ -140,7 +142,7 @@ mDegrees = concatMap fff melody117s
   where fff : Note → List DiatonicDegree
         fff (tone _ p) = pitchToDegreeCMajor p ∷ []
         fff (rest _)   = []
-aaa = map triadSetToList (harmonizations mDegrees)
+aaa = harmonizations (drop 0 mDegrees)
 {-
 (I ∷ V ∷ []) ∷
 (I ∷ []) ∷
@@ -151,6 +153,22 @@ aaa = map triadSetToList (harmonizations mDegrees)
 (II ∷ IV ∷ VI ∷ []) ∷
 (I ∷ III ∷ V ∷ []) ∷ []
 -}
+
+{-
+(V ∷ VI ∷ III ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+-}
+
 
 ------
 
@@ -163,6 +181,17 @@ triads117 = V ∷ V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []
 
 pts117 : List (Pitch × Triad)
 pts117 = zip pitches117s triads117
+
+chords117 : List (Vec Pitch 4)
+chords117 = map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt)) pts117
+
+chordsPoints117 : List (Vec Point 4)
+chordsPoints117 = map (Data.Vec.map tone) chords117
+
+harm117 : Harmony 4 (length chords117)
+harm117 = harmony (fromList (map chord chordsPoints117))
+
+
 
 bbb = bassLines pts117
 
@@ -187,5 +216,8 @@ testSTrack = track "Test S" piano channel1 tempo (notes→events mVelocity testS
 testBTrack : MidiTrack
 testBTrack = track "Test B" piano channel1 tempo (notes→events mVelocity testB)
 
+testTrack : MidiTrack
+testTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
+
 testTracks : List MidiTrack
-testTracks = testSTrack ∷ testBTrack ∷ []
+testTracks = testTrack ∷ []

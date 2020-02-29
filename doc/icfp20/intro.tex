@@ -2,7 +2,7 @@
 \label{sec:intro}
 
 Edgar Var\`{e}se describes music as ``organized sound'', and
-throughtout history cultures have created and applied systems of rules
+throughout history cultures have created and applied systems of rules
 and guidelines to govern the music they create, most notably the
 Common Practice Period of Western music spanning the 17th to early
 20th centuries. These rule systems are seldom absolute, and indeed
@@ -35,14 +35,14 @@ support for dependent types, and requires many extentions and tricks
 such as the use of singleton types~\citep{eisenberg-singleton} to
 simulate a restricted form of dependent types. (TODO: fix wording)
 
-We would like to explore what can be done in the context of music by
+In this paper we explore what can be done in the context of music by
 using a programming language that offers full dependent types. We use
 the language Agda~\citep{norell-phd} since it is fairly mature and
 aims to be a functional programming language as well as a proof
 assistant. It also features a Haskell FFI so we can take advantage of
 existing Haskell libraries, in partiular for MIDI.
 
-Full dependent types allow expression of full predicate logic, and it is
+Full dependent types allow expression of predicate logic, and it is
 tempting to take a standard textbook on music theory such as
 \citet{piston-harmony} or \citet{aldwell2018harmony} and attempt to
 formalize it in type theory. However this is difficult since most
@@ -65,10 +65,10 @@ harmony are not separate concepts but in fact deeply intertwined, we
 are able to reuse counterpoint rules to help develop natural-sounding
 harmonizations.
 
-We make use of and extend~\cite{MusicTools}, a library of small tools
+We make use of and extend~\citet{MusicTools}, a library of small tools
 for analysis and synthesis of music written in Agda, with the goal
 of eventually being a dependently-typed alternative to Euterpea. 
-Previous work by ~\cite{cong-cp} using Music Tools expressed
+Previous work by ~\citet{cong-cp} using Music Tools expressed
 first-species counterpoint with the Agda type system, so that an error
 in counterpoint resulted in an Agda type error. Although this takes
 advantage of Agda's native type checking, it has several
@@ -77,7 +77,8 @@ as the corresponding musical error. Another is TODO: flexibility and
 composability.
 
 This is an experience report, and we highlight both the advantages and
-disadvantages of using Agda
+disadvantages of using Agda. TODO: MORE
 
+TODO: Talk about conclusion.
 
 TODO: check that bib style is allowed.

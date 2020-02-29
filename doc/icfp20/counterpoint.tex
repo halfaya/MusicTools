@@ -39,13 +39,13 @@ TODO: contrast old and new methods
 Counterpoint is a technique for combining multiple lines of melodies.
 Composing counterpoint is like arranging a song for choir:
 we start with a \emph{cantus firmus}, which serves as the base melody,
-and compose counterpoint lines above or below the cantus firmus.
+and compose a counterpoint line above or below the cantus firmus.
 When doing this, we must make sure that the whole music sounds
 harmonically pleasing, and that the individual melodic lines are
 distinguishable to the listener.
 
 In this section, we present an implementation of species counterpoint,
-based on the formulation given by Fux~\citep{fux-cp}.
+based on the formulation given by \citet{fux-cp}.
 The idea is to represent ``good'' counterpoint  as a dependent record,
 whose fields encode the musical content as well as proofs that the
 counterpoint follows certain rules.
@@ -59,10 +59,11 @@ other variants can be formalized in an analogous way.
 
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
-which is required to start with a tonic and consist only of whole notes.
+which is required to start with a tonic (the first note of a scale;
+e.g., C in the case of C major) and consist only of whole notes.
 Figure~\ref{fig:fs} shows an example of first species counterpoint.
-The lower line is the cantus firmus, which we excerpt from a famous
-German song called ``Froschgesang'' (Frog's song).
+The lower line is the cantus firmus, which we excerpt from a German
+song called \emph{Froschgesang} (Frog's song).
 The upper line is the counterpoint composed by the second author.
 
 \subsubsection{Representing Music}
@@ -78,8 +79,8 @@ Therefore, the Frog's song in Figure~\ref{fig:fs} is represented as a
 compound of the following three elements:
 
 \begin{alltt}
- PitchInterval : Set
- PitchInterval = Pitch \(\times\) Interval
+PitchInterval : Set
+PitchInterval = Pitch \(\times\) Interval
   
 first : PitchInterval
 first = (c 5 , per8)
@@ -101,8 +102,8 @@ different parts are subject to different rules, as we detail below.
 
 The beginning of the music should express perfection.
 As we saw in Section~\ref{sec:music}, there are three intervals that
-are classified as perfect: the 1st (more commonly called the
-\emph{unison}), the 5th, and the 8th.
+are classified as perfect: the 1st (usually called the \emph{unison}),
+t5th, and 8th.
 The first interval of the music must then be one of these intervals.
 In our formalization, we implement this rule as the
 \texttt{checkBeginning} function, which reports an error
@@ -156,16 +157,17 @@ checkIntervals = mapMaybe intervalCheck
 
 The independence of melodic lines is also affected by \emph{motion},
 i.e., the way one interval moves to another interval.
-As can be seen from Figure~\ref{fig:motion} left, there are four
-kinds of motion: \emph{contrary} (two lines go in different directions),
+As Figure~\ref{fig:motion} left shows, there are four kinds of motion:
+\emph{contrary} (two lines go in different directions),
 \emph{parallel} (two lines go in the same direction by the same
 distance), \emph{similar} (two lines go in the same direction),
 and \emph{oblique} (one line plays the same note).
-There is a consensus that approaching a perfect interval by parallel
-or similar motion (as in Figure~\ref{fig:motion} right) destroys the
-independence of lines.
-To rule out this, we define the \texttt{checkMotion} function, which
-lists all occurrences of such invalid motion.
+It is known that approaching a perfect interval by parallel or similar
+motion (as in Figure~\ref{fig:motion} right) destroys the independence
+of lines.
+To rule out such motion, we define the \texttt{checkMotion}
+function, which checks all pairs of two adjacent intervals and
+returns a list of erroneous patterns.
 
 \begin{alltt}
 data MotionError : Set where
@@ -183,20 +185,21 @@ motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
 
 checkMotion : List PitchInterval \(\rightarrow\) List MotionError
 checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs
--- where pairs returns a list of all adjacent pairs in a given list
+-- where pairs l returns a list of pairs consisting of two adjacent elements of l
 \end{alltt}
 
 \paragraph{Ending}
 
 The ending of the music should express relaxation.
-Among different intervals, the unison and the 8th are considered
+Among different intervals, the unison and 8th are considered
 most stable, hence the last interval of the music must be either of
 these intervals.
 The last interval should also be approached by a \emph{cadence},
 a progression that gives rise to a sense of resolution.
-We encode these rules as the \texttt{checkEnding} function.
-Note that it returns the \texttt{tooShort} error when the music does
-not have enough number of bars to form a valid ending.
+This in turn suggests that a valid ending requires the middle bars
+to be non-empty.
+We encode these rules as the \texttt{checkEnding} function, which,
+upon finding an invalid ending, tells us which rules are not satisfied.
 
 \begin{alltt}
 data EndingError : Set where

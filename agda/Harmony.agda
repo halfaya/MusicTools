@@ -2,18 +2,23 @@
 
 module Harmony where
 
-open import Data.Bool       using (Bool; true; false; if_then_else_)
-open import Data.Fin        using (#_) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; map; []; _∷_; concatMap; foldr)
-open import Data.Nat        using (ℕ; suc)
+open import Data.Bool       using (Bool; true; false; if_then_else_; _∨_; not)
+open import Data.Fin        using (#_; toℕ) renaming (zero to fz; suc to fs)
+open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head)
+open import Data.Maybe      using (fromMaybe; is-nothing; Maybe; just; nothing)
+open import Data.Nat        using (ℕ; suc; _∸_; _<ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
-open import Data.Vec        using (Vec; toList)
+open import Data.Product    using (_×_; _,_; proj₁; proj₂; uncurry)
+open import Data.Vec        using (Vec; toList; []; _∷_)
 open import Function        using (_∘_)
 
-open import BitVec          using (BitVec; empty; insert; elements; _∩_)
+open import BitVec          using (BitVec; empty; insert; elements; _∩_; _∈_)
+open import Counterpoint
+open import Interval
 open import Music
 open import Note
 open import Pitch
+open import Util            using (filter)
 
 -- either 0 or 1 pitch class
 pointToPitchClass : Point → List PitchClass
@@ -74,7 +79,7 @@ rootTriad (diatonicDegree (fs (fs (fs (fs fz)))))           = V
 rootTriad (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = VI
 rootTriad (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = VII
 
-triadDegrees : Triad → List DiatonicDegree
+triadDegrees : Triad → Vec DiatonicDegree 3
 triadDegrees t =
   let root = triadRoot t
       third = thirdUp root
@@ -126,17 +131,142 @@ previousTriads : Triad → List Triad
 previousTriads I   = V ∷ IV ∷ I ∷ [] -- omit VII since you'll get stuck -- TODO: Remove I
 previousTriads II  = VI ∷ IV ∷ []
 previousTriads III = VI ∷ []     -- omit VII since you'll get stuck
-previousTriads IV  = I ∷ []
+previousTriads IV  = I ∷ III ∷ [] -- to make Piston's example work, include III here
 previousTriads V   = I ∷ IV ∷ II ∷ VI ∷ []
-previousTriads VI  = III ∷ I ∷ II ∷ V ∷ []
+previousTriads VI  = IV ∷ II ∷ V ∷ []
 previousTriads VII = []
 
-harmonizations : List DiatonicDegree → List TriadSet
-harmonizations []       = []
-harmonizations (d ∷ []) = triadListToSet (containingTriads d) ∷ []
-harmonizations (d ∷ d' ∷ ds) with harmonizations (d' ∷ ds)
-... | []       = []
-... | ts ∷ tss =
-  let us = triadListToSet (concatMap previousTriads (triadSetToList ts))
-      vs = triadListToSet (containingTriads d)
-  in (us ∩ vs) ∷ ts ∷ tss
+harmonizations : List DiatonicDegree → List (List Triad)
+harmonizations [] = []
+harmonizations (d ∷ []) = map (_∷ []) (containingTriads d)
+harmonizations (d ∷ d' ∷ ds) =
+  let tss = harmonizations (d' ∷ ds)
+      dTriads  = containingTriads d
+  in concatMap (λ t → concatMap (λ ts → if prevOk t (head ts) then (t ∷ ts) ∷ [] else []) tss) dTriads
+  where
+    prevOk : Triad → Maybe Triad → Bool
+    prevOk t nothing  = true
+    prevOk t (just x) = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
+
+-- Given a pitch p and a diatontic degree d, return a pitch that
+-- has degree d and is 1-2 octaves lower than p.
+-- TODO: Fix the range to be within 1-2 octaves.
+pitchLower : Pitch → DiatonicDegree → Pitch
+pitchLower p d =
+  let (c , o) = absoluteToRelative p
+      c'      = degreeToPitchClassMajor d
+  in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
+
+-- Given a pitch p and a diatontic degree d, return a pitch that
+-- has degree d and is 1-2 octaves lower than p.
+-- TODO: Fix the range to be within 1-2 octaves.
+voiceChord : Pitch → (DiatonicDegree × DiatonicDegree × DiatonicDegree) → Pitch × Pitch × Pitch
+voiceChord s (a , t , b)  =
+  let (s' , o) = absoluteToRelative s
+      a'       = degreeToPitchClassMajor a
+      t'       = degreeToPitchClassMajor t
+      b'       = degreeToPitchClassMajor b
+      ao       = if toℕ (unPitchClass a') <ᵇ toℕ (unPitchClass s') then o  else octave (unoctave o  ∸ 1)
+      to       = if toℕ (unPitchClass t') <ᵇ toℕ (unPitchClass a') then ao else octave (unoctave ao ∸ 1)
+      bo       = if toℕ (unPitchClass b') <ᵇ toℕ (unPitchClass t') then to else octave (unoctave to ∸ 1)
+  in relativeToAbsolute (a' , ao) ,
+     relativeToAbsolute (t' , to) ,
+     relativeToAbsolute (b' , bo)
+
+-- Given a soprano pitch p and a triad harmonization t,
+-- generate a list of possible bass notes.
+-- Assumes p is in t. Only the root of the triad is
+-- allowed to be doubled.
+-- Each bass note is pitched 1-2 octaves below p.
+bassNotes : Pitch → Triad → List Pitch
+bassNotes p t =
+  let sop  = pitchToDegreeCMajor p
+      root = triadRoot t
+      ds   = toList (triadDegrees t)
+      ds'  = filter (λ d → (sop ≡ᵈ root) ∨ not (sop ≡ᵈ d)) ds
+  in map (pitchLower p) ds'
+
+-- Given a soprano pitch p and a triad harmonization t,
+-- generate a list of possible chords.
+-- Assumes p is in t. Only the root of the triad is
+-- allowed to be doubled.
+-- Each bass note is pitched 1-2 octaves below p.
+-- Alto and Tenor fit inside.
+harmonizingChord : Pitch → Triad → Vec Pitch 3
+harmonizingChord p t =
+  let sop  = pitchToDegreeCMajor p
+      root = triadRoot t
+      ds   = triadDegrees t
+      ds'  = if sop ≡ᵈ root then ds else root ∷ remove sop ds
+  in pick3 ds'
+  where
+    pick3 : Vec DiatonicDegree 3 → Vec Pitch 3
+    pick3 (d ∷ d₁ ∷ d₂ ∷ []) =
+      let (p , p₁ , p₂) = voiceChord p (d , d₁ , d₂)
+      in p ∷ p₁ ∷ p₂ ∷ []
+    remove : DiatonicDegree → Vec DiatonicDegree 3 → Vec DiatonicDegree 2
+    remove sop (d ∷ d₁ ∷ d₂ ∷ []) =
+      if d ≡ᵈ sop then d₁ ∷ d₂ ∷ []
+      else (if d₁ ≡ᵈ sop then d ∷ d₂ ∷ [] else d ∷ d₁ ∷ [])
+
+-- Given a soprano line with harmonization, generate
+-- a list of possible bass lines 1-1 with soprano notes.
+-- The SB counterpoint must satisfy 1st species
+-- interval and motion rules.
+bassLines : List (Pitch × Triad) → List (List Pitch)
+-- We need to make the base case a singleton list of an empty list for
+-- the general case to work. Possibly look into modifying the general
+-- case to handle a base case of an empty list.
+bassLines [] = [] ∷ []
+bassLines ((sop , triad) ∷ pts) =
+  let pss = bassLines pts
+      basses  = bassNotes sop triad
+      intervalOkSBs : List PitchInterval -- list of bass notes with interval up to the corresponding soproano note that pass intervalCheck
+      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
+      intervalOkBs = map proj₁ intervalOkSBs
+      intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
+  in filter (mCheck sop (Data.Maybe.map proj₁ (head pts))) intervalOkBassLines
+  where
+    -- Given a soprano pitch, possibly a second soprano pitch and a list of
+    -- bass pitches, if the second soprano pitch exists and there are at
+    -- least two bass pitches, check that the motion from the first SB pair to
+    -- the second is allowed. If there aren't two SB pairs, return true.
+    mCheck : Pitch → Maybe Pitch → List Pitch → Bool
+    mCheck _ nothing  _               = true
+    mCheck _ (just _) []              = true
+    mCheck _ (just _) (_ ∷ [])        = true
+    mCheck s₁ (just s₂) (b₁ ∷ b₂ ∷ _) =
+      let sb₁ = pitchPairToPitchInterval (b₁ , s₁)
+          sb₂ = pitchPairToPitchInterval (b₂ , s₂)
+      in (is-nothing ∘ uncurry motionCheck) (sb₁ , sb₂)
+
+-- Given a soprano line with harmonization, generate
+-- a list of possible triads 1-1 with soprano notes.
+-- All pairwise counterpoint must satisfy 1st species
+-- interval and motion rules.
+chordProg : List (Pitch × Triad) → List (List Pitch)
+-- We need to make the base case a singleton list of an empty list for
+-- the general case to work. Possibly look into modifying the general
+-- case to handle a base case of an empty list.
+chordProg [] = [] ∷ []
+chordProg ((sop , triad) ∷ pts) =
+  let pss = chordProg pts
+      basses  = bassNotes sop triad
+      intervalOkSBs : List PitchInterval -- list of bass notes with interval up to the corresponding soproano note that pass intervalCheck
+      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
+      intervalOkBs = map proj₁ intervalOkSBs
+      intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
+  in filter (mCheck sop (Data.Maybe.map proj₁ (head pts))) intervalOkBassLines
+  where
+    -- Given a soprano pitch, possibly a second soprano pitch and a list of
+    -- bass pitches, if the second soprano pitch exists and there are at
+    -- least two bass pitches, check that the motion from the first SB pair to
+    -- the second is allowed. If there aren't two SB pairs, return true.
+    mCheck : Pitch → Maybe Pitch → List Pitch → Bool
+    mCheck _ nothing  _               = true
+    mCheck _ (just _) []              = true
+    mCheck _ (just _) (_ ∷ [])        = true
+    mCheck s₁ (just s₂) (b₁ ∷ b₂ ∷ _) =
+      let sb₁ = pitchPairToPitchInterval (b₁ , s₁)
+          sb₂ = pitchPairToPitchInterval (b₂ , s₂)
+      in (is-nothing ∘ uncurry motionCheck) (sb₁ , sb₂)

@@ -2,16 +2,12 @@
 
 module Piston where
 
-open import Data.Bool using (Bool; not; _∨_)
-open import Data.Fin
-open import Data.List using (List; map; _∷_; []; concatMap; zip; drop)
-open import Data.Maybe using (fromMaybe; is-nothing)
-open import Data.Nat
-open import Data.Product using (_×_; _,_; proj₁; proj₂)
-open import Function using (_∘_)
---open import Data.Vec using (Vec; []; _∷_; zip; toList) renaming (map to vmap)
-
-open import Relation.Binary.PropositionalEquality using (refl)
+open import Data.Fin     using (#_)
+open import Data.List    using (List; map; _∷_; []; concatMap; zip; drop; length; replicate; intercalate)
+open import Data.Nat     using (ℕ)
+open import Data.Product using (_×_; proj₁; proj₂)
+open import Data.Vec     using (Vec; fromList; _∷_; [])
+open import Function     using (_∘_)
 
 open import Counterpoint
 open import Harmony
@@ -146,7 +142,7 @@ mDegrees = concatMap fff melody117s
   where fff : Note → List DiatonicDegree
         fff (tone _ p) = pitchToDegreeCMajor p ∷ []
         fff (rest _)   = []
-aaa = map triadSetToList (harmonizations mDegrees)
+aaa = harmonizations (drop 0 mDegrees)
 {-
 (I ∷ V ∷ []) ∷
 (I ∷ []) ∷
@@ -158,40 +154,24 @@ aaa = map triadSetToList (harmonizations mDegrees)
 (I ∷ III ∷ V ∷ []) ∷ []
 -}
 
+{-
+(V ∷ VI ∷ III ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(V ∷ VI ∷ III ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(V ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
+(I ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+-}
+
+
 ------
 
--- Code to generate B given S
-
--- Given a pitch p and a diatontic degree d, return a pitch that
--- has degree d and is 1-2 octaves lower than p.
-pitchLower : Pitch → DiatonicDegree → Pitch
-pitchLower p d =
-  let (c , o) = absoluteToRelative p
-      c'      = degreeToPitchClassMajor d
-  in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
-
--- assume pitch is in triad
-bassNotes : Pitch → Triad → List Pitch
-bassNotes p t =
-  let sop  = pitchToDegreeCMajor p
-      root = triadRoot t
-      ds   = triadDegrees t
-      ds'  = filter (λ d → (sop ≡ᵈ root) ∨ not (sop ≡ᵈ d)) ds
-  in map (pitchLower p) ds'
-
-bassLines : List (Pitch × Triad) → List (List Pitch)
-bassLines [] = []
-bassLines ((p , t) ∷ []) =
-  let ps = bassNotes p t
-      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
-      goodBs = map proj₁ pis
-  in map (_∷ []) goodBs
-bassLines ((p , t) ∷ pt ∷ pts) =
-  let pss = bassLines (pt ∷ pts)
-      ps  = bassNotes p t
-      pis = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, p)) ps)
-      goodBs = map proj₁ pis
-  in concatMap (λ ps → (map (_∷ ps) goodBs)) pss
 
 pitches117s : List Pitch
 pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []
@@ -202,10 +182,18 @@ triads117 = V ∷ V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []
 pts117 : List (Pitch × Triad)
 pts117 = zip pitches117s triads117
 
-bbb = bassLines (drop 5 pts117)
-ccc = pitch 43 ∷ pitch 47 ∷ pitch 38 ∷ []
-ddd = (map (pitchPairToPitchInterval ∘ (_, g 5)) ccc)
-eee = filter (is-nothing ∘ intervalCheck) ddd
+chords117 : List (Vec Pitch 4)
+chords117 = map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt)) pts117
+
+chordsPoints117 : List (Vec Point 4)
+chordsPoints117 = map (Data.Vec.map tone) chords117
+
+harm117 : Harmony 4 (length chords117)
+harm117 = harmony (fromList (map chord chordsPoints117))
+
+
+
+bbb = bassLines pts117
 
 -- 36 : c 3
 -- 40 : e 3
@@ -214,3 +202,22 @@ eee = filter (is-nothing ∘ intervalCheck) ddd
 -- 47 : b 3
 -- 52 : e 4
 -- 57 : a 4
+
+testS : List Note
+testS = intercalate (rest half ∷ []) (replicate (length bbb) (map (tone half) pitches117s))
+
+testB : List Note
+testB = intercalate (rest half ∷ []) (map (map (tone half)) bbb)
+--map (tone half) (pitch 47 ∷ pitch 43 ∷  pitch 36 ∷ pitch 36 ∷  pitch 41 ∷ pitch 57 ∷ pitch 43 ∷ pitch 41 ∷ pitch 43 ∷ [])
+
+testSTrack : MidiTrack
+testSTrack = track "Test S" piano channel1 tempo (notes→events mVelocity testS)
+
+testBTrack : MidiTrack
+testBTrack = track "Test B" piano channel1 tempo (notes→events mVelocity testB)
+
+testTrack : MidiTrack
+testTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
+
+testTracks : List MidiTrack
+testTracks = testTrack ∷ []

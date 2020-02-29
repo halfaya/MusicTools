@@ -7,18 +7,67 @@ and guidelines to govern the music they create, most notably the
 Common Practice Period of Western music spanning the 17th to early
 20th centuries. These rule systems are seldom absolute, and indeed
 deliberate breaking of the rules is often part of the aesthetic, but they
-roughly constrain the music they apply to and give it a common form
-and sound.
+roughly constrain the music they apply to and
+give it a common form and sound.
 
 Artists and theoreticians have attempted to capture and codify these
-rule systems, always informally in natural language, and typically
+rule systems, informally in natural language, and typically
 accompanied by examples from the existing literature. The intent is
-both to analysize existing music and then to use these principles to
+both to analyze existing music and then to use these principles to
 guide the creation of new music, in other words for synthesis.
 
 Starting in the 20th century, computers have become ubiquitous in
 music in every area, including sound sythesis, composition and
-production (\citep{roads-tutorial}).
+production~\citep{roads-tutorial}. In terms of music theory, there has
+been a line of recent work on using functional programming for
+harmonic
+analysis~\citep{magalhaes-harmtrace,dehaas-harmtrace-a,dehaas-harmtrace-b},
+harmonization of a melody and generation of melodies based on a
+harmonization~\citep{koops-fharm,magalhaes-fcomp} and
+counterpoint~\citep{szamozvancev-welltyped}. There is also an
+established Haskell library Euterpea~\citep{hudak-haskell} for general music
+and sound exploration.
 
-[more here]
+To describe rules of basic harmonic structure,
+\citet{magalhaes-harmtrace} and its successors use dependent
+types. (TODO: Give an example.) However Haskell currently has limited
+support for dependent types, and requires many extentions and tricks
+such as the use of singleton types~\citep{eisenberg-singleton} to
+simulate a restricted form of dependent types. (TODO: fix wording)
 
+We would like to explore what can be done in the context of music by
+using a programming language that offers full dependent types. We use
+the language Agda~\citep{norell-phd} since it is fairly mature and
+aims to be a functional programming language as well as a proof
+assistant. It also features a Haskell FFI so we can take advantage of
+existing Haskell libraries, in partiular for MIDI.
+
+Full dependent types allow a fully expressive logic, and it is
+tempting to take a standard textbook on music theory such as
+\citet{piston-harmony} or \citet{aldwell2018harmony} and attempt to
+formalize it in type theory.
+
+
+
+
+-- people are starting to use computers for analysis and synthesis of rule systems
+(reference Haskell work). In particular FP, and some rudimentary dep types
+
+-- With full dep types, expressive logic, tempting to formalize all the rules
+of some theory book in dep types. Point out difficulties....
+
+-- Music Tools, compare to Euterpea + other Haskell work, mention FARM.
+
+-- In this paper, focus on counterpoint plus basic start to some harmony.
+
+
+Counterpoint section: contrast old and new methods
+
+Harmony section: Harmonize melody, use counterpoint for voice leading and to contrain harmony.
+Mention grid for harmonic analsis, makes use of vectors.
+
+conclusion: easy to express rules, break into parts, reuse in other contexts, extend.
+Downsides: hard to do some things (equality, sets, etc), Proof emphasis can get in the way, but
+may want to use in the future. Future work: equivalence, ornaments, ML.
+
+TODO: Fix bib style.

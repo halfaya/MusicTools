@@ -42,32 +42,42 @@ aims to be a functional programming language as well as a proof
 assistant. It also features a Haskell FFI so we can take advantage of
 existing Haskell libraries, in partiular for MIDI.
 
-Full dependent types allow a fully expressive logic, and it is
+Full dependent types allow expression of full predicate logic, and it is
 tempting to take a standard textbook on music theory such as
 \citet{piston-harmony} or \citet{aldwell2018harmony} and attempt to
-formalize it in type theory.
+formalize it in type theory. However this is difficult since most
+``rules'' in music theory are not absolute, but rather suggestions of
+varying degrees (themselves vaguely specified) of importance. Since
+ultimately the resulting created music is more important than the
+theory, an alternative is to attempt to indirectly deduce the rules
+from music samples, using for example machine
+learning~\citep{huang-cp}. However.... TODO
+TODO: Perhaps create rules and weight them, then use ML.
+
+Although formalization of a large amount of music theory is a goal,
+for now we start with the modest task of expressing a small,
+relatively strict rule set known as species
+counterpoint~\cite{fux-cp}. TODO--more here
+We also present preliminary work on harmonizing a melody using
+a subset of rules based on \citet{piston-harmony}, contrasting with
+existing work by \citet{koops-fharm}. Notably, since counterpoint and
+harmony are not separate concepts but in fact deeply intertwined, we
+are able to reuse counterpoint rules to help develop natural-sounding
+harmonizations.
+
+We make use of and extend~\cite{MusicTools}, a library of small tools
+for analysis and synthesis of music written in Agda, with the goal
+of eventually being a dependently-typed alternative to Euterpea. 
+Previous work by ~\cite{cong-cp} using Music Tools expressed
+first-species counterpoint with the Agda type system, so that an error
+in counterpoint resulted in an Agda type error. Although this takes
+advantage of Agda's native type checking, it has several
+downsides. One is that the Agda errors may be difficult to interpret
+as the corresponding musical error. Another is TODO: flexibility and
+composability.
+
+This is an experience report, and we highlight both the advantages and
+disadvantages of using Agda
 
 
-
-
--- people are starting to use computers for analysis and synthesis of rule systems
-(reference Haskell work). In particular FP, and some rudimentary dep types
-
--- With full dep types, expressive logic, tempting to formalize all the rules
-of some theory book in dep types. Point out difficulties....
-
--- Music Tools, compare to Euterpea + other Haskell work, mention FARM.
-
--- In this paper, focus on counterpoint plus basic start to some harmony.
-
-
-Counterpoint section: contrast old and new methods
-
-Harmony section: Harmonize melody, use counterpoint for voice leading and to contrain harmony.
-Mention grid for harmonic analsis, makes use of vectors.
-
-conclusion: easy to express rules, break into parts, reuse in other contexts, extend.
-Downsides: hard to do some things (equality, sets, etc), Proof emphasis can get in the way, but
-may want to use in the future. Future work: equivalence, ornaments, ML.
-
-TODO: Fix bib style.
+TODO: check that bib style is allowed.

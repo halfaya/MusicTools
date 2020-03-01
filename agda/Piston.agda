@@ -144,6 +144,32 @@ mDegrees = concatMap fff melody117s
         fff (rest _)   = []
 aaa = harmonizations (drop 0 mDegrees)
 {-
+(VI ∷ V ∷ []) ∷
+(VI ∷ III ∷ []) ∷
+(II ∷ V ∷ []) ∷
+(IV ∷ V ∷ []) ∷
+(IV ∷ I ∷ []) ∷ []
+
+(V ∷ VI ∷ V ∷ []) ∷
+(V ∷ VI ∷ III ∷ []) ∷
+(V ∷ IV ∷ V ∷ []) ∷
+(V ∷ IV ∷ I ∷ []) ∷ []
+
+(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ V ∷ []) ∷
+(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ I ∷ []) ∷
+(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ V ∷ []) ∷
+(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ I ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ V ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ I ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ V ∷ []) ∷
+(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ I ∷ []) ∷ []
+-}
+
+{-
 (I ∷ V ∷ []) ∷
 (I ∷ []) ∷
 (I ∷ []) ∷

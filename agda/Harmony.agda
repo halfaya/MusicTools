@@ -128,10 +128,10 @@ rootProgression VI  = nextTriad (II ∷ V   ∷ []) (III ∷ IV ∷ []) (I      
 rootProgression VII = nextTriad (I  ∷ III ∷ []) (VI       ∷ []) (II  ∷ IV  ∷ V ∷ [])
 
 previousTriads : Triad → List Triad
-previousTriads I   = V ∷ IV ∷ I ∷ [] -- omit VII since you'll get stuck -- TODO: Remove I
+previousTriads I   = V ∷ IV ∷ [] -- omit VII since you'll get stuck
 previousTriads II  = VI ∷ IV ∷ []
 previousTriads III = VI ∷ []     -- omit VII since you'll get stuck
-previousTriads IV  = I ∷ III ∷ [] -- to make Piston's example work, include III here
+previousTriads IV  = I ∷ V ∷ II ∷ []
 previousTriads V   = I ∷ IV ∷ II ∷ VI ∷ []
 previousTriads VI  = IV ∷ II ∷ V ∷ []
 previousTriads VII = []
@@ -157,21 +157,22 @@ pitchLower p d =
       c'      = degreeToPitchClassMajor d
   in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
 
--- Given a pitch p and a diatontic degree d, return a pitch that
--- has degree d and is 1-2 octaves lower than p.
--- TODO: Fix the range to be within 1-2 octaves.
-voiceChord : Pitch → (DiatonicDegree × DiatonicDegree × DiatonicDegree) → Pitch × Pitch × Pitch
-voiceChord s (a , t , b)  =
+voiceChord : Pitch → Vec DiatonicDegree 3 → Vec Pitch 3
+voiceChord s (a ∷ t ∷ b ∷ [])  =
   let (s' , o) = absoluteToRelative s
       a'       = degreeToPitchClassMajor a
       t'       = degreeToPitchClassMajor t
       b'       = degreeToPitchClassMajor b
-      ao       = if toℕ (unPitchClass a') <ᵇ toℕ (unPitchClass s') then o  else octave (unoctave o  ∸ 1)
-      to       = if toℕ (unPitchClass t') <ᵇ toℕ (unPitchClass a') then ao else octave (unoctave ao ∸ 1)
-      bo       = if toℕ (unPitchClass b') <ᵇ toℕ (unPitchClass t') then to else octave (unoctave to ∸ 1)
-  in relativeToAbsolute (a' , ao) ,
-     relativeToAbsolute (t' , to) ,
-     relativeToAbsolute (b' , bo)
+      ao       = downOctave a' s' o
+      to       = downOctave t' a' ao
+      bo       = downOctave b' t' to
+  in relativeToAbsolute (a' , ao) ∷
+     relativeToAbsolute (t' , to) ∷
+     relativeToAbsolute (b' , bo) ∷ []
+  where downOctave : PitchClass → PitchClass → Octave → Octave
+        downOctave pc₁ pc₂ o =
+          if toℕ (unPitchClass pc₁) <ᵇ toℕ (unPitchClass pc₂) then o
+          else octave (unoctave o  ∸ 1)
 
 -- Given a soprano pitch p and a triad harmonization t,
 -- generate a list of possible bass notes.
@@ -198,12 +199,8 @@ harmonizingChord p t =
       root = triadRoot t
       ds   = triadDegrees t
       ds'  = if sop ≡ᵈ root then ds else root ∷ remove sop ds
-  in pick3 ds'
+  in voiceChord p ds'
   where
-    pick3 : Vec DiatonicDegree 3 → Vec Pitch 3
-    pick3 (d ∷ d₁ ∷ d₂ ∷ []) =
-      let (p , p₁ , p₂) = voiceChord p (d , d₁ , d₂)
-      in p ∷ p₁ ∷ p₂ ∷ []
     remove : DiatonicDegree → Vec DiatonicDegree 3 → Vec DiatonicDegree 2
     remove sop (d ∷ d₁ ∷ d₂ ∷ []) =
       if d ≡ᵈ sop then d₁ ∷ d₂ ∷ []

@@ -29,6 +29,11 @@ cpMiddle1 : List Interval
 cpMiddle1 =
   maj6 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
 
+-- Bad counterpoint (the first octave is approached by parallel motion)
+cpMiddle1' : List Interval 
+cpMiddle1' =
+  per8 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
+
 -- Second species counterpoint (middle bars)
 cpMiddle2 : List (Interval × Interval) 
 cpMiddle2 =
@@ -45,11 +50,14 @@ cpMiddle2 =
 first1 : PitchInterval
 first1 = (c 5 , per8)
 
-last1 : PitchInterval
-last1 = (c 5 , per8)
-
 middle1 : List PitchInterval 
 middle1 = zip cfMiddle cpMiddle1
+
+middle1' : List PitchInterval 
+middle1' = zip cfMiddle cpMiddle1'
+
+last1 : PitchInterval
+last1 = (c 5 , per8)
 
 first2 : PitchInterval
 first2 = (c 5 , per5)
@@ -62,6 +70,9 @@ last2 = (c 5 , per8)
 
 fs : FirstSpecies
 fs = firstSpecies first1 middle1 last1 refl refl refl refl
+
+fs' : FirstSpecies
+fs' = firstSpecies first1 middle1' last1 refl refl refl refl
 
 ss : SecondSpecies
 ss = secondSpecies first2 middle2 last2 refl refl refl refl refl

@@ -111,7 +111,9 @@ record FirstSpecies : Set where
     lastBar     : PitchInterval
     beginningOk : checkBeginning firstBar ≡ nothing
     intervalsOk : checkIntervals middleBars ≡ []
-    motionOk    : checkMotion middleBars ≡ []
+    motionOk    : checkMotion (firstBar ∷ middleBars) ≡ []
+                  -- no need to include the last bar,
+                  -- since endingOK guarantees contrary motion in the ending
     endingOk    : checkEnding middleBars lastBar ≡ nothing
 
 ------------------------------------------------
@@ -186,5 +188,5 @@ record SecondSpecies : Set where
     beginningOk   : checkBeginning2 firstBar ≡ nothing
     strongBeatsOk : checkStrongBeats middleBars ≡ []
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []
-    motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars) ++ (lastBar ∷ [])) ≡ []
+    motionOk      : checkMotion2 (firstBar ∷ (expandPitchIntervals2 middleBars)) ≡ []
     endingOk      : checkEnding2 middleBars lastBar ≡ nothing

@@ -255,7 +255,7 @@ record FirstSpecies : Set where
     lastBar     : PitchInterval
     beginningOk : checkBeginning firstBar \(\equiv\) nothing
     intervalsOk : checkIntervals middleBars \(\equiv\) []
-    motionOk    : checkMotion middleBars \(\equiv\) []
+    motionOk    : checkMotion (firstBar :: middleBars) \(\equiv\) []
     endingOk    : checkEnding middleBars lastBar \(\equiv\) nothing
 \end{alltt}
 
@@ -313,14 +313,14 @@ last2 = (c 5 , per8)
 The rules for second species counterpoint can be obtained by
 tweaking those for first species and adding a few new ones.
 Here we go through the rules without showing the corresponding
-Agda functions, as they are largely similar to what we have seen
-before.
+Agda functions, as they are largely similar to what we defined for
+first species.
 
 \paragraph{Beginning}
 
-The beginning of the music is \emph{not} allowed to be the unison,
-as it prevents the listener from recognizing the beginning of the
-counterpoint line.
+The beginning of the music may be either the 5th or 8th, but
+\emph{not} the unison, as it prevents the listener from recognizing
+the beginning of the counterpoint line.
 % We restrict the first interval by defining a new error
 % \texttt{BeginningError2} and a function \texttt{checkBeginning2}
 % that works analogously to \texttt{checkBeginning} for first species.
@@ -335,7 +335,7 @@ first species: they must all be consonant, non-unison intervals.
 
 \paragraph{Weak Beats}
 
-Weak beats are constrained in a looser manner.
+Weak beats are constrained in a looser manner than strong beats.
 First, they are allowed to be dissonant if they are created by a
 \emph{passing tone}, i.e., a note in the middle of two step-wise
 motions in the same direction (as in bars 4-5 of Figure~\ref{fig:ss}).
@@ -355,13 +355,25 @@ across bars.
 % \texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and
 % checks every pair of weak beat and strong beat intervals.
 
+\paragraph{Ending}
+
+The last interval must again be the unison or 8th, preceded by an
+appropriate interval that constitutes a cadence structure.
+
 \subsubsection{Putting Things Together}
 
 Now we define \texttt{SecondSpecies}, a record type inhabited by
 correct second species counterpoint.
 As in \texttt{FirstSpecies}, we have three fields holding the musical
-content, followed by five fields carrying the proofs of the properties
-disucssed above.
+content, followed by five fields carrying the proofs of the required
+properties disucssed above\footnote{
+  As the reader would have imagined, each \texttt{checkXXX} function
+  corresponds to one rule that must be satisfied by the counterpoint.
+  The auxiliary function \texttt{secondPitch} in \texttt{weakBeatsOk}
+  extracts the counterpoint note of the last interval, and
+  \texttt{expandPitchIntervals2} turns a list of \texttt{PitchInterval2}s
+  into a list of \texttt{PitchInterval}s.
+}.
 
 \begin{alltt}
 record SecondSpecies : Set where
@@ -374,8 +386,7 @@ record SecondSpecies : Set where
     strongBeatsOk : checkStrongBeats middleBars \(\equiv\) []
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) \(\equiv\) []
     motionOk      : checkMotion2 (firstBar ::
-                                  (expandPitchIntervals2 middleBars) ++
-                                  (lastBar :: [])) \(\equiv\) []
+                                  (expandPitchIntervals2 middleBars)) \(\equiv\) []
     endingOk      : checkEnding2 middleBars lastBar \(\equiv\) nothing
 \end{alltt}
 
@@ -386,3 +397,51 @@ counterpoint in Figure~\ref{fig:ss} is correct.
 ss : SecondSpecies
 ss = SecondSpecies first2 middle2 last2 refl refl refl refl refl
 \end{alltt}
+
+\subsection{Comparison with Previous Work}
+\label{sec:cp:comp}
+
+\citet{cong-cp} implement correct-by-construction counterpoint
+using an older version of Music Tools.
+The idea is to represent counterpoint as a list-like datatype,
+where the base cases enforce a valid ending and the inductive case
+guarantees correct uses of intervals and motion (by means of
+implicit arguments representing proofs).
+
+Our representation of counterpoint improves on the existing
+implementation in two ways.
+First, while \citet{cong-cp} rely on the Agda type checker to report
+errors in the counterpoint, we use our own type checker (implemented
+as the \texttt{checkXXX} functions) and type errors (defined as the
+\texttt{XXXError} datatypes).
+This allows us to produce error messages that clearly state what
+kind of mistake the programmer has made.
+Suppose we have replaced the second interval of Figure~\ref{fig:fs} by
+an octave (8th) of D, breaking the rule that perfect intervals cannot
+be approached by parallel motion.
+In our implementation, this results in an error in the
+\texttt{motionOk} field, which requires a proof of
+\texttt{checkMotion (firstBar :: middleBars) \(\equiv\) []}:
+
+\begin{alltt}
+(parallel (c 5 , per8) (d 5 , per8) :: []) != [] of type (List MotionError)
+\end{alltt}
+
+\noindent In \citet{cong-cp}'s implementation, on the other hand,
+the error results in the first \texttt{PitchInterval} being
+highlighted in yellow, with the following error message displayed
+in the Agda buffer:
+
+\begin{alltt}
+\_13 : motionOk (c 5 , c 6) (d 5 , d 6)
+\end{alltt}
+
+\noindent This indicates the existence of an unsolved metavariable.
+To a non-expert user, it may be difficult to connect this message to
+the musical error.
+
+The second improvement from \citet{cong-cp} is that, instead of
+incorporating all the rules into the counterpoint datatype, we define
+each of them as a separate function.
+This makes it possible to reuse certain rules in a different context,
+as we will see in the next section.

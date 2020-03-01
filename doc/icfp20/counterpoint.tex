@@ -277,7 +277,9 @@ We next discuss a more complex variant of counterpoint, called the
 second species.
 In second species, we set \emph{two} half notes against every cantus
 firmus note.
-Figure~\ref{fig:ss} is an example of such two-against-one counterpoint,
+This gives rise to the distinction between \emph{strong} beats (the
+first interval in a bar) and \emph{weak beats} (the second interval).
+Figure~\ref{fig:ss} is an example of two-against-one counterpoint,
 again composed for the Frog's song.
 
 \subsubsection{Representing Music}
@@ -288,7 +290,7 @@ More specifically, it is encouraged to begin the counterpoint line with
 a half rest and end with a whole note.
 Therefore, in our implementation, we reuse the \texttt{PitchInterval} 
 type for the first and last bars, and define a new type
-\texttt{PitchInterval2} for middle bars:
+\texttt{PitchInterval2} for middle bars.
 
 \begin{alltt}
 PitchInterval2 : Set
@@ -308,63 +310,58 @@ last2 = (c 5 , per8)
 
 \subsubsection{Representing Rules}
 
-In second species counterpoint, some parts of the music are applied
-the same rules as first species, while other parts are constrained by
-new rules.
+The rules for second species counterpoint can be obtained by
+tweaking those for first species and adding a few new ones.
+Here we go through the rules without showing the corresponding
+Agda functions, as they are largely similar to what we have seen
+before.
 
 \paragraph{Beginning}
 
 The beginning of the music is \emph{not} allowed to be the unison,
 as it prevents the listener from recognizing the beginning of the
 counterpoint line.
-We restrict the first interval by defining a new error
-\texttt{BeginningError2} and a function \texttt{checkBeginning2}
-that works analogously to \texttt{checkBeginning} for first species.
+% We restrict the first interval by defining a new error
+% \texttt{BeginningError2} and a function \texttt{checkBeginning2}
+% that works analogously to \texttt{checkBeginning} for first species.
 
 \paragraph{Strong Beats}
 
-The rhythmic structure of secound species counterpoint gives rise to
-the distinction between \emph{strong beats} (the first interval in a bar)
-and \emph{weak beats} (the second interval).
 Strong beats in middle bars are constrained by the same rules as in
-first species.
-That is, they must all be consonant, non-unison intervals, and in the 
-case of perfect intervals, the motion from the preceding interval (on
-the weak beat) must be either contrary or oblique.
-We encode these restrictions as the \texttt{checkStrongBeats}
-function, which, as the \texttt{checkIntervals} function for first
-species, returns a list of found errors.
+first species: they must all be consonant, non-unison intervals.
+% We encode this restriction as the \texttt{checkStrongBeats}
+% function, which, as the \texttt{checkIntervals} function for first
+% species, returns a list of found errors.
 
 \paragraph{Weak Beats}
 
-Compared to strong beasts, weak beats are constrained in a looser
-manner.
+Weak beats are constrained in a looser manner.
 First, they are allowed to be dissonant if they are created by a
 \emph{passing tone}, i.e., a note in the middle of two step-wise
 motions in the same direction (as in bars 4-5 of Figure~\ref{fig:ss}).
 Second, they are allowed to be the unison if they are left by step in
 the opposite direction from their approach (as in bars 5-6 of
 Figure~\ref{fig:ss}).
-We implement these rules as the \texttt{checkWeakBeats} function,
-which checks the validity of every three successive beats in the
-middle bars.
+% We implement these rules as the \texttt{checkWeakBeats} function,
+% which checks the validity of every three successive beats in the
+% middle bars.
 
 \paragraph{Motion}
 
 Parallel and similar motion towards a perfect interval is prohibited
 across bars.
-We enforce this rule using the \texttt{checkMotion2} function,
-which uses \texttt{expandPitchIntervals2} to convert a list of
-\texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and
-checks every pair of weak beat and strong beat intervals.
+% We enforce this rule using the \texttt{checkMotion2} function,
+% which uses \texttt{expandPitchIntervals2} to convert a list of
+% \texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and
+% checks every pair of weak beat and strong beat intervals.
 
 \subsubsection{Putting Things Together}
 
 Now we define \texttt{SecondSpecies}, a record type inhabited by
 correct second species counterpoint.
 As in \texttt{FirstSpecies}, we have three fields holding the musical
-content, followed by five fields carrying the proofs of various
-properties.
+content, followed by five fields carrying the proofs of the properties
+disucssed above.
 
 \begin{alltt}
 record SecondSpecies : Set where

@@ -60,8 +60,8 @@ other variants can be formalized in an analogous way.
 
 First species counterpoint is the simplest variant of counterpoint.
 In first species, we set one note against each note in the cantus firmus,
-which is required to start with a tonic (the first note of a scale;
-e.g., C in the case of C major) and consist only of whole notes.
+which is required to start with a tonic (the first note of a scale,
+such as C in C major) and consist only of whole notes.
 Figure~\ref{fig:fs} shows an example of first species counterpoint.
 The lower line is the cantus firmus, which we excerpt from a German
 song called \emph{Froschgesang} (Frog's song).
@@ -79,11 +79,8 @@ middle bars.
 Therefore, the Frog's song in Figure~\ref{fig:fs} is represented as a
 compound of the following three elements:
 
-\begin{alltt}
-PitchInterval : Set
-PitchInterval = Pitch \(\times\) Interval
-  
-first : PitchInterval
+\begin{alltt}  
+first : PitchInterval -- Pitch \(\times\) Interval
 first = (c 5 , per8)
 
 middle : List PitchInterval
@@ -104,17 +101,17 @@ different parts are subject to different rules, as we detail below.
 The beginning of the music should express perfection.
 As we saw in Section~\ref{sec:music}, there are three intervals that
 are classified as perfect: the 1st (usually called the \emph{unison}),
-t5th, and 8th.
+5th, and 8th.
 The first interval of the music must then be one of these intervals.
 In our formalization, we implement this rule as the
 \texttt{checkBeginning} function, which reports an error
 \texttt{not158 i} when the first interval \texttt{i} is an invalid one.
-Since Agda does not have exceptions, we turn the error into an option
-value by wrapping it around the \texttt{just} constructor.
+Since Agda does not have exceptions, we turn the error into a
+\texttt{Maybe} value by wrapping it around the \texttt{just} constructor.
 
 \begin{alltt}
 data BeginningError : Set where
-  not158   : PitchInterval \(\rightarrow\) BeginningError
+  not158 : PitchInterval \(\rightarrow\) BeginningError
   
 checkBeginning : PitchInterval \(\rightarrow\) Maybe BeginningError
 checkBeginning pi@(_ , i) =
@@ -132,7 +129,7 @@ As we saw before, consonant intervals include the unison,
 of the 3rd interval, and similarly for the 6th.}, 5th, 6th, and 8th,
 and among these, the unison is clearly an obstacle to distinguishing
 between the two lines of music.
-Therefore, the middle bars must consist of the latter four intervals.
+Therefore, the middle bars must consist only of the latter four intervals.
 We encode this rule as the \texttt{checkIntervals} function, which
 returns a list of errors correponding to the occurrences of dissonant
 intervals and unisons.
@@ -140,13 +137,13 @@ intervals and unisons.
 \begin{alltt}
 data IntervalError : Set where
   dissonant : Interval \(\rightarrow\) IntervalError
-  unison    : Pitch \(\rightarrow\) IntervalError
+  unison    : Pitch    \(\rightarrow\) IntervalError
 
 intervalCheck : PitchInterval \(\rightarrow\) Maybe IntervalError
 intervalCheck (p , i) with isConsonant i | isUnison i
-... | false | _    = just (dissonant i)
-... | _     | true = just (unison p)
-... | _     | _    = nothing
+intervalCheck (p , i) | false | _    = just (dissonant i)
+intervalCheck (p , i) | _     | true = just (unison p)
+intervalCheck (p , i) | _     | _    = nothing
 
 checkIntervals : List PitchInterval \(\rightarrow\) List IntervalError
 checkIntervals = mapMaybe intervalCheck
@@ -161,10 +158,10 @@ i.e., the way one interval moves to another interval.
 As Figure~\ref{fig:motioncadence} left shows, there are four kinds of motion:
 \emph{contrary} (two lines go in different directions),
 \emph{parallel} (two lines go in the same direction by the same
-distance), \emph{similar} (two lines go in the same direction),
-and \emph{oblique} (one line plays the same note).
+distance), \emph{similar} (two lines go in the same direction by
+different distances), and \emph{oblique} (one line plays the same note).
 It is known that approaching a perfect interval by parallel or similar
-motion tends to fuse the two lines of melody into one.
+motion tends to fuse the melodic lines into one.
 To rule out such motion, we define the \texttt{checkMotion}
 function, which inspects all pairs of two adjacent intervals (using an
 auxiliary function \texttt{pairs}) and returns a list of erroneous patterns.
@@ -203,8 +200,8 @@ errors.
 
 \begin{alltt}
 data EndingError : Set where
-  not18    : PitchInterval \(\rightarrow\) EndingError
-  not27    : PitchInterval \(\rightarrow\) EndingError
+  not18    : PitchInterval      \(\rightarrow\) EndingError
+  not27    : PitchInterval      \(\rightarrow\) EndingError
   tooShort : List PitchInterval \(\rightarrow\) EndingError
 
 endingCheck : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) Maybe EndingError
@@ -226,25 +223,12 @@ checkEnding (p :: ps) q = checkEnding ps q
 \subsubsection{Putting Things Together}
 
 Using the encoding of music and rules we have seen so far, we define
-\texttt{FirstSpecies}, a record type inhabited by correct counterpoint.
+\texttt{FirstSpecies}, a record type inhabited by correct first species
+counterpoint.
 The first three fields of this record type represent the first, middle,
 and last bars, respectively.
 The last four fields stand for the proofs that the music satisfies all
-the required properties, that is:
-
-\begin{itemize}
-  \item The beginning is a perfect consonance
-  \item The middle bars have no dissonant interval or unison
-  \item The middle bars have no perfect interval approached by
-    parallel or similar motion
-  \item The ending is a unison or an octave approached by a cadence
-\end{itemize}
-
-\noindent Recall that the functions representing these rules return
-either an option value or a list of found errors.
-Therefore, the correctness proofs either take the form
-\texttt{func args $\equiv$ nothing}, or look like
-\texttt{func args $\equiv$ []}.
+the required properties.
 
 \begin{alltt}
 record FirstSpecies : Set where
@@ -261,7 +245,7 @@ record FirstSpecies : Set where
 
 With this record type, we can show that the counterpoint in
 Figure~\ref{fig:fs} is correct, since the music is an inhabitant of
-the \texttt{FirstSpecies} type.
+\texttt{FirstSpecies}.
 
 \begin{alltt}
 fs : FirstSpecies
@@ -293,13 +277,10 @@ type for the first and last bars, and define a new type
 \texttt{PitchInterval2} for middle bars.
 
 \begin{alltt}
-PitchInterval2 : Set
-PitchInterval2 = Pitch \(\times\) Interval \(\times\) Interval
-
 first2 : PitchInterval
 first2 = (c 5 , per5)
 
-middle2 : List PitchInterval2
+middle2 : List PitchInterval2 -- Pitch \(\times\) Interval \(\times\) Interval
 middle2 =
   (d 5 , min3 , per5) :: (e 5 , min3 , min6) :: (f 5 , maj3 , aug4) ::
   (e 5 , min6 , min3) :: (d 5 , min3 , maj6) :: []
@@ -335,13 +316,11 @@ first species: they must all be consonant, non-unison intervals.
 
 \paragraph{Weak Beats}
 
-Weak beats are constrained in a looser manner than strong beats.
-First, they are allowed to be dissonant if they are created by a
+Weak beats are allowed to be dissonant if they are created by a
 \emph{passing tone}, i.e., a note in the middle of two step-wise
 motions in the same direction (as in bars 4-5 of Figure~\ref{fig:ss}).
-Second, they are allowed to be the unison if they are left by step in
-the opposite direction from their approach (as in bars 5-6 of
-Figure~\ref{fig:ss}).
+They may also be the unison if they are left by step in the opposite
+direction from their approach (as in bars 5-6 of Figure~\ref{fig:ss}).
 % We implement these rules as the \texttt{checkWeakBeats} function,
 % which checks the validity of every three successive beats in the
 % middle bars.
@@ -357,7 +336,7 @@ across bars.
 
 \paragraph{Ending}
 
-The last interval must again be the unison or 8th, preceded by an
+The last interval must be the unison or 8th, preceded by an
 appropriate interval that constitutes a cadence structure.
 
 \subsubsection{Putting Things Together}
@@ -367,10 +346,8 @@ correct second species counterpoint.
 As in \texttt{FirstSpecies}, we have three fields holding the musical
 content, followed by five fields carrying the proofs of the required
 properties disucssed above\footnote{
-  As the reader would have imagined, each \texttt{checkXXX} function
-  corresponds to one rule that must be satisfied by the counterpoint.
   The auxiliary function \texttt{secondPitch} in \texttt{weakBeatsOk}
-  extracts the counterpoint note of the last interval, and
+  extracts the counterpoint note of a given interval, and
   \texttt{expandPitchIntervals2} turns a list of \texttt{PitchInterval2}s
   into a list of \texttt{PitchInterval}s.
 }.

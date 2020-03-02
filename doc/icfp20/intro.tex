@@ -64,7 +64,7 @@ existing Haskell libraries, in partiular for MIDI generation.
 Full dependent types allow expression of predicate logic, and it is
 tempting to take a standard textbook on music theory such as
 \citet{piston-harmony} or \citet{aldwell2018harmony} and formalize it
-in type theory.  As a first step we start with the modest task of
+in type theory.  As a first step towards this goal, we start with the modest task of
 expressing a small, relatively strict rule set known as species
 counterpoint~\cite{fux-cp}, intended for combining interdependent
 melody lines to produce a pleasant-sounding result.  Roughly speaking,
@@ -109,12 +109,11 @@ straightforward to reuse rules in different contexts.  Put differently,
 our representation of rules satisfies modularity.
 
 The rest of this paper structured as follows.  Section~\ref{sec:music}
-provides a brief glossary of musical terms, to prepare the
-reader with no familiarity in music theory.  Sections~\ref{sec:cp} and
-\ref{sec:harmony} describe our formalization of counterpoint and
-harmony, focusing on the composable and modular aspects of the
-proposed approach.  Lastly, Section~\ref{sec:conclusion} concludes
-the paper with future perspectives.
+introduces basic musical concepts as well as their Agda representation.
+Sections~\ref{sec:cp} and \ref{sec:harmony} describe our formalization
+of counterpoint and harmony, focusing on the composable and
+modular aspects of the proposed approach.  Lastly,
+Section~\ref{sec:conclusion} concludes the paper with future perspectives.
 
 This is an experience report, and we highlight both the advantages and
 disadvantages of using Agda for music theory. On one hand the

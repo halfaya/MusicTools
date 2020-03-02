@@ -40,9 +40,9 @@ data IntervalError : Set where
 
 intervalCheck : PitchInterval → Maybe IntervalError
 intervalCheck (p , i) with isConsonant i | isUnison i
-... | false | _    = just (dissonant i)
-... | _     | true = just (unison p)
-... | _     | _    = nothing
+intervalCheck (p , i) | false | _    = just (dissonant i)
+intervalCheck (p , i) | _     | true = just (unison p)
+intervalCheck (p , i) | _     | _    = nothing
 
 checkIntervals : List PitchInterval → List IntervalError
 checkIntervals = mapMaybe intervalCheck
@@ -156,13 +156,16 @@ checkStrongBeats = checkIntervals ∘ map strongBeat
 
 checkWeakBeat : PitchInterval2 → Pitch → Maybe IntervalError
 checkWeakBeat (p , i , j) q with isConsonant j | isUnison j 
-... | false | _ = if isPassingTone (secondPitch (p , i)) (secondPitch (p , j)) q
-                  then nothing
-                  else just (dissonant j)
-... | _ | true = if isOppositeStep (secondPitch (p , i)) (secondPitch (p , j)) q
-                 then nothing
-                 else just (unison p)
-... | _ | _    = nothing
+checkWeakBeat (p , i , j) q | false | _ =
+  if isPassingTone (secondPitch (p , i)) (secondPitch (p , j)) q
+  then nothing
+  else just (dissonant j)
+checkWeakBeat (p , i , j) q | _ | true =
+  if isOppositeStep (secondPitch (p , i)) (secondPitch (p , j)) q
+  then nothing
+  else just (unison p)
+checkWeakBeat (p , i , j) q | _ | _    =
+  nothing
  
 checkWeakBeats : List PitchInterval2 → Pitch → List IntervalError
 checkWeakBeats []            p = []

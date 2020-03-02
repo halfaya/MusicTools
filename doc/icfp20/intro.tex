@@ -2,7 +2,7 @@
 \label{sec:intro}
 
 Edgar Var\`{e}se describes music as ``organized sound'', and
-throughout history cultures have created and applied systems of rules
+throughout history cultures have developed and applied systems of rules
 and guidelines to govern the music they create, most notably the
 Common Practice Period of Western music spanning the 17th to early
 20th centuries. These rule systems are seldom absolute, and indeed
@@ -29,7 +29,7 @@ established Haskell library Euterpea~\citep{hudak-haskell} for general music
 and sound exploration.
 
 To describe rules of basic harmonic structure,
-\citet{magalhaes-harmtrace} and its successors use dependent types,
+\citet{magalhaes-harmtrace} and their successors use dependent types,
 for example to index chords by major or minor mode.  However Haskell
 currently has limited support for dependent types, and requires many
 extentions and tricks such as the use of singleton
@@ -37,74 +37,91 @@ types~\citep{eisenberg-singleton}.
 
 In this paper we explore what can be done in the context of music by
 using a programming language that offers full dependent types. We use
-the language Agda~\citep{norell-phd} since it is fairly mature and
-aims to be a functional programming language as well as a proof
+Agda~\citep{norell-phd} since it is fairly mature and
+aims to be both a functional programming language and a proof
 assistant. It also features a Haskell FFI so we can take advantage of
-existing Haskell libraries, in partiular for MIDI.
+existing Haskell libraries, in partiular for MIDI generation.
+
+% However this is difficult because most
+% ``rules'' in music theory are not absolute, but rather suggestions of
+% varying degrees (themselves vaguely specified) of importance. Since
+% ultimately the resulting created music is more important than the
+% theory, an alternative is to attempt to indirectly deduce the rules
+% from music samples, using machine learning~\citep{huang-cp} or
+% some other statistical methods. Unfortunately the set of deduced
+% rules could sometimes be insufficient for generating good music.
+% As an example, \citet{roberts-cp} develop the Bach Doodle
+% harmonization tool using Bach chorals as training data, but still
+% observe high frequency of parallel 5th and 8th that are extremely
+% rare in Bach's music.
+
+% Ultimately it seems some kind of mixture of rules and statistics may
+% be the best way to faithfully capture an effective theory of
+% music. One simple approach would be to develop a logic of rules and
+% their interactions, but attach weights to the rules which could be
+% determined via machine learning techniques.
 
 Full dependent types allow expression of predicate logic, and it is
 tempting to take a standard textbook on music theory such as
-\citet{piston-harmony} or \citet{aldwell2018harmony} and attempt to
-formalize it in type theory. However this is difficult since most
-``rules'' in music theory are not absolute, but rather suggestions of
-varying degrees (themselves vaguely specified) of importance. Since
-ultimately the resulting created music is more important than the
-theory, an alternative is to attempt to indirectly deduce the rules
-from music samples, using for example machine
-learning~\citep{huang-cp}. However there is the danger that since
-the rules were never explicit they could end up being violated with
-poor results; for example parallel fifths and octaves that are
-extremely rare (and almost always due to special allowed
-circumstances) in Bach chorales used as training data resulted
-in a much higher frequency of their use in generated
-harmonizations~\citep{roberts-cp}.
-
-Ultimately it seems some kind of mixture of rules and statistics may
-be the best way to faithfully capture an effective theory of
-music. One simple approach would be to develop a logic of rules and
-their interactions, but attach weights to the rules which could be
-determined via machine learning techniques.
-
-Our long-term goal is formalization of a large amount of music theory.
-As a first step we start with the modest task of expressing a small,
-relatively strict rule set known as species
+\citet{piston-harmony} or \citet{aldwell2018harmony} and formalize it
+in type theory.  As a first step we start with the modest task of
+expressing a small, relatively strict rule set known as species
 counterpoint~\cite{fux-cp}, intended for combining interdependent
-melody lines to produce a pleasant-sounding result.
+melody lines to produce a pleasant-sounding result.  Roughly speaking,
+what we do is to write a custom musical type checker in Agda.
+Compared to the previous work by \citet{cong-cp}, where rules are
+expressed directly as Agda types, our approach makes it easier to
+describe fine-grained rules, produce readable error messages, and add
+or drop rules depending on the circumstances.
 
-We make use of and extend~\citet{MusicTools}, a library of small tools
-for analysis and synthesis of music written in Agda, with the goal of
-eventually being a dependently-typed alternative to Euterpea.
-Previous work by \citet{cong-cp} using Music Tools expressed
-first-species counterpoint with the Agda type system, so that an error
-in counterpoint resulted in an Agda type error. Although this takes
-advantage of Agda's native type checking, it has several
-downsides. One is that the Agda errors may be difficult to interpret
-as the corresponding musical error. Another is that it is difficult to
-keep the types both simple and flexible.
+% [NOTE: I've squeezed the description of our new counterpoint
+% implementation.]
 
-In this work we present an alternative representation of counterpoint
-using what could be considered a custom musical type checker written
-in Agda. This allows us to easily describe fine-grained rules, write
-custom type errors, and then combine subsets of rules together for
-larger-scale checking. Music can be easily combined with rules it
-satisfies as a dependent record type. This record represents a proof
-certificate that the music follows the asserted rules.
-Rules can also easily be used in
-other contexts, satisfying modularity and composability.
+% We make use of and extend Music Tools~\citep{MusicTools},
+% a library of small tools
+% for analysis and synthesis of music written in Agda, with the goal of
+% eventually being a dependently-typed alternative to Euterpea.
+% Previous work by \citet{cong-cp} expresses
+% first-species counterpoint with the Agda type system, so that an error
+% in counterpoint results in an Agda type error. Although this takes
+% advantage of Agda's native type checking, it has several
+% downsides. One is that the Agda errors may be difficult to interpret
+% as the corresponding musical error. Another is that it is difficult to
+% keep the types both simple and flexible.
+
+% In this work we present an alternative representation of counterpoint
+% using what could be considered a custom musical type checker written
+% in Agda. This allows us to easily describe fine-grained rules, write
+% custom type errors, and then combine subsets of rules together for
+% larger-scale checking. Music can be combined with rules it
+% satisfies as a dependent record type. This record represents a proof
+% certificate that the music follows the asserted rules.
+% Rules can also be used in multiple different contexts, satisfying
+% modularity and composability.
 
 We also present preliminary work on harmonizing a melody using
 a subset of rules based on \citet{piston-harmony}, contrasting with
-existing work by \citet{koops-fharm}. Notably, since counterpoint and
+existing work by \citet{koops-fharm}. Since counterpoint and
 harmony are not separate concepts but in fact deeply intertwined, we
-are able to reuse counterpoint rules to help develop natural-sounding
-harmonizations.
+would wish to reuse counterpoint rules to develop natural-sounding
+harmonizations.  We show that, with our custom type checker, it is
+straightforward to reuse rules in different contexts.  Put differently,
+our representation of rules satisfies modularity.
+
+The rest of this paper structured as follows.  Section~\ref{sec:music}
+provides a brief glossary of musical terms, to prepare the
+reader with no familiarity in music theory.  Sections~\ref{sec:cp} and
+\ref{sec:harmony} describe our formalization of counterpoint and
+harmony, focusing on the composable and modular aspects of the
+proposed approach.  Lastly, Section~\ref{sec:conclusion} concludes
+the paper with future perspectives.
 
 This is an experience report, and we highlight both the advantages and
 disadvantages of using Agda for music theory. On one hand the
 expressiveness of dependent types makes it easy and natural to
-describe music theory rules. However we find the emphasis on proof
+describe music theory rules. On the other hand we find the emphasis on proof
 construction and particularly the extra work needed for decidable
 equality can add an extra burden which is not always welcome. However
 overall we feel the positives far outweigh the negatives, and in the
-final section we describe future work which may help reduce the tedium.
+final section we discuss possible ways to reduce the tedium.
 

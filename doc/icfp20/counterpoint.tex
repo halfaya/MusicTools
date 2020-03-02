@@ -7,21 +7,21 @@
   \end{figure}
 }
 
-\newcommand{\Motion}{
+\newcommand{\MotionCadence}{
   \begin{figure}
-    \includegraphics[width=7cm]{fig/motion1.png}
-    \hspace{8mm}
-    \includegraphics[width=3.35cm]{fig/motion2.png}
+    \includegraphics[width=7cm]{fig/motion.png}
+    \hspace{1.2cm}
+    \includegraphics[width=3.33cm]{fig/cadence.png}
     \begin{flushleft}
     \begin{small}
-      \hspace{1.55cm} contrary \ \ \ \ \ \ \ \ parallel \ \ \ \ \ \ \
-      \ \ \,similar \ \ \ \ \ \ \ \ \ oblique
-      \hspace{1.3cm} paralell-5th \ \ \ similar-8th
+      \hspace{1.2cm} contrary \ \ \ \ \ \ \ \ \,parallel \ \ \ \ \ \ \
+      \ \ \ \,similar \ \ \ \ \ \ \ \ \ \ oblique
+      %\hspace{1.3cm} paralell-5th \ \ \ similar-8th
     \end{small}
     \end{flushleft}
-    \caption{Four Kinds of Motion (left) and Invalid Patterns (right)}
-    \Description{Four Kinds of Motion (left) and Invalid Patterns (right)}
-    \label{fig:motion}
+    \caption{Motion (left) and Cadence (right)}
+    \Description{Motion (left) and Cadence (right)}
+    \label{fig:motioncadence}
   \end{figure}
 }
 
@@ -36,8 +36,6 @@
 
 \section{Counterpoint}
 \label{sec:cp}
-
-TODO: contrast old and new methods
 
 Counterpoint is a technique for combining multiple lines of melodies.
 Composing counterpoint is like arranging a song for choir:
@@ -156,7 +154,7 @@ checkIntervals = mapMaybe intervalCheck
 
 \paragraph{Motion}
 
-\Motion
+\MotionCadence
 
 The independence of melodic lines is also affected by \emph{motion},
 i.e., the way one interval moves to another interval.
@@ -166,11 +164,10 @@ As Figure~\ref{fig:motion} left shows, there are four kinds of motion:
 distance), \emph{similar} (two lines go in the same direction),
 and \emph{oblique} (one line plays the same note).
 It is known that approaching a perfect interval by parallel or similar
-motion (as in Figure~\ref{fig:motion} right) destroys the independence
-of lines.
+motion tends to fuse the two lines of melody into one.
 To rule out such motion, we define the \texttt{checkMotion}
-function, which checks all pairs of two adjacent intervals and
-returns a list of erroneous patterns.
+function, which inspects all pairs of two adjacent intervals (using an
+auxiliary function \texttt{pairs}) and returns a list of erroneous patterns.
 
 \begin{alltt}
 data MotionError : Set where
@@ -188,21 +185,21 @@ motionCheck i1 i2 | similar  | true  = just (similar i1 i2)
 
 checkMotion : List PitchInterval \(\rightarrow\) List MotionError
 checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs
--- where pairs l returns a list of pairs consisting of two adjacent elements of l
 \end{alltt}
 
 \paragraph{Ending}
 
 The ending of the music should express relaxation.
-Among different intervals, the unison and 8th are considered
-most stable, hence the last interval of the music must be either of
-these intervals.
+There is a concensus that the unison and 8th are the most stable
+intervals, hence the music must end with either of these intervals.
 The last interval should also be approached by a \emph{cadence},
-a progression that gives rise to a sense of resolution.
+a progression that gives rise to a sense of resolution
+(Figure~\ref{fig:motion} right).
 This in turn suggests that a valid ending requires the middle bars
 to be non-empty.
 We encode these rules as the \texttt{checkEnding} function, which,
-upon finding an invalid ending, tells us which rules are not satisfied.
+upon finding an invalid ending, reports one of the three possible
+errors.
 
 \begin{alltt}
 data EndingError : Set where

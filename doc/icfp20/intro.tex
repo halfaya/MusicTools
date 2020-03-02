@@ -70,10 +70,11 @@ relatively strict rule set known as species
 counterpoint~\cite{fux-cp}, intended for combining interdependent
 melody lines to produce a pleasant-sounding result.
 
-We make use of and extend~\citet{MusicTools}, a library of small tools
+We make use of and extend Music Tools~\citep{MusicTools},
+a library of small tools
 for analysis and synthesis of music written in Agda, with the goal of
 eventually being a dependently-typed alternative to Euterpea.
-Previous work by \citet{cong-cp} using Music Tools expresses
+Previous work by \citet{cong-cp} expresses
 first-species counterpoint with the Agda type system, so that an error
 in counterpoint resulted in an Agda type error. Although this takes
 advantage of Agda's native type checking, it has several
@@ -88,8 +89,8 @@ custom type errors, and then combine subsets of rules together for
 larger-scale checking. Music can be easily combined with rules it
 satisfies as a dependent record type. This record represents a proof
 certificate that the music follows the asserted rules.
-Rules can also easily be used in
-other contexts, satisfying modularity and composability.
+Rules can also be used in multiple different contexts, satisfying
+modularity and composability.
 
 We also present preliminary work on harmonizing a melody using
 a subset of rules based on \citet{piston-harmony}, contrasting with
@@ -101,7 +102,7 @@ harmonizations.
 This is an experience report, and we highlight both the advantages and
 disadvantages of using Agda for music theory. On one hand the
 expressiveness of dependent types makes it easy and natural to
-describe music theory rules. However we find the emphasis on proof
+describe music theory rules. On the other hand we find the emphasis on proof
 construction and particularly the extra work needed for decidable
 equality can add an extra burden which is not always welcome. However
 overall we feel the positives far outweigh the negatives, and in the

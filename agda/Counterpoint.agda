@@ -1,5 +1,6 @@
 {-# OPTIONS --without-K #-}
 
+-- First and second species counterpoint
 module Counterpoint where
 
 open import Data.Bool using (Bool; true; false; if_then_else_; _∨_; _∧_; not)
@@ -23,6 +24,9 @@ open import Util using (pairs)
 
 ------------------------------------------------
 
+-- First species
+
+-- Beginning must be the 1st, 5th, or 8th
 data BeginningError : Set where
   not158   : PitchInterval → BeginningError
 
@@ -34,6 +38,7 @@ checkBeginning pi@(_ , i) =
   
 ------------------------------------------------
 
+-- Intervals in middle bars must be consonant and non-unison
 data IntervalError : Set where
   dissonant : Interval → IntervalError
   unison    : Pitch    → IntervalError
@@ -49,6 +54,7 @@ checkIntervals = mapMaybe intervalCheck
 
 ------------------------------------------------
 
+-- Perfect intervals must not approached by parallel or similar motion
 data Motion : Set where
   contrary : Motion
   parallel : Motion
@@ -81,6 +87,7 @@ checkMotion = mapMaybe (uncurry motionCheck) ∘ pairs
 
 ------------------------------------------------
 
+-- Ending must be the 1st or 8th approached by a cadence
 data EndingError : Set where
   not18    : PitchInterval → EndingError
   not27    : PitchInterval → EndingError
@@ -103,6 +110,7 @@ checkEnding (p ∷ ps) q = checkEnding ps q
 
 ------------------------------------------------
 
+-- Correct first species counterpoint
 record FirstSpecies : Set where
   constructor firstSpecies
   field
@@ -134,6 +142,9 @@ expandPitchInterval2 (p , i , j) = (p , i) ∷ (p , j) ∷ []
 expandPitchIntervals2 : List PitchInterval2 → List PitchInterval
 expandPitchIntervals2 = concatMap expandPitchInterval2
 
+------------------------------------------------
+
+-- Beginning must be the 5th or 8th
 data BeginningError2 : Set where
   not58    : PitchInterval → BeginningError2
 
@@ -148,12 +159,15 @@ checkEnding2 []           _   = just (tooShort [])
 checkEnding2 (p ∷ [])     q   = endingCheck (weakBeat p) q
 checkEnding2 (_ ∷ p ∷ ps) q   = checkEnding2 (p ∷ ps) q
 
--- We might want to lift the ordinary interval error to one involving PitchInterval2
--- to give the user more context, but for now keep it simple.
+------------------------------------------------
 
+-- Strong beats must be consonant and non-unison
 checkStrongBeats : List PitchInterval2 → List IntervalError
 checkStrongBeats = checkIntervals ∘ map strongBeat
 
+------------------------------------------------
+
+-- Weak beats may be dissonant or unison
 checkWeakBeat : PitchInterval2 → Pitch → Maybe IntervalError
 checkWeakBeat (p , i , j) q with isConsonant j | isUnison j 
 checkWeakBeat (p , i , j) q | false | _ =
@@ -174,20 +188,23 @@ checkWeakBeats pis@(_ ∷ qis) p =
            (zip pis
                 (map (λ {(q , i , j) → proj₂ (pitchIntervalToPitchPair (q , i))}) qis ++ (p ∷ [])))
 
--- no parallel or similar motion to a perfect interval across bars
--- assumes a bar after the first PitchInterval, and then after every other PitchInterval
+------------------------------------------------
+
+-- Perfect intervals on strong beats must not be approached by parallel or similar motion
 checkMotion2 : List PitchInterval → List MotionError
 checkMotion2 []           = []
 checkMotion2 (_ ∷ [])     = []
 checkMotion2 (p ∷ q ∷ ps) = checkMotion (p ∷ q ∷ []) ++ checkMotion2 ps
 
--- Still more conditions to be added, but these are the main points.
+------------------------------------------------
+
+-- Correct second species counterpoint
 record SecondSpecies : Set where
   constructor secondSpecies
   field
-    firstBar      : PitchInterval -- for now require counterpont to start with a rest, which is preferred
+    firstBar      : PitchInterval -- require counterpont to start with a rest, which is preferred
     middleBars    : List PitchInterval2
-    lastBar       : PitchInterval -- for now require counterpoint to end with only a single whole note, which is preferred
+    lastBar       : PitchInterval -- require counterpoint to end with only a single whole note, which is preferred
     beginningOk   : checkBeginning2 firstBar ≡ nothing
     strongBeatsOk : checkStrongBeats middleBars ≡ []
     weakBeatsOk   : checkWeakBeats middleBars (secondPitch lastBar) ≡ []

@@ -1,9 +1,10 @@
 {-# OPTIONS --without-K #-}
 
+-- First and second species counterpoint for Frog's song
 module Frog where
 
 open import Data.Fin
-open import Data.List using (List; []; _∷_; _++_; zip; map)
+open import Data.List using (List; []; _∷_; _++_; map)
 open import Data.Maybe using (fromMaybe)
 open import Data.Nat
 open import Data.Product using (_×_; _,_; proj₁; proj₂)
@@ -19,70 +20,50 @@ open import Pitch
 open import Interval
 open import Util
 
--- Frog's song (middle bars)
-cfMiddle : List Pitch 
-cfMiddle =
-  d 5 ∷ e 5 ∷ f 5 ∷ e 5 ∷ d 5 ∷ []
+-- First species counterpoint (musical content)
+first : PitchInterval
+first = (c 5 , per8)
 
--- First species counterpoint
-cpMiddle1 : List Interval 
-cpMiddle1 =
-  maj6 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
+middle : List PitchInterval 
+middle = (d 5 , maj6) ∷ (e 5 , min6) ∷ (f 5 , maj3) ∷ (e 5 , min3) ∷ (d 5 , maj6) ∷ []
 
--- Bad counterpoint (the first octave is approached by parallel motion)
-cpMiddle1' : List Interval 
-cpMiddle1' =
-  per8 ∷ min6 ∷ maj3 ∷ min3 ∷ maj6 ∷ []
+middle' : List PitchInterval 
+middle' = (d 5 , per8) ∷ (e 5 , min6) ∷ (f 5 , maj3) ∷ (e 5 , min3) ∷ (d 5 , maj6) ∷ []
 
--- Second species counterpoint (middle bars)
-cpMiddle2 : List (Interval × Interval) 
-cpMiddle2 =
-  -- with dissonant interval and unison
-  (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
-  (min6 , per1) ∷ (min3 , maj6) ∷ []
-  -- with dissonant interval
-  -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , aug4) ∷
-  -- (min6 , min3) ∷ (min3 , maj6) ∷ []
-  -- with unison
-  -- (min3 , per5) ∷ (min3 , min6) ∷ (maj3 , per1) ∷
-  -- (min3 , min6) ∷ (min3 , maj6) ∷ []
+last : PitchInterval
+last = (c 5 , per8)
 
-first1 : PitchInterval
-first1 = (c 5 , per8)
-
-middle1 : List PitchInterval 
-middle1 = zip cfMiddle cpMiddle1
-
-middle1' : List PitchInterval 
-middle1' = zip cfMiddle cpMiddle1'
-
-last1 : PitchInterval
-last1 = (c 5 , per8)
-
+-- Second species counterpoint (musical content)
 first2 : PitchInterval
 first2 = (c 5 , per5)
 
 middle2 : List PitchInterval2 
-middle2 = zip cfMiddle cpMiddle2
+middle2 = (d 5 , min3 , per5) ∷ (e 5 , min3 , min6) ∷ (f 5 , maj3 , aug4) ∷
+          (e 5 , min6 , per1) ∷ (d 5 , min3 , maj6) ∷ []
 
 last2 : PitchInterval
 last2 = (c 5 , per8)
 
+-- Correct first species counterpoint
 fs : FirstSpecies
-fs = firstSpecies first1 middle1 last1 refl refl refl refl
+fs = firstSpecies first middle last refl refl refl refl
 
+{-
+-- Parallel octave example from Section 3.3; ill-typed
 fs' : FirstSpecies
-fs' = firstSpecies first1 middle1' last1 refl refl refl refl
+fs' = firstSpecies first middle' last refl refl refl refl
+-}
 
+-- Correct second species counterpoint
 ss : SecondSpecies
 ss = secondSpecies first2 middle2 last2 refl refl refl refl refl
 
+
+-- Music as list of notes
 cf cp1 cp2 : List Note
 cf =
   tone whole (proj₁ (FirstSpecies.firstBar fs)) ∷
   map (tone whole ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) ++
-  -- yellow highlight when writing
-  -- (tone whole ∘ proj₁ ∘ pitchIntervalToPitchPair) (FirstSpecies.firstBar ss)
   tone whole (proj₁ (FirstSpecies.lastBar fs)) ∷
   []
   
@@ -101,6 +82,7 @@ cp2 =
 
 ----
 
+-- MIDI generation
 piano marimba : InstrumentNumber-1
 piano   = # 0
 marimba = # 12

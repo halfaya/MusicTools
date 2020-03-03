@@ -172,7 +172,7 @@ data MotionError : Set where
   similar  : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) MotionError
 
 motionCheck : PitchInterval \(\rightarrow\) PitchInterval \(\rightarrow\) Maybe MotionError
-motionCheck i1 i2 with motion i1 i2 | isPerfect (proj\(\sb{\mathtt{2}}\) i2)
+motionCheck i1 i2 with motion i1 i2 | isPerfect (proj\(\sb{2}\) i2)
 motionCheck i1 i2 | contrary | \_     = nothing
 motionCheck i1 i2 | oblique  | \_     = nothing
 motionCheck i1 i2 | parallel | false = nothing
@@ -249,7 +249,7 @@ Figure~\ref{fig:fs} is correct, since the music is an inhabitant of
 
 \begin{alltt}
 fs : FirstSpecies
-fs = firstSpecies first1 middle1 last1 refl refl refl refl
+fs = firstSpecies first middle last refl refl refl refl
 \end{alltt}
 
 \subsection{Second Species Counterpoint}
@@ -405,22 +405,24 @@ field, with the following message:
 
 \noindent In \citet{cong-cp}'s implementation, on the other hand,
 the invalid motion results in an unsolved metavariable \texttt{\_13},
-representing the proof that the two intervals form a valid motion:
+meaning that Agda failed to construct a proof required by the
+counterpoint constructor:
 
 \begin{alltt}
 \_13 : motionOk (c 5 , per8) (d 5 , per8)
 \end{alltt}
 
-\noindent Compared to the error message produced by our
-implementation, this lacks the exact information about the motion
-between the two intervals.
-
-We would also like to note that the attempt to precisely reporting
-musical errors has appeared in the work by \citet{szamozvancev-welltyped}.
-They formalize various musical rules, including those for intervals
-and motion, using GHC's custom type error feature.
-However, they do not aim to fully support species counterpoint,
-and thus do not cover as many rules as we do.
+\noindent For a non-expert user, it may be difficult to connect
+this message to the corresponding musical error \footnote{
+  The attempt to produce customized musical errors has also
+  appeared in \citet{szamozvancev-welltyped}.
+  They formalize various musical rules, including those for
+  intervals and motion, using GHC's custom type error feature.
+  However, their error messages are not as precise as ours:
+  e.g., for the parallel octave example, they simply report
+  ``\texttt{Direct motion into a perfect octave is forbidden}'',
+  without the precise information about the two intervals and
+  the motion between them.}.
 
 The second improvement from \citet{cong-cp} is that, instead of
 incorporating all the rules into a counterpoint datatype, we define

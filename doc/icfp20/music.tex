@@ -86,17 +86,16 @@ There are 13 kinds of interval within an octave
 several different perspectives:
 (i) major or minor; (ii) consonant or dissonant; and (iii) perfect
 or imperfect.
-We define intervals as a datatype \texttt{Interval}, where each
-constructor represents one of the 13 intervals.
+We represent intervals as natural numbers, but in this paper, we
+refer to them using more informative names such as \texttt{maj3}
+and \texttt{per8}.
 
-\paragraph{Chords}
+\paragraph{Chords and Triads}
 
-A \emph{chord} refers to a set of simultaneously sounding pitches.
-The most common pattern of chords is called \emph{triads},
-consisting of three notes separated by (major or minor) 3rd intervals.
-Chords are usually denoted by roman numerals representing the
-lowest note (the \emph{root}).
-We define triads as a datatype \texttt{Triad} with constructors
-\texttt{I}, \texttt{II}, etc., and obtain their constituent notes
-(packaged into a three-element vector) via a function
-\texttt{triadDegrees}.
+A \emph{chord} refers to a set of simultaneously sounding notes.
+In this paper we are particularly interested in \emph{triads},
+which are chords consisting of three notes separated by the 3rd
+intervals (i.e., \texttt{maj3} and \texttt{min3}).
+We define triads as a datatype \texttt{Triad} with roman numeral
+constructors representing the lowest note (called the \emph{root}).
+For instance, \texttt{I} in C major represents the triad C-E-G.

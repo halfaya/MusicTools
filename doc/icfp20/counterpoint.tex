@@ -124,11 +124,9 @@ checkBeginning pi@(_ , i) =
 
 The middle bars of the music should maintain consonance of intervals
 and independence of melodic lines.
-As we saw before, consonant intervals include the unison,
-3rd\footnote{We use ``3rd'' to mean both the major and minor variants
-of the 3rd interval, and similarly for the 6th.}, 5th, 6th, and 8th,
-and among these, the unison is clearly an obstacle to distinguishing
-between the two lines of music.
+As we saw in Figure~\ref{fig:interval}, consonant intervals include
+the unison, 3rd, 5th, 6th, and 8th, and among these, the unison is
+clearly an obstacle to distinguishing between the two lines of music.
 Therefore, the middle bars must consist only of the latter four intervals.
 We encode this rule as the \texttt{checkIntervals} function, which
 returns a list of errors corresponding to the occurrences of dissonant

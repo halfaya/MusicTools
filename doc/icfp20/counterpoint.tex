@@ -378,11 +378,11 @@ ss = SecondSpecies first2 middle2 last2 refl refl refl refl refl
 \subsection{Comparison with Previous Work}
 \label{sec:cp:comp}
 
-\citet{cong-cp} implement correct-by-construction counterpoint
-using an older version of Music Tools.
-The idea is to represent counterpoint as a list-like datatype,
-where the base cases enforce a valid ending and the inductive case
-guarantees correct uses of intervals and motion (by means of
+The type-theoretical formalization of counterpoint has previously
+been attempted by \citet{cong-cp}.
+They represent correct counterpoint as an Agda datatype akin to
+a list, where the base cases enforce a valid ending and the inductive
+case guarantees correct uses of intervals and motion (by means of
 implicit arguments representing proofs).
 
 Our representation of counterpoint improves on the existing
@@ -396,29 +396,37 @@ kind of mistake the programmer has made.
 Suppose we have replaced the second interval of Figure~\ref{fig:fs} by
 an octave (8th) of D, breaking the rule that perfect intervals cannot
 be approached by parallel motion.
-In our implementation, this results in an error in the
-\texttt{motionOk} field, which requires a proof of
-\texttt{checkMotion (firstBar :: middleBars) \(\equiv\) []}:
+In our implementation, this causes an error in the \texttt{motionOk}
+field, with the following message:
 
 \begin{alltt}
 (parallel (c 5 , per8) (d 5 , per8) :: []) != [] of type (List MotionError)
 \end{alltt}
 
 \noindent In \citet{cong-cp}'s implementation, on the other hand,
-the error results in the first \texttt{PitchInterval} being
-highlighted in yellow, with the following error message displayed
-in the Agda buffer:
+the invalid motion results in an unsolved metavariable \texttt{\_13},
+representing the proof that the two intervals form a valid motion:
 
 \begin{alltt}
-\_13 : motionOk (c 5 , c 6) (d 5 , d 6)
+\_13 : motionOk (c 5 , per8) (d 5 , per8)
 \end{alltt}
 
-\noindent This indicates the existence of an unsolved metavariable.
-To a non-expert user, it may be difficult to connect this message to
-the musical error.
+\noindent Compared to the error message produced by our
+implementation, this lacks the exact information about the motion
+between the two intervals.
+
+We would also like to note that the attempt to precisely reporting
+musical errors has appeared in the work by \citet{szamozvancev-welltyped}.
+They formalize various musical rules, including those for intervals
+and motion, using GHC's custom type error feature.
+However, they do not aim to fully support species counterpoint,
+and thus do not cover as many rules as we do.
 
 The second improvement from \citet{cong-cp} is that, instead of
-incorporating all the rules into the counterpoint datatype, we define
-each of them as a separate function.
-This makes it possible to reuse certain rules in a different context,
-as we will see in the next section.
+incorporating all the rules into a counterpoint datatype, we define
+each of them as a separate function and combine them using a
+record type.
+This makes it easy to switch between strict and relaxed rule sets:
+we just need to add or remove certain fields.
+It also allows us to reuse some of the rules in a context other than
+counterpoint, as we will see in the next section.

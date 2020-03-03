@@ -1,0 +1,63 @@
+\section{Representations of Counterpoint and Harmony}
+\label{sec:cpharmony}
+
+Harmony refers to simultaneously sounding tones (chords) and harmonic progression
+a series of chords. It is in essence the of dual of counterpoint. A
+fundamental representation used in Music Tools is a grid of
+\texttt{Point}s, where a \texttt{Point} represents either a pitch, a
+hold of a previous pitch, or a rest.
+
+\begin{alltt}
+data Point : Set where
+  tone : Pitch \(\rightarrow\) Point
+  hold : Pitch \(\rightarrow\) Point
+  rest : Point
+\end{alltt}
+
+Music is thus considered to be quantized to some minimal duration,
+with the horizontal dimension representing time and the vertical
+dimension representing pitch. A slice in the horizontal direction is a
+\texttt{Melody}, represented as a vector of points of some length $n$. Similarly a slice
+in the vertical direction is a \texttt{Chord}, again of some fixed length.
+
+\begin{alltt}
+data Melody (n : \(\mathbb{N}\)) : Set where
+  melody : Vec Point n \(\rightarrow\) Melody n
+
+data Chord (n : \(\mathbb{N}\)) : Set where
+  chord : Vec Point n \(\rightarrow\) Chord n
+\end{alltt}
+
+One can think of the grid as several melodies in parallel of the same
+duration. This is essentially counterpoint, and thus given that
+name. Note the crucial use of dependent types here to ensure all
+melodies have the same duration $d$. The counterpoint is specified to
+have $v$ voices.
+
+\begin{alltt}
+data Counterpoint (v : \(\mathbb{N}\)) (d : \(\mathbb{N}\)): Set where
+  cp : Vec (Melody d) v \(\rightarrow\) Counterpoint v d
+\end{alltt}
+
+Dually one can think of the grid as a series of chords, in another
+word a harmonic progression, although this is named \texttt{Harmony}
+in the library for conciseness. Again dependent types enforce every
+chord has the same number of voices.
+
+\begin{alltt}
+data Harmony (v : \(\mathbb{N}\)) (d : \(\mathbb{N}\)): Set where
+  harmony : Vec (Chord v) d \(\rightarrow\) Harmony v d
+\end{alltt}
+
+Converting between \texttt{Counterpoint} and \texttt{Harmony} is
+simply matrix transposition. These are fundamental representations
+that can be used directly for analysis, for example, and there are
+functions to convert them to MIDI for sound generation.
+
+There are many other ways to represent music, which have advantages in
+certain contexts. For example in Section~\ref{sec:cp}
+\texttt{PitchInterval} and \texttt{PitchInterval2} were used instead
+of \texttt{Counterpoint} since they more explictly represent the
+structure of the music in species counterpoint. It is straightforward
+to convert between the representations, and worth using the most
+appropriate type for a given situation.

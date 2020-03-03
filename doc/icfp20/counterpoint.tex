@@ -122,7 +122,7 @@ checkBeginning pi@(_ , i) =
 
 \paragraph{Intervals}
 
-The middle bars of the music should maintain harmonical consonance
+The middle bars of the music should maintain consonance of intervals
 and independence of melodic lines.
 As we saw before, consonant intervals include the unison,
 3rd\footnote{We use ``3rd'' to mean both the major and minor variants
@@ -131,7 +131,7 @@ and among these, the unison is clearly an obstacle to distinguishing
 between the two lines of music.
 Therefore, the middle bars must consist only of the latter four intervals.
 We encode this rule as the \texttt{checkIntervals} function, which
-returns a list of errors correponding to the occurrences of dissonant
+returns a list of errors corresponding to the occurrences of dissonant
 intervals and unisons.
 
 \begin{alltt}
@@ -187,7 +187,7 @@ checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs
 \paragraph{Ending}
 
 The ending of the music should express relaxation.
-There is a concensus that the unison and 8th are the most stable
+There is a consensus that the unison and 8th are the most stable
 intervals, hence the music must end with either of these intervals.
 The last interval should also be approached by a \emph{cadence},
 a progression that gives rise to a sense of resolution
@@ -345,7 +345,7 @@ Now we define \texttt{SecondSpecies}, a record type inhabited by
 correct second species counterpoint.
 As in \texttt{FirstSpecies}, we have three fields holding the musical
 content, followed by five fields carrying the proofs of the required
-properties disucssed above\footnote{
+properties discussed above\footnote{
   The auxiliary function \texttt{secondPitch} in \texttt{weakBeatsOk}
   extracts the counterpoint note of a given interval, and
   \texttt{expandPitchIntervals2} turns a list of \texttt{PitchInterval2}s

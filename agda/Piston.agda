@@ -242,8 +242,8 @@ testSTrack = track "Test S" piano channel1 tempo (notes→events mVelocity testS
 testBTrack : MidiTrack
 testBTrack = track "Test B" piano channel1 tempo (notes→events mVelocity testB)
 
-testTrack : MidiTrack
-testTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
+testHTrack : MidiTrack
+testHTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
 
-testTracks : List MidiTrack
-testTracks = testTrack ∷ []
+testHTracks : List MidiTrack
+testHTracks = testHTrack ∷ []

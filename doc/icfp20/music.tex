@@ -23,6 +23,8 @@
 \section{Basic Musical Terms and Their Representation in Agda}
 \label{sec:music}
 
+[TODO] Maybe need to explain degrees, instead of duration and notes.
+
 \paragraph{Pitches}
 
 A \emph{pitch} tells us how high or low a sound is.
@@ -86,3 +88,15 @@ several different perspectives:
 or imperfect.
 We define intervals as a datatype \texttt{Interval}, where each
 constructor represents one of the 13 intervals.
+
+\paragraph{Chords}
+
+A \emph{chord} refers to a set of simultaneously sounding pitches.
+The most common pattern of chords is called \emph{triads},
+consisting of three notes separated by (major or minor) 3rd intervals.
+Chords are usually denoted by roman numerals representing the
+lowest note (the \emph{root}).
+We define triads as a datatype \texttt{Triad} with constructors
+\texttt{I}, \texttt{II}, etc., and obtain their constituent notes
+(packaged into a three-element vector) via a function
+\texttt{triadDegrees}.

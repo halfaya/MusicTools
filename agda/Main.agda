@@ -15,6 +15,9 @@ main =
   let channel      = 0
       ticksPerBeat = 4 -- 16th notes
       file         = "/Users/name/Music/test.mid"
+-- counterpoint
       song         = cfcpTracks1
---    song         = cfcpTracks2
+--      song         = cfcpTracks2
+-- harmony
+--      song         = testHTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

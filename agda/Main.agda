@@ -17,6 +17,7 @@ main =
       ticksPerBeat = 1 -- half notes
 --      file         = "/tmp/test.mid"
       file         = "/Users/leo/Music/MusicTools/test.mid"
+--      file         = "/Users/youyou/Music/test.mid"
 -- counterpoint
 --      song         = cfcpTracks1
 --      song         = cfcpTracks2

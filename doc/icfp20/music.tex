@@ -23,11 +23,10 @@
 \section{Basic Musical Terms and Their Representation in Agda}
 \label{sec:music}
 
-[TODO] Maybe need to explain degrees, instead of duration and notes.
-
 \paragraph{Pitches}
 
-A \emph{pitch} tells us how high or low a sound is.
+The most basic concept in melody is \emph{pitches}, which tell us
+how high or low a tone is.
 We represent pitches as natural numbers, but throughout the paper,
 we use a more readable notation \texttt{name octave}, where
 \texttt{name} ranges over \texttt{c}, \texttt{d}, \texttt{e}, etc.,
@@ -45,10 +44,20 @@ For instance, the middle C is represented as \texttt{c 5}.
 % PitchOctave = Fin 12 \(\times\) Octave
 % \end{alltt}
 
+\paragraph{Scale Degrees}
+
+While pitches uniquely determine the position of a tone on e.g.
+a piano keyboard, \emph{scale degrees} stand for the relative position
+of a tone in a scale.
+For instance, a diatonic scale consists of seven scale degrees, which
+corresponds to C, D, E, F, G, A, B in the case of C major.
+We represent scale degrees as a datatype with seven constructors
+\texttt{d1} - \texttt{d7}.
+
 \paragraph{Duration}
 
-\emph{Duration} denotes an unspecified unit of time during which
-a sound or silence lasts.
+For rhythm, the fundamental concept is \emph{duration}, an
+unspecified unit of time during which a sound or silence lasts.
 We represent duration as a natural number, and use this value to
 calculate the absolute length when the music is played at a specific
 tempo.
@@ -61,13 +70,13 @@ per minute.
 %   duration : \(\mathbb{N}\) \(\rightarrow\) Duration
 % \end{alltt}
 
-\paragraph{Notes}
+% \paragraph{Notes}
 
-Combining pitches and duration gives us \emph{notes}.
-We represent notes as a datatype \texttt{Note} with two constructors:
-\texttt{tone} for notes with sound and \texttt{rest} for those without.
-For example, \texttt{tone whole (c 5)} is a whole note whose sound
-is the middle C.
+% Combining pitches and duration gives us \emph{notes}.
+% We represent notes as a datatype \texttt{Note} with two constructors:
+% \texttt{tone} for notes with sound and \texttt{rest} for those without.
+% For example, \texttt{tone whole (c 5)} is a whole note whose sound
+% is the middle C.
 
 % \begin{alltt}
 % data Note : Set where
@@ -87,16 +96,22 @@ several different perspectives:
 (i) major or minor; (ii) consonant or dissonant; and (iii) perfect
 or imperfect.
 We represent intervals as natural numbers, but in this paper, we
-refer to them using more informative names such as \texttt{maj3}
-and \texttt{per8}.
+refer to them using names such as \texttt{maj3} and \texttt{per8},
+which are more reader-friendly.
 
 \paragraph{Chords and Triads}
 
-A \emph{chord} refers to a set of simultaneously sounding notes.  In
-this paper we are particularly interested in \emph{triads}, which are
+A \emph{chord} refers to a set of simultaneously sounding notes.
+In this paper we are particularly interested in \emph{triads}, which are
 chords consisting of three notes separated by the 3rd intervals (i.e.,
-\texttt{maj3} and \texttt{min3}).  We define triads as a datatype
-\texttt{Triad} with roman numeral constructors representing the scale
-degree of the lowest note (called the \emph{root}). The other two
-notes are then members of the scale a third and a fifth above the
-root. For instance, \texttt{I} in C major represents the triad C-E-G.
+\texttt{maj3} and \texttt{min3}).
+We define triads as a datatype with roman numeral constructors
+representing the scale degree of the lowest note (called the \emph{root}).
+The other two notes are then members of the scale a third and a fifth
+above the root.
+For instance, the triad \texttt{I} in C major corresponds to the chord
+C-E-G.
+Triads can also be arranged in a way that a non-root note appears as
+the lowest note.
+Such arrangement is called \emph{inversion}; if a triad is not applied
+inversion, it is in \emph{root position}.

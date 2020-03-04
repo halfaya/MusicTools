@@ -376,16 +376,33 @@ ss = SecondSpecies first2 middle2 last2 refl refl refl refl refl
 \subsection{Comparison with Previous Work}
 \label{sec:cp:comp}
 
-The type-theoretical formalization of counterpoint has first
-been attempted by \citet{szamozvancev-welltyped}.
-They encode the rules for intervals and motion by declaring
-type classes \texttt{ValidHarmInterval} and \texttt{ValidMotion},
-and specifying which instances are invalid using GHC's support
-for custom type errors.
+The type-theoretical formalization of counterpoint has first been
+attempted by \citet{szamozvancev-welltyped}.
+They encode the rule for intervals by declaring a type class
+\texttt{ValidHarmInterval} that classifies valid intervals, and then
+specifying which instances are invalid using GHC's support for
+custom type errors.
+They also implement the restriction on motion based on a similar idea.
 
-The availability of the custom error feature is an advantage of using
-Haskell, but the language's type system does not allow producing
-detailed error messages.
+The availability of the custom type error feature is an advantage of
+using Haskell: it allows the rule writer to leverage Haskell's type checker.
+We believe that extending Agda with such support would be
+beneficial in music formalization and for many other purposes.
+
+More recently, \citet{cong-cp} give an implementation of first
+species counterpoint using dependent types in Agda.
+Their idea is to represent correct counterpoint as a list-like
+datatype, where the base cases enforce a valid ending and the
+inductive case guarantees correct uses of intervals and motion
+(by means of implicit arguments representing proofs).
+
+Our representation of counterpoint improves on Cong and Leo's
+in two ways.
+First, while Cong and Leo rely on the Agda type checker to report
+errors, we use our own type checker (implemented as the
+\texttt{checkXXX} functions) and type errors (defined as the
+\texttt{XXXError} datatypes).
+This allows us to produce more user-friendly error messages.
 Suppose we have replaced the second interval of Figure~\ref{fig:fs} by
 an octave (8th) of D, breaking the rule that perfect intervals cannot
 be approached by parallel motion.
@@ -396,39 +413,10 @@ field, with the following message:
 (parallel (c 5 , per8) (d 5 , per8) :: []) != [] of type (List MotionError)
 \end{alltt}
 
-\noindent Observe that the message clearly tells us which intervals
-form what kind of invalid motion.
-
-In Szamozvancev and Gale's implementation, the same example
-results in the following error:
-
-\begin{alltt}
-Direct motion into a perfect octave is forbidden.
-\end{alltt}
-
-\noindent The lack of the precise information about the intervals
-and motion is due to the absence of native dependent types in
-Haskell.
-
-More recently, \citet{cong-cp} give an implementation of first
-species counterpoint using dependent types in Agda.
-Their idea is to represent correct counterpoint as a list-like
-datatype, where the base cases enforce a valid ending and the
-inductive case guarantees correct uses of intervals and motion
-(by means of implicit arguments representing proofs).
-
-Our representation of counterpoint improves on their
-implementation in two ways.
-First, while \citet{cong-cp} rely on the Agda type checker to report
-errors in the counterpoint, we use our own type checker (implemented
-as the \texttt{checkXXX} functions) and type errors (defined as the
-\texttt{XXXError} datatypes).
-This allows us to produce helpful error messages while keeping
-types simple.
-Indeed, for the parallel octave example discussed above,
-\citet{cong-cp} would just report the existence of an unsolved
-metavariable \texttt{\_13}, meaning that Agda failed to construct
-a proof required by the counterpoint constructor:
+\noindent In contrast, Cong and Leo would just report the existence
+of an unsolved metavariable \texttt{\_13}, meaning that Agda failed
+to construct a proof required by the counterpoint constructor.
+Thus, the user would see the following message in the Agda buffer:
 
 \begin{alltt}
 \_13 : motionOk (c 5 , per8) (d 5 , per8)
@@ -439,8 +427,7 @@ this message to the corresponding musical error.
 
 The second improvement from \citet{cong-cp} is that, instead of
 incorporating all the rules into a counterpoint datatype, we define
-each of them as a separate function and combine them using a
-record type.
+each rule as a separate function and combining them using a record type.
 This makes it easy to switch between strict and relaxed rule sets:
 we just need to add or remove certain fields.
 It also allows us to reuse some of the rules in a context other than

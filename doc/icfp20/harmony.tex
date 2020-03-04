@@ -75,7 +75,7 @@ using the \texttt{Triad} datatype from Section~\ref{sec:music}.
 
 \begin{alltt}
 record NextTriad : Set where
-  constructor nextTriadb
+  constructor nextTriad
   field
     usual : List Triad; sometimes : List Triad; rare : List Triad
 
@@ -89,9 +89,9 @@ It is easiest to create a harmonic progression in reverse, to
 ensure that one ends a musical phrase with either a full (V--I) or half (V)
 cadence, and work backward from there. So we would like to invert this
 table to give a list of likely triads to precede a given triad. This
-would normally be straightfoward but here we see a disadvantage of
+would normally be straightforward but here we see a disadvantage of
 using Agda. As is typical with languages based on dependent type
-theories, equality is a very subtle concept and even determing if a
+theories, equality is a very subtle concept and even determining if a
 term is a member of a list is nontrivial.
 
 In Haskell this would be easy---there is an \texttt{Eq} typeclass and a
@@ -154,7 +154,7 @@ four parts flows horizontally and how the lines interact---in other
 words the counterpoint). They use inversions (in which the
 third or fifth of the chord is in the bass) to ensure each melody line
 does not move too much, but as the harmonizing triads are all in close
-postion separated from the melody, the result sounds like a soprano
+position separated from the melody, the result sounds like a soprano
 melody with block chord accompaniment, rather than four independent
 lines.
 

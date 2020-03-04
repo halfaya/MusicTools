@@ -115,7 +115,17 @@ previousTriads II  = VI :: IV :: []
 \subsection{Completing the Harmonization}
 \label{sec:harmony:complete}
 
-TODO: Finish this.
+As Piston does we require the harmonizing triad to include the melody
+note. A function \texttt{harmonizations} is used to generate a list of
+all candidate harmonizations for a given melody. For space
+considerations the function is not shown here but is available in the
+supplement \texttt{Harmony.agda}. Here again we encounter difficulties
+with equality and membership. We use a bit vector to represent the
+set of scale degrees in a triad where each scale degree is mapped to
+an element of \texttt{Fin 7}.
+
+We next restrict to progressions ending in a half cadence (V) to match
+Piston's example. This results in 25 candidate progressions.
 
 See Figure~\ref{fig:harmonizationMT}, which is currently just a copy of
 the other figure, but included here now for space.
@@ -136,16 +146,23 @@ more sophisticated hierarchical grammar from previous
 work~\citep{magalhaes-harmtrace}.
 
 Their technique is to first require the melody notes to be members of
-the harmonizing chords, then use their previous work to try to
-create a harmonic analysis of every possible sequence of chords that
-arises, choosing the one that most closely fits their
-grammar. Although the result is not bad, it clearly leaves room for
-improvement. Noted in the paper is that no attention is given to
-voicing (how each of the four parts flows horizontally and how the
-lines interact---in other words the counterpoint). Not noted is that
-the melody note is always doubled, whereas typically in four-part
-harmony it is preferred to double the root note. Also minimizing the
-number of parse errors as a means to choose the best harmonization
-does not necessarily have a musical meaning.
+the harmonizing chords, then use their previous work to try to create
+a harmonic analysis of every possible sequence of chords that arises,
+choosing the one that most closely fits their grammar. Although the
+result is not bad, it clearly leaves room for improvement. Noted in
+the paper is that no attention is given to voicing (how each of the
+four parts flows horizontally and how the lines interact---in other
+words the counterpoint). They use inversions (in which the
+third or fifth of the chord is in the bass) to ensure each melody line
+does not move too much, but as the harmonizing triads are all in close
+postion separated from the melody the result sounds like a soprano
+melody with block chord accompaniment rather than four independent
+lines.
+
+In addition note that the melody note is always doubled, whereas
+typically in four-part harmony it is preferred to double the root note
+as Piston does. Also minimizing the number of parse errors as a means
+to choose the best harmonization does not necessarily have a musical
+meaning.
 
 TODO: More comparison.

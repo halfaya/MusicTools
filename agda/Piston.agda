@@ -52,6 +52,8 @@ melodyCs =
   tone qtr (b 5) ∷ tone qtr (d♯ 5) ∷ tone qtr (e 5) ∷ tone qtr (f♯ 5) ∷ 
   tone whole (e 5) ∷ []
 
+-- This is example 9-1 in the 5th edition of Piston.
+-- It was example 117 in a previous edition used in the FHARM paper.
 -- 4/4 time
 melody117s : List Note
 melody117s =
@@ -136,74 +138,21 @@ melody117Tracks =  melody117sTrack ∷ melody117aTrack ∷ melody117tTrack ∷ m
 
 -----
 
--- test
-
-mDegrees = concatMap fff melody117s
-  where fff : Note → List DiatonicDegree
-        fff (tone _ p) = pitchToDegreeCMajor p ∷ []
-        fff (rest _)   = []
-aaa = harmonizations (drop 0 mDegrees)
-{-
-(VI ∷ V ∷ []) ∷
-(VI ∷ III ∷ []) ∷
-(II ∷ V ∷ []) ∷
-(IV ∷ V ∷ []) ∷
-(IV ∷ I ∷ []) ∷ []
-
-(V ∷ VI ∷ V ∷ []) ∷
-(V ∷ VI ∷ III ∷ []) ∷
-(V ∷ IV ∷ V ∷ []) ∷
-(V ∷ IV ∷ I ∷ []) ∷ []
-
-(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ V ∷ []) ∷
-(V ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ I ∷ []) ∷
-(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ V ∷ []) ∷
-(V ∷ VI ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ I ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ V ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ I ∷ V ∷ IV ∷ I ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ V ∷ []) ∷
-(V ∷ I ∷ V ∷ IV ∷ VI ∷ V ∷ IV ∷ I ∷ []) ∷ []
--}
-
-{-
-(I ∷ V ∷ []) ∷
-(I ∷ []) ∷
-(I ∷ []) ∷
-(II ∷ IV ∷ []) ∷
-(I ∷ IV ∷ VI ∷ []) ∷
-(III ∷ V ∷ []) ∷
-(II ∷ IV ∷ VI ∷ []) ∷
-(I ∷ III ∷ V ∷ []) ∷ []
--}
-
-{-
-(V ∷ VI ∷ III ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
-(V ∷ VI ∷ III ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
-(V ∷ VI ∷ III ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
-(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
-(V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
-(V ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
-(I ∷ I ∷ I ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ []) ∷
-(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []) ∷
-(I ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ I ∷ []) ∷
-(I ∷ I ∷ I ∷ IV ∷ VI ∷ V ∷ VI ∷ V ∷ []) ∷
--}
-
-
-------
-
+-- Harmonization of Piston's example 9-1 (117).
 
 pitches117s : List Pitch
 pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []
 
+degrees117 : List DiatonicDegree
+degrees117 = map pitchToDegreeCMajor pitches117s
+
+-- All harmonizations which include the melody, follow the
+-- table of root progressions, and end with V.
+-- 25 possibilities.
+harms = filter halfCadence (harmonizations degrees117)
+
 triads117 : List Triad
-triads117 = V ∷ V ∷ I ∷ I ∷ IV ∷ VI ∷ III ∷ IV ∷ V ∷ []
+triads117 = (V ∷ I ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ [])
 
 pts117 : List (Pitch × Triad)
 pts117 = zip pitches117s triads117
@@ -217,8 +166,15 @@ chordsPoints117 = map (Data.Vec.map tone) chords117
 harm117 : Harmony 4 (length chords117)
 harm117 = harmony (fromList (map chord chordsPoints117))
 
+testHTrack : MidiTrack
+testHTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
 
+testHTracks : List MidiTrack
+testHTracks = testHTrack ∷ []
 
+-------------------
+
+{-
 bbb = bassLines pts117
 
 -- 36 : c 3
@@ -241,9 +197,5 @@ testSTrack = track "Test S" piano channel1 tempo (notes→events mVelocity testS
 
 testBTrack : MidiTrack
 testBTrack = track "Test B" piano channel1 tempo (notes→events mVelocity testB)
+-}
 
-testHTrack : MidiTrack
-testHTrack = track "Test Harm" piano channel1 tempo (harmony→events mVelocity harm117)
-
-testHTracks : List MidiTrack
-testHTracks = testHTrack ∷ []

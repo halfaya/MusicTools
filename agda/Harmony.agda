@@ -151,6 +151,11 @@ harmonizations (d ∷ d' ∷ ds) =
     prevOk t nothing  = true
     prevOk t (just x) = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
 
+halfCadence : List Triad → Bool
+halfCadence []           = false
+halfCadence (t ∷ [])     = t ≡ᵗ V
+halfCadence (_ ∷ t ∷ ts) = halfCadence (t ∷ ts)
+
 -- Given a pitch p and a diatontic degree d, return a pitch that
 -- has degree d and is 1-2 octaves lower than p.
 pitchLower : Pitch → DiatonicDegree → Pitch
@@ -193,18 +198,21 @@ bassNotes p t =
   in map (pitchLower p) ds'
 
 -- Given a soprano pitch p and a triad harmonization t,
--- generate a list of possible chords.
+-- generate a harmonizing chord in root position.
 -- Assumes p is in t. Only the root of the triad is
 -- allowed to be doubled.
 -- Each bass note is pitched 1-2 octaves below p.
 -- Alto and Tenor fit inside.
+-- Currently root or third preferred for alto.
 harmonizingChord : Pitch → Triad → Vec Pitch 3
 harmonizingChord p t =
-  let sop  = pitchToDegreeCMajor p
-      root = triadRoot t
-      ds   = triadDegrees t
-      ds'  = if sop ≡ᵈ root then ds else root ∷ remove sop ds
-  in voiceChord p ds'
+  let sop   = pitchToDegreeCMajor p
+      root  = triadRoot t
+      third = thirdUp root
+      fifth = thirdUp third
+      alto  = if sop ≡ᵈ root then third else root
+      tenor = if sop ≡ᵈ fifth then third else fifth
+  in voiceChord p (alto ∷ tenor ∷ root ∷ [])
   where
     remove : DiatonicDegree → Vec DiatonicDegree 3 → Vec DiatonicDegree 2
     remove sop (d ∷ d₁ ∷ d₂ ∷ []) =

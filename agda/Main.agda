@@ -14,10 +14,11 @@ main : IO Unit
 main =
   let channel      = 0
       ticksPerBeat = 4 -- 16th notes
-      file         = "/Users/name/Music/test.mid"
+--      file         = "/tmp/test.mid"
+      file         = "/Users/leo/Music/MusicTools/test.mid"
 -- counterpoint
-      song         = cfcpTracks1
+--      song         = cfcpTracks1
 --      song         = cfcpTracks2
 -- harmony
---      song         = testHTracks
+      song         = testHTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

@@ -77,9 +77,13 @@ record NextTriad : Set where
     usual : List Triad; sometimes : List Triad; rare : List Triad
 
 rootProgression : Triad \(\rightarrow\) NextTriad
-rootProgression I   = nextTriad (IV :: V :: []) (VI :: []) (II :: III :: [])
-rootProgression II  = nextTriad (V :: []) (IV  :: VI :: []) (I :: III :: [])
--- other cases omitted for space
+rootProgression I   = nextTriad (IV :: V :: []) (VI :: []) (II  :: III : [])
+rootProgression II  = nextTriad (V :: []) (IV :: VI :: []) (I :: III :: [])
+rootProgression III = nextTriad (VI :: []) (IV :: []) (I :: II :: V :: [])
+rootProgression IV  = nextTriad (V :: []) (I :: II :: []) (III :: VI :: [])
+rootProgression V   = nextTriad (I :: []) (IV :: VI :: []) (II :: III :: [])
+rootProgression VI  = nextTriad (II :: V :: []) (III :: IV :: []) (I :: [])
+rootProgression VII = nextTriad (I  :: III :: []) (VI :: []) (II :: IV  :: V :: [])
 \end{alltt}
 
 It is easiest to create a harmonic progression in reverse, to
@@ -106,7 +110,11 @@ excluding the rare cases.
 previousTriads : Triad \(\rightarrow\) List Triad
 previousTriads I   = V :: IV :: VII :: []
 previousTriads II  = VI :: IV :: []
--- other cases omitted for space
+previousTriads III = VI :: VII :: []
+previousTriads IV  = I :: V :: II :: III :: []
+previousTriads V   = I :: IV :: II :: VI :: []
+previousTriads VI  = IV :: I :: II :: V :: VII :: []
+previousTriads VII = []
 \end{alltt}
 
 \subsection{Completing the Harmonization}

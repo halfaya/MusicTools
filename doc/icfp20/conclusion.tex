@@ -1,19 +1,20 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We believe that functional programming, and in particular functional
-programming with dependent types, is a promising way to do software
-engineering going forward. The languages and tools are perhaps not yet
-as finely polished and rich as those typically used in production
-software, but they are fundamentally far more powerful, and thus once
-the infrastructure (and training of programmers) catches up should
-become the languages of choice.
+% We believe that functional programming, and in particular functional
+% programming with dependent types, is a promising way to do software
+% engineering going forward. The languages and tools are perhaps not yet
+% as finely polished and rich as those typically used in production
+% software, but they are fundamentally far more powerful, and thus once
+% the infrastructure (and training of programmers) catches up should
+% become the languages of choice.
 
-Music is an especially valuable domain in which to explore these
-ideas. We have found it to be a microcosm of issues that arise
+In this paper we have reported our experience in using Agda for
+formalizing music theory.
+We have found music to be a microcosm of issues that arise
 everywhere in software engineering: modularity, composability,
-correctness, and data issues such as handling equivalent formulations of
-the same data as well slightly different formulations. If we can
+correctness, and data issues such as handling equivalent or slightly
+different formulations of the same data. If we can
 demonstrate that functional programming with dependent types works
 well in the domain of music, the same techniques can be used in
 software in general.
@@ -30,7 +31,7 @@ reuse a function that just works on a pitch to work on a note, which
 consists of a pitch plus a duration.
 
 For now we have explicitly converted between equivalent representations
-and explicitly lifted functions, to get a feel for the amount of work
+and lifted functions, to get a feel for the amount of work
 required.  However in the world of dependent types there are known
 research techniques for handling these cases, namely transporting
 across equivalences as in Homotopy Type Theory~\citep{hottbook} and

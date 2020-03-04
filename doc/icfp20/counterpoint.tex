@@ -50,8 +50,8 @@ based on the formulation given by \citet{fux-cp}.
 The idea is to represent ``good'' counterpoint  as a dependent record,
 whose fields encode the musical content as well as proofs that the
 counterpoint follows certain rules.
-Due to the space limitation, we only show some exerpts of our
-implementation; see our anonymous supplementary material
+Due to the space limitation, we only show some essential parts of
+our implementation; see our anonymized supplement
 \texttt{Counterpoint.agda} for full details.
 
 \subsection{First Species Counterpoint}
@@ -81,7 +81,7 @@ Therefore, the Frog's song in Figure~\ref{fig:fs} is represented as a
 compound of the following three elements:
 
 \begin{alltt}  
-first : PitchInterval -- Pitch \(\times\) Interval
+first : PitchInterval -- defined as Pitch \(\times\) Interval
 first = (c 5 , per8)
 
 middle : List PitchInterval
@@ -126,8 +126,9 @@ checkBeginning pi@(_ , i) =
 The middle bars of the music should maintain consonance of intervals
 and independence of melodic lines.
 As we saw in Figure~\ref{fig:interval}, consonant intervals include
-the unison, 3rd, 5th, 6th, and 8th, and among these, the unison is
-clearly an obstacle to distinguishing between the two lines of music.
+the unison, 3rd, 5th, 6th, and 8th.
+Among these, the unison is clearly an obstacle to distinguishing
+between the two lines of music.
 Therefore, the middle bars must consist only of the latter four intervals.
 We encode this rule as the \texttt{checkIntervals} function, which
 returns a list of errors corresponding to the occurrences of dissonant
@@ -162,8 +163,9 @@ different distances), and \emph{oblique} (one line plays the same note).
 It is known that approaching a perfect interval by parallel or similar
 motion tends to fuse the melodic lines into one.
 To rule out such motion, we define the \texttt{checkMotion}
-function, which inspects all pairs of two adjacent intervals (using an
-auxiliary function \texttt{pairs}) and returns a list of erroneous patterns.
+function, which inspects all pairs of two adjacent intervals (using 
+auxiliary functions \texttt{motion} and \texttt{pairs}) and returns a
+list of erroneous patterns.
 
 \begin{alltt}
 data MotionError : Set where
@@ -186,8 +188,8 @@ checkMotion = mapMaybe (uncurry motionCheck) \(\circ\) pairs
 \paragraph{Ending}
 
 The ending of the music should express relaxation.
-There is a consensus that the unison and 8th are the most stable
-intervals, hence the music must end with either of these intervals.
+Since the unison and 8th are considered most stable, the music
+must end with either of these intervals.
 The last interval should also be approached by a \emph{cadence},
 a progression that gives rise to a sense of resolution
 (Figure~\ref{fig:motioncadence} right).
@@ -243,8 +245,7 @@ record FirstSpecies : Set where
 \end{alltt}
 
 With this record type, we can show that the counterpoint in
-Figure~\ref{fig:fs} is correct, since the music is an inhabitant of
-\texttt{FirstSpecies}.
+Figure~\ref{fig:fs} is correct, by constructing the following proof term:
 
 \begin{alltt}
 fs : FirstSpecies
@@ -268,18 +269,18 @@ again composed for the Frog's song.
 \subsubsection{Representing Music}
 
 In second species, the first and last bars may have a different structure
-from middle bars.
+from the middle bars.
 More specifically, it is encouraged to begin the counterpoint line with
 a half rest and end with a whole note.
 Therefore, in our implementation, we reuse the \texttt{PitchInterval} 
 type for the first and last bars, and define a new type
-\texttt{PitchInterval2} for middle bars.
+\texttt{PitchInterval2} for the middle bars.
 
 \begin{alltt}
 first2 : PitchInterval
 first2 = (c 5 , per5)
 
-middle2 : List PitchInterval2 -- Pitch \(\times\) Interval \(\times\) Interval
+middle2 : List PitchInterval2 -- defined as Pitch \(\times\) Interval \(\times\) Interval
 middle2 =
   (d 5 , min3 , per5) :: (e 5 , min3 , min6) :: (f 5 , maj3 , aug4) ::
   (e 5 , min6 , min3) :: (d 5 , min3 , maj6) :: []
@@ -307,8 +308,8 @@ the beginning of the counterpoint line.
 
 \paragraph{Strong Beats}
 
-Strong beats in middle bars are constrained by the same rules as in
-first species: they must all be consonant, non-unison intervals.
+Strong beats in the middle bars are constrained by the same rules
+as in first species: they must all be consonant, non-unison intervals.
 % We encode this restriction as the \texttt{checkStrongBeats}
 % function, which, as the \texttt{checkIntervals} function for first
 % species, returns a list of found errors.
@@ -327,7 +328,8 @@ direction from their approach (as in bars 5-6 of Figure~\ref{fig:ss}).
 \paragraph{Motion}
 
 Parallel and similar motion towards a perfect interval is prohibited
-across bars.
+across bars, that is, between the weak beat in one bar and the
+strong beat in the next bar.
 % We enforce this rule using the \texttt{checkMotion2} function,
 % which uses \texttt{expandPitchIntervals2} to convert a list of
 % \texttt{PitchInterval2} into a list of \texttt{PitchInterval}, and
@@ -383,12 +385,13 @@ They encode the rule for intervals by declaring a type class
 \texttt{ValidHarmInterval} that classifies valid intervals, and then
 specifying which instances are invalid using GHC's support for
 custom type errors.
-They also implement the restriction on motion based on a similar idea.
+They also rule out invalid motion using a similar technique.
 
-The availability of the custom type error feature is an advantage of
-using Haskell: it allows the rule writer to leverage Haskell's type checker.
-We believe that extending Agda with such support would be
-beneficial in music formalization and for many other purposes.
+The idea of producing custom musical type errors underlies our
+implementation as well.
+The difference is that we have no means to leverage the Agda
+type checker due to the lack of such a language feature, which
+we consider to be a downside of using Agda for musical purposes.
 
 More recently, \citet{cong-cp} give an implementation of first
 species counterpoint using dependent types in Agda.
@@ -399,14 +402,14 @@ inductive case guarantees correct uses of intervals and motion
 
 Our representation of counterpoint improves on Cong and Leo's
 in two ways.
-First, while Cong and Leo rely on the Agda type checker to report
-errors, we use our own type checker (implemented as the
+First, while they rely on the Agda type checker to report errors,
+we use our own type checker (implemented as the
 \texttt{checkXXX} functions) and type errors (defined as the
 \texttt{XXXError} datatypes).
 This allows us to produce more user-friendly error messages.
-Suppose we have replaced the second interval of Figure~\ref{fig:fs} by
-an octave (8th) of D, breaking the rule that perfect intervals cannot
-be approached by parallel motion.
+To see the difference, suppose we have replaced the second interval
+of Figure~\ref{fig:fs} by an octave (8th) of D, breaking the rule
+that perfect intervals cannot be approached by parallel motion.
 In our implementation, this causes an error in the \texttt{motionOk}
 field, with the following message:
 
@@ -415,8 +418,8 @@ field, with the following message:
 \end{alltt}
 
 \noindent In contrast, Cong and Leo would just report the existence
-of an unsolved metavariable \texttt{\_13}, meaning that Agda failed
-to construct a proof required by the counterpoint constructor.
+of an unsolved metavariable, meaning that Agda failed to construct
+a proof required by the counterpoint constructor.
 Thus, the user would see the following message in the Agda buffer:
 
 \begin{alltt}
@@ -427,9 +430,10 @@ Thus, the user would see the following message in the Agda buffer:
 this message to the corresponding musical error.
 
 The second improvement from \citet{cong-cp} is that, instead of
-incorporating all the rules into a counterpoint datatype, we define
-each rule as a separate function and combining them using a record type.
+hard-coding all the rules into a datatype designed specifically for
+counterpoint, we define each rule as a separate function and
+combine them using a record type.
 This makes it easy to switch between strict and relaxed rule sets:
 we just need to add or remove certain fields.
 It also allows us to reuse some of the rules in a context other than
-counterpoint, as we will see in the next section.
+counterpoint, as we will see in Section~\ref{sec:harmony:complete}.

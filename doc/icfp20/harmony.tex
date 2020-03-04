@@ -2,30 +2,30 @@
   \begin{figure}
     \includegraphics[width=5.5cm]{fig/piston.png}
     \hspace{1cm}
-    \includegraphics[width=5cm]{fig/fharm.png} \\
+    \includegraphics[width=5.5cm]{fig/harmmt.png} \\
     \begin{flushleft}
     \begin{small}
-     \hspace{2.35cm} V \ \ \ \ \ \ \ \,I \ \ \ \ \ \ \ \,IV \,VI \ \,III \ IV \ \ \,V
-     \hspace{2.6cm} V \,III \ \ I \ III \ \,II IV \,III\,IV \ \,V
+     \hspace{2.1cm} V \ \ \ \ \ \ \ \,I \ \ \ \ \ \ \ \,IV \,VI \ \,III \ IV \ \ \,V
+     \hspace{2.65cm} I \ \ V \ \ \ VI \ V \ \ IV \ I \ \ \ V  \,IV \ \ \ \ V
     \end{small}
     \end{flushleft}
-    \caption{Harmonization by Piston (left) and \fharm (right)}
-    \Description{Harmonization by Piston (left) and \fharm (right)}
+    \caption{Harmonization by Piston (left) and Our Implementation (right)}
+    \Description{Harmonization by Piston (left) and Our Implementation (right)}
     \label{fig:harmonization}
   \end{figure}
 }
 
-\newcommand{\HarmonizationMT}{
+\newcommand{\HarmonizationF}{
   \begin{figure}
-    \includegraphics[width=5.5cm]{fig/harmmt.png}
+    \includegraphics[width=5.5cm]{fig/fharm.png}
     \begin{flushleft}
     \begin{small}
-     \hspace{5.4cm} I \ \ V \ \ \ VI \ \,V \ \ IV \ I \ \ \ V  \,IV \ \ \ \ V
+     \hspace{5.5cm} V \,III \ \ \ I \ \,III \ \,II \,IV \ \,III IV \ \ V
     \end{small}
     \end{flushleft}
-    \caption{Harmonization by Music Tools}
-    \Description{Harmonization by Music Tools}
-    \label{fig:harmonizationMT}
+    \caption{Harmonization by \fharm}
+    \Description{Harmonization by \fharm}
+    \label{fig:harmonizationF}
   \end{figure}
 }
 
@@ -34,10 +34,12 @@
 
 Harmony refers to simultaneously sounding tones (chords) and its study
 is primarily concerned with the progression of chords throughout a
-piece of music. It is in essence the of dual of counterpoint. In this
+piece of music. It is in essence the dual of counterpoint. In this
 section we formalize a small part of the classic text
 \citet{piston-harmony}, in particular part of Chapter~9 which is
 concerned with techniques for harmonizing a given melody.
+The complete implementation can be found in \texttt{Harmony.agda}
+and \texttt{Piston.agda} of the anonymized supplement.
 
 \subsection{Harmonic Progression}
 \label{sec:harmony:prog}
@@ -99,9 +101,9 @@ In Haskell this would be easy---there is an \texttt{Eq} type class and a
 method for automatically generating equalities. In the Agda Standard
 Library~\citep{agda-stdlib} list membership is a relation with
 constructive evidence of membership, and requires far more effort than we
-would like given that we currently don't need to do
+would like, given that we currently do not need to do
 proofs. Alternatives include defining decidable equality for triads
-(which requires writing out 49 cases) or mapping to natural numbers
+(which requires writing out 49 cases), or mapping to natural numbers
 and using already implemented decidable or boolean equality for
 those. For now we simply write the inverse function manually,
 excluding the rare cases.
@@ -122,9 +124,8 @@ previousTriads VII = []
 
 As Piston does we require the harmonizing triad to include the melody
 note. We use a function \texttt{harmonizations} to generate a list of
-all candidate harmonizations for a given melody. For space
-considerations we refer the reader to the supplement
-\texttt{Harmony.agda} for its definition. Here again we encounter difficulties
+all candidate harmonizations for a given melody (see
+\texttt{Harmony.agda} for its definition). Here again we encounter difficulties
 with equality and membership. We use a bit vector to represent the
 set of scale degrees in a triad, where each scale degree is mapped to
 an element of \texttt{Fin 7}. However we are able to make use of
@@ -172,18 +173,19 @@ motionErrors xs =
   in concatMap checkMotion (sas :: sts :: sbs :: ats :: abs :: tbs :: [])
 \end{alltt}
 
-The harmonization produced is shown in Figure~\ref{fig:harmonizationMT}.
-
-\HarmonizationMT
+The harmonization produced is shown in Figure~\ref{fig:harmonization}
+right.
 
 \subsection{Comparison with Previous Work}
 \label{sec:harmony:compare}
 
-Most of the Haskell-based
-work~\citep{magalhaes-harmtrace,koops-fharm,magalhaes-fcomp} has
+\HarmonizationF
+
+Most of the Haskell-based work on
+music~\citep{magalhaes-harmtrace,koops-fharm,magalhaes-fcomp} has
 focused on harmony. In particular \fharm~\citep{koops-fharm} tackles
-the problem of harmonization of a melody;
-Figure~\ref{fig:harmonization} right shows their harmonization of
+the problem of harmonizing a melody;
+Figure~\ref{fig:harmonizationF} shows their harmonization of
 Piston's example. Their method is quite different from
 ours. Instead of using Piston's table of root progressions they use a
 more sophisticated hierarchical grammar from previous
@@ -197,16 +199,17 @@ Although the result produced by \fharm is not bad, it clearly leaves
 room for improvement. Noted in
 the paper is that no attention is given to voicing (how each of the
 four parts flows horizontally and how the lines interact---in other
-words the counterpoint). They use inversions (in which the
-third or fifth of the chord is in the bass) to ensure each melody line
+words the counterpoint). They use inversions to ensure each melody line
 does not move too much, but as the harmonizing triads are all in close
 position separated from the melody, the result sounds like a soprano
 melody with block chord accompaniment, rather than four independent
 lines.
 
-Furthermore, \fharm always double the melody note, not the root note
-as Piston does (and as preferred in four-part harmony in general).
-Also, minimizing the number of parse errors as a means
+Among those issues not discussed in the paper, one is the choice of
+notes to be doubled: \fharm always doubles the melody note, while
+in four part harmony it is generally preferred to double the root
+note as Piston does.
+Another concern is that minimizing the number of parse errors as a means
 to choose the best harmonization does not necessarily have a musical
 meaning.
 

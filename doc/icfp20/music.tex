@@ -58,12 +58,8 @@ We represent scale degrees as a datatype with seven constructors
 
 For rhythm, the fundamental concept is \emph{duration}, an
 unspecified unit of time during which a sound or silence lasts.
-We represent duration as a natural number, and use this value to
-calculate the absolute length when the music is played at a specific
-tempo.
-As an example, the duration constant \texttt{whole} has value
-\texttt{16} and corresponds to 4 seconds if the tempo is 60 beats
-per minute.
+Examples of duration include whole, half, and quarter;
+we define them simply as natural number constants.
 
 % \begin{alltt}
 % data Duration : Set where
@@ -95,14 +91,13 @@ There are 13 kinds of interval within an octave
 several different perspectives:
 (i) major or minor; (ii) consonant or dissonant; and (iii) perfect
 or imperfect.
-We represent intervals as natural numbers, but in this paper, we
-refer to them using names such as \texttt{maj3} and \texttt{per8},
-which are more reader-friendly.
+We represent intervals as natural numbers, and refer to them using
+conventional names such as \texttt{maj3} and \texttt{per8}.
 
 \paragraph{Chords and Triads}
 
 A \emph{chord} refers to a set of simultaneously sounding notes.
-In this paper we are particularly interested in \emph{triads}, which are
+Of our particular interest is \emph{triads}, which are
 chords consisting of three notes separated by the 3rd intervals (i.e.,
 \texttt{maj3} and \texttt{min3}).
 We define triads as a datatype with roman numeral constructors
@@ -114,4 +109,4 @@ C-E-G.
 Triads can also be arranged in a way that a non-root note appears as
 the lowest note.
 Such arrangement is called \emph{inversion}; if a triad is not applied
-inversion, it is in \emph{root position}.
+inversion, we say that it is in \emph{root position}.

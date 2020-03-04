@@ -4,7 +4,7 @@ module Harmony where
 
 open import Data.Bool       using (Bool; true; false; if_then_else_; _∨_; not)
 open import Data.Fin        using (#_; toℕ) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head)
+open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head; zip)
 open import Data.Maybe      using (fromMaybe; is-nothing; Maybe; just; nothing)
 open import Data.Nat        using (ℕ; suc; _∸_; _<ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
@@ -18,7 +18,7 @@ open import Interval
 open import Music
 open import Note
 open import Pitch
-open import Util            using (filter)
+open import Util            using (filter; concatMaybe)
 
 -- either 0 or 1 pitch class
 pointToPitchClass : Point → List PitchClass
@@ -139,19 +139,23 @@ previousTriads V   = I ∷ IV ∷ II ∷ VI ∷ []
 previousTriads VI  = IV ∷ I ∷ II ∷ V ∷ VII ∷ []
 previousTriads VII = []
 
-harmonizations : List DiatonicDegree → List (List Triad)
+harmonizations : {n : ℕ} → Vec DiatonicDegree n → List (Vec Triad n)
 harmonizations [] = []
 harmonizations (d ∷ []) = map (_∷ []) (containingTriads d)
 harmonizations (d ∷ d' ∷ ds) =
   let tss = harmonizations (d' ∷ ds)
       dTriads  = containingTriads d
-  in concatMap (λ t → concatMap (λ ts → if prevOk t (head ts) then (t ∷ ts) ∷ [] else []) tss) dTriads
+  in concatMap (λ t → concatMaybe (prependTriad t tss)) dTriads
   where
-    prevOk : Triad → Maybe Triad → Bool
-    prevOk t nothing  = true
-    prevOk t (just x) = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
+    prevOk : Triad → Triad → Bool
+    prevOk t x = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
+--    prevOk t nothing  = true
+--    prevOk t (just x) = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
+    prependTriad : {n : ℕ} → Triad → Vec Triad (suc n) → Maybe (Vec Triad (suc (suc n)))
+    prependTriad t ts = if prevOk t (Data.Vec.head ts) then just (t ∷ ts) else nothing
+    
 
-halfCadence : List Triad → Bool
+halfCadence : {n : ℕ} → Vec Triad n → Bool
 halfCadence []           = false
 halfCadence (t ∷ [])     = t ≡ᵗ V
 halfCadence (_ ∷ t ∷ ts) = halfCadence (t ∷ ts)
@@ -203,7 +207,7 @@ bassNotes p t =
 -- allowed to be doubled.
 -- Each bass note is pitched 1-2 octaves below p.
 -- Alto and Tenor fit inside.
--- Currently root or third preferred for alto.
+-- Currently root or third is preferred for alto.
 harmonizingChord : Pitch → Triad → Vec Pitch 3
 harmonizingChord p t =
   let sop   = pitchToDegreeCMajor p
@@ -218,6 +222,17 @@ harmonizingChord p t =
     remove sop (d ∷ d₁ ∷ d₂ ∷ []) =
       if d ≡ᵈ sop then d₁ ∷ d₂ ∷ []
       else (if d₁ ≡ᵈ sop then d ∷ d₂ ∷ [] else d ∷ d₁ ∷ [])
+
+-- Create 4 part harmonizations ending in V for a melody in C major.
+voicedHarmonizations : {n : ℕ} → Vec Pitch n → List (Vec (Vec Pitch 4) n)
+voicedHarmonizations {n} ps =
+  let ds = Data.Vec.map pitchToDegreeCMajor ps
+      hs : List (Vec Triad n)
+      hs = filter halfCadence (harmonizations ds)
+  in map (λ ts → Data.Vec.map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt)) (Data.Vec.zip ps ts)) hs
+
+voicedHarmonizations1 : {n : ℕ} → Vec Pitch n → List (Vec Pitch 4)
+voicedHarmonizations1 ps = fromMaybe [] (Data.Maybe.map toList (head (voicedHarmonizations ps)))
 
 -- Given a soprano line with harmonization, generate
 -- a list of possible bass lines 1-1 with soprano notes.

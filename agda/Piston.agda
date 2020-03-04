@@ -143,27 +143,13 @@ melody117Tracks =  melody117sTrack ∷ melody117aTrack ∷ melody117tTrack ∷ m
 pitches117s : List Pitch
 pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []
 
-degrees117 : List DiatonicDegree
-degrees117 = map pitchToDegreeCMajor pitches117s
-
--- All harmonizations which include the melody, follow the
--- table of root progressions, and end with V.
--- 25 possibilities.
-harms = filter halfCadence (harmonizations degrees117)
-
-triads117 : List Triad
-triads117 = (V ∷ I ∷ VI ∷ V ∷ IV ∷ I ∷ V ∷ VI ∷ V ∷ [])
-
-pts117 : List (Pitch × Triad)
-pts117 = zip pitches117s triads117
-
-chords117 : List (Vec Pitch 4)
-chords117 = map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt)) pts117
+vh117 : List (Vec Pitch 4)
+vh117 = voicedHarmonizations1 pitches117s
 
 chordsPoints117 : List (Vec Point 4)
-chordsPoints117 = map (Data.Vec.map tone) chords117
+chordsPoints117 = map (Data.Vec.map tone) vh117
 
-harm117 : Harmony 4 (length chords117)
+harm117 : Harmony 4 (length vh117)
 harm117 = harmony (fromList (map chord chordsPoints117))
 
 testHTrack : MidiTrack

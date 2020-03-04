@@ -13,7 +13,8 @@ open import Piston
 main : IO Unit
 main =
   let channel      = 0
-      ticksPerBeat = 4 -- 16th notes
+--      ticksPerBeat = 4 -- 16th notes
+      ticksPerBeat = 32 -- half notes
 --      file         = "/tmp/test.mid"
       file         = "/Users/leo/Music/MusicTools/test.mid"
 -- counterpoint

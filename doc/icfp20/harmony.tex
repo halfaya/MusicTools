@@ -98,12 +98,14 @@ term is a member of a list is nontrivial.
 
 In Haskell this would be easy--there is an \texttt{Eq} typeclass and a
 method for automatically generating equalities. In the Agda Standard
-Library~\citep{agda-stdlib} is a relation with constructive proof of
-membership, and requires far more effort than we need. Alternatives
-include defining decidable equality for triads (which requires writing
-out 49 cases) or mapping to natural numbers and using already
-implemented decidable or boolean equality for those. For now we simply
-write the inverse function manually, excluding the rare cases.
+Library~\citep{agda-stdlib} list membership is a relation with
+constructive evidence of membership, and requires far more effort we
+would like given that we currently don't need to do
+proofs. Alternatives include defining decidable equality for triads
+(which requires writing out 49 cases) or mapping to natural numbers
+and using already implemented decidable or boolean equality for
+those. For now we simply write the inverse function manually,
+excluding the rare cases.
 
 \begin{alltt}
 previousTriads : Triad → List Triad

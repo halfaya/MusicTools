@@ -98,7 +98,7 @@ term is a member of a list is nontrivial.
 In Haskell this would be easy---there is an \texttt{Eq} type class and a
 method for automatically generating equalities. In the Agda Standard
 Library~\citep{agda-stdlib} list membership is a relation with
-constructive evidence of membership, and requires far more effort we
+constructive evidence of membership, and requires far more effort than we
 would like given that we currently don't need to do
 proofs. Alternatives include defining decidable equality for triads
 (which requires writing out 49 cases) or mapping to natural numbers
@@ -133,7 +133,7 @@ harmonization matches the melody, and continue to use vectors in the
 following functions where appropriate.
 
 We next restrict to progressions ending in a half cadence (V) to match
-Piston's example (\texttt{filter halfCadence}). This results in 25
+Piston's example. This results in 25
 candidate progressions. For each pitch and triad pair we construct a
 \texttt{harmonizingChord} in root position with the root doubled. The
 function \texttt{voiceChord} spaces the notes nicely. All of this work

@@ -226,10 +226,8 @@ voicedHarmonizations {n} ps =
   let ds = Data.Vec.map pitchToDegreeCMajor ps
       hs : List (Vec Triad n)
       hs = filter halfCadence (harmonizations ds)
-  in map (λ ts → Data.Vec.map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt)) (Data.Vec.zip ps ts)) hs
-
-voicedHarmonizations1 : {n : ℕ} → Vec Pitch n → List (Vec Pitch 4)
-voicedHarmonizations1 ps = fromMaybe [] (Data.Maybe.map toList (head (voicedHarmonizations ps)))
+  in map (λ ts → Data.Vec.map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt))
+                              (Data.Vec.zip ps ts)) hs
 
 -- Check interval between each pair of voices.
 intervalsOkFilter : Vec Pitch 4 → Bool
@@ -249,7 +247,7 @@ motionErrors xs =
   let ss = Data.Vec.map (Data.Vec.head) xs
       as = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail) xs
       ts = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail) xs
-      bs = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail ∘  Data.Vec.tail) xs
+      bs = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail ∘ Data.Vec.tail) xs
 
       sas = map pitchPairToPitchInterval (toList (Data.Vec.zip as ss))
       sts = map pitchPairToPitchInterval (toList (Data.Vec.zip ts ss))
@@ -257,8 +255,7 @@ motionErrors xs =
       ats = map pitchPairToPitchInterval (toList (Data.Vec.zip ts as))
       abs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs as))
       tbs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs ts))
-      errs = concatMap checkMotion (sas ∷ sts ∷ sbs ∷ ats ∷ abs ∷ tbs ∷ [])
-  in errs
+  in concatMap checkMotion (sas ∷ sts ∷ sbs ∷ ats ∷ abs ∷ tbs ∷ [])
 
 --filterSBMotionOk : {n : ℕ} → List (Vec (Vec Pitch 4) n) → List (Vec (Vec Pitch 4) n)
 --filterSBMotionOk = filter motionOkFilter

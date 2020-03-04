@@ -14,7 +14,7 @@ main : IO Unit
 main =
   let channel      = 0
 --      ticksPerBeat = 4 -- 16th notes
-      ticksPerBeat = 1 -- half notes
+      ticksPerBeat = 1 -- quarter notes
 --      file         = "/tmp/test.mid"
       file         = "/Users/leo/Music/MusicTools/test.mid"
 -- counterpoint

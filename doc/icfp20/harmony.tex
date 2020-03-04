@@ -106,7 +106,7 @@ those. For now we simply write the inverse function manually,
 excluding the rare cases.
 
 \begin{alltt}
-previousTriads : Triad → List Triad
+previousTriads : Triad \(\rightarrow\) List Triad
 previousTriads I   = V :: IV :: VII :: []
 previousTriads II  = VI :: IV :: []
 -- other cases omitted for space
@@ -122,13 +122,52 @@ considerations we refer the reader to the supplement
 \texttt{Harmony.agda} for its definition. Here again we encounter difficulties
 with equality and membership. We use a bit vector to represent the
 set of scale degrees in a triad, where each scale degree is mapped to
-an element of \texttt{Fin 7}.
+an element of \texttt{Fin 7}. However we are able to make use of
+dependent types in the form of vectors to ensure the length of each
+harmonization matches the melody, and continue to use vectors in the
+following functions where appropriate.
 
 We next restrict to progressions ending in a half cadence (V) to match
-Piston's example. This results in 25 candidate progressions.
+Piston's example (\texttt{filter halfCadence}). This results in 25
+candidate progressions. For each pitch and triad pair we construct a
+\texttt{harmonizingChord} in root position with the root doubled. The
+function \texttt{voiceChord} spaces the notes nicely. All of this work
+ins done in the function \texttt{voicedHarmonizations}.
 
-See Figure~\ref{fig:harmonizationMT}, which is currently just a copy of
-the other figure, but included here now for space.
+\begin{alltt}
+voicedHarmonizations : \{n : N\} \(\rightarrow\) Vec Pitch n \(\rightarrow\) List (Vec (Vec Pitch 4) n)
+voicedHarmonizations \{n\} ps =
+  let ds = map pitchToDegreeCMajor ps
+      hs : List (Vec Triad n)
+      hs = filter halfCadence (harmonizations ds)
+      in map (\(\lambda\) ts \(\rightarrow\) map (\(\lambda\) pt \(\rightarrow\)
+             \(\text{proj}_1\) pt :: harmonizingChord (\(\text{proj}_1\) pt) (\(\text{proj}_2\) pt)) (zip ps ts)) hs
+\end{alltt}
+
+To determine the ``best'' of these harmonizations, we now make use of
+\texttt{motionCheck} from the counterpoint work. We compare all six
+pairs of melodies, count the number of motion errors present, and pick
+the harmonization which minimizes these flaws. The functon to
+determine all errors is straightfoward.
+
+\begin{alltt}
+motionErrors : \{n : N\} \(\rightarrow\) Vec (Vec Pitch 4) n \(\rightarrow\) List MotionError
+motionErrors xs =
+  let ss = map (head) xs
+      as = map (head \(\circ\) tail) xs
+      ts = map (head \(\circ\) tail \(\circ\) tail) xs
+      bs = map (head \(\circ\) tail \(\circ\) tail \(\circ\) tail) xs
+
+      sas = map pitchPairToPitchInterval (toList (zip as ss))
+      sts = map pitchPairToPitchInterval (toList (zip ts ss))
+      sbs = map pitchPairToPitchInterval (toList (zip bs ss))
+      ats = map pitchPairToPitchInterval (toList (zip ts as))
+      abs = map pitchPairToPitchInterval (toList (zip bs as))
+      tbs = map pitchPairToPitchInterval (toList (zip bs ts))
+  in concatMap checkMotion (sas :: sts :: sbs :: ats :: abs :: tbs :: [])
+\end{alltt}
+
+The harmonization produced is shown in Figure~\ref{fig:harmonizationMT}.
 
 \HarmonizationMT
 
@@ -166,4 +205,6 @@ Also, minimizing the number of parse errors as a means
 to choose the best harmonization does not necessarily have a musical
 meaning.
 
-TODO: More comparison.
+Our harmonization follows Piston's rules more closely and has arguably
+better spacing of voices; readers can decide for themselves which is
+more pleasing.

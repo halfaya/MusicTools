@@ -4,9 +4,10 @@ module Piston where
 
 open import Data.Fin     using (#_)
 open import Data.List    using (List; map; _∷_; []; concatMap; zip; drop; length; replicate; intercalate)
+open import Data.Maybe   using (Maybe; fromMaybe)
 open import Data.Nat     using (ℕ)
 open import Data.Product using (_×_; proj₁; proj₂)
-open import Data.Vec     using (Vec; fromList; _∷_; [])
+open import Data.Vec     using (Vec; fromList; _∷_; []; toList)
 open import Function     using (_∘_)
 
 open import Counterpoint
@@ -140,11 +141,24 @@ melody117Tracks =  melody117sTrack ∷ melody117aTrack ∷ melody117tTrack ∷ m
 
 -- Harmonization of Piston's example 9-1 (117).
 
-pitches117s : List Pitch
+pitches117s : Vec Pitch 9
 pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 5 ∷ []
 
+vhs117 : List (Vec (Vec Pitch 4) 9)
+vhs117 = voicedHarmonizations pitches117s
+
+--vhs117m : List (Vec (Vec Pitch 4) 9)
+--vhs117m = filter motionOkFilter vhs117
+
+yy : List (Vec (Vec Pitch 4) 9) → List MotionError
+yy [] = []
+yy (x ∷ xs) = motionErrors x
+
+best : Maybe (List (Vec Pitch 4))
+best = Data.Maybe.map toList (listMin (length ∘ motionErrors) vhs117)
+
 vh117 : List (Vec Pitch 4)
-vh117 = voicedHarmonizations1 pitches117s
+vh117 = fromMaybe [] best
 
 chordsPoints117 : List (Vec Point 4)
 chordsPoints117 = map (Data.Vec.map tone) vh117

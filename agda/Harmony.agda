@@ -2,9 +2,9 @@
 
 module Harmony where
 
-open import Data.Bool       using (Bool; true; false; if_then_else_; _∨_; not)
+open import Data.Bool       using (Bool; true; false; if_then_else_; _∨_; not; _∧_)
 open import Data.Fin        using (#_; toℕ) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head; zip)
+open import Data.List       using (List; map; []; _∷_; concatMap; foldr; head; zip; null)
 open import Data.Maybe      using (fromMaybe; is-nothing; Maybe; just; nothing)
 open import Data.Nat        using (ℕ; suc; _∸_; _<ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
@@ -145,15 +145,12 @@ harmonizations (d ∷ []) = map (_∷ []) (containingTriads d)
 harmonizations (d ∷ d' ∷ ds) =
   let tss = harmonizations (d' ∷ ds)
       dTriads  = containingTriads d
-  in concatMap (λ t → concatMaybe (prependTriad t tss)) dTriads
+  in concatMap (λ t → concatMaybe (map (prependTriad t) tss)) dTriads
   where
     prevOk : Triad → Triad → Bool
     prevOk t x = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
---    prevOk t nothing  = true
---    prevOk t (just x) = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
     prependTriad : {n : ℕ} → Triad → Vec Triad (suc n) → Maybe (Vec Triad (suc (suc n)))
     prependTriad t ts = if prevOk t (Data.Vec.head ts) then just (t ∷ ts) else nothing
-    
 
 halfCadence : {n : ℕ} → Vec Triad n → Bool
 halfCadence []           = false
@@ -233,6 +230,38 @@ voicedHarmonizations {n} ps =
 
 voicedHarmonizations1 : {n : ℕ} → Vec Pitch n → List (Vec Pitch 4)
 voicedHarmonizations1 ps = fromMaybe [] (Data.Maybe.map toList (head (voicedHarmonizations ps)))
+
+-- Check interval between each pair of voices.
+intervalsOkFilter : Vec Pitch 4 → Bool
+intervalsOkFilter (s ∷ a ∷ t ∷ b ∷ []) =
+  null (concatMaybe (map (intervalCheck ∘ pitchPairToPitchInterval)
+--                         ((s , a) ∷ (s , t) ∷ (s , b) ∷ (a , t) ∷ (a , b) ∷ (t , b) ∷ [])))
+                         ((s , a) ∷ (s , b) ∷ (s , t) ∷ [])))
+
+filterIntervalsOk : {n : ℕ} → List (Vec (Vec Pitch 4) n) → List (Vec (Vec Pitch 4) n)
+filterIntervalsOk xs =
+  let f : List (Vec Pitch 4) → Bool
+      f xs = foldr _∧_ true (map intervalsOkFilter xs)
+  in filter (f ∘ toList) xs
+
+motionErrors : {n : ℕ} → Vec (Vec Pitch 4) n → List MotionError
+motionErrors xs =
+  let ss = Data.Vec.map (Data.Vec.head) xs
+      as = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail) xs
+      ts = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail) xs
+      bs = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail ∘  Data.Vec.tail) xs
+
+      sas = map pitchPairToPitchInterval (toList (Data.Vec.zip as ss))
+      sts = map pitchPairToPitchInterval (toList (Data.Vec.zip ts ss))
+      sbs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs ss))
+      ats = map pitchPairToPitchInterval (toList (Data.Vec.zip ts as))
+      abs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs as))
+      tbs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs ts))
+      errs = concatMap checkMotion (sas ∷ sts ∷ sbs ∷ ats ∷ abs ∷ tbs ∷ [])
+  in errs
+
+--filterSBMotionOk : {n : ℕ} → List (Vec (Vec Pitch 4) n) → List (Vec (Vec Pitch 4) n)
+--filterSBMotionOk = filter motionOkFilter
 
 -- Given a soprano line with harmonization, generate
 -- a list of possible bass lines 1-1 with soprano notes.

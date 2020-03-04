@@ -7,7 +7,7 @@ open import Data.Fin             using (Fin; #_) renaming (suc to fsuc)
 open import Data.Bool            using (Bool; true; false; if_then_else_)
 open import Data.List            using (List; concat; replicate; []; _∷_)
 open import Data.Maybe           using (Maybe; just; nothing)
-open import Data.Nat             using (ℕ; suc; _*_)
+open import Data.Nat             using (ℕ; suc; _*_; _<ᵇ_)
 open import Data.Product         using (_×_; _,_)
 open import Data.Vec             using (Vec; _∷_; []) renaming (concat to cat; replicate to rep)
 open import Function             using (_∘_)
@@ -48,3 +48,9 @@ concatMaybe : {ℓ : Level} {A : Set ℓ} → List (Maybe A) → List A
 concatMaybe []             = []
 concatMaybe (nothing ∷ xs) = concatMaybe xs
 concatMaybe (just x  ∷ xs) = x ∷ concatMaybe xs
+
+listMin : {ℓ : Level} {A : Set ℓ} → (A → ℕ) → List A → Maybe A
+listMin f [] = nothing
+listMin f (x ∷ xs) with listMin f xs
+... | nothing = just x
+... | just y  = if f x <ᵇ f y then just x else just y 

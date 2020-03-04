@@ -58,6 +58,9 @@ data Triad : Set where
   VI  : Triad
   VII : Triad
 
+--data Triad : Set where
+--  I : Triad; II : Triad; III : Triad; IV : Triad; V : Triad; VI : Triad; VII : Triad
+
 allTriads : List Triad
 allTriads = I ∷ II ∷ III ∷ IV ∷ V ∷ VI ∷ VII ∷ []
 
@@ -128,12 +131,12 @@ rootProgression VI  = nextTriad (II ∷ V   ∷ []) (III ∷ IV ∷ []) (I      
 rootProgression VII = nextTriad (I  ∷ III ∷ []) (VI       ∷ []) (II  ∷ IV  ∷ V ∷ [])
 
 previousTriads : Triad → List Triad
-previousTriads I   = V ∷ IV ∷ [] -- omit VII since you'll get stuck
+previousTriads I   = V ∷ IV ∷ VII ∷ []
 previousTriads II  = VI ∷ IV ∷ []
-previousTriads III = VI ∷ []     -- omit VII since you'll get stuck
-previousTriads IV  = I ∷ V ∷ II ∷ []
+previousTriads III = VI ∷ VII ∷ []
+previousTriads IV  = I ∷ V ∷ II ∷ III ∷ []
 previousTriads V   = I ∷ IV ∷ II ∷ VI ∷ []
-previousTriads VI  = IV ∷ II ∷ V ∷ []
+previousTriads VI  = IV ∷ I ∷ II ∷ V ∷ VII ∷ []
 previousTriads VII = []
 
 harmonizations : List DiatonicDegree → List (List Triad)
@@ -150,13 +153,15 @@ harmonizations (d ∷ d' ∷ ds) =
 
 -- Given a pitch p and a diatontic degree d, return a pitch that
 -- has degree d and is 1-2 octaves lower than p.
--- TODO: Fix the range to be within 1-2 octaves.
 pitchLower : Pitch → DiatonicDegree → Pitch
 pitchLower p d =
   let (c , o) = absoluteToRelative p
       c'      = degreeToPitchClassMajor d
   in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
 
+-- Given a soporano voice s a pitch and the other voices
+-- as diatonic degrees of a major scale, voice the
+-- accompaniment in close position.
 voiceChord : Pitch → Vec DiatonicDegree 3 → Vec Pitch 3
 voiceChord s (a ∷ t ∷ b ∷ [])  =
   let (s' , o) = absoluteToRelative s
@@ -218,7 +223,7 @@ bassLines [] = [] ∷ []
 bassLines ((sop , triad) ∷ pts) =
   let pss = bassLines pts
       basses  = bassNotes sop triad
-      intervalOkSBs : List PitchInterval -- list of bass notes with interval up to the corresponding soproano note that pass intervalCheck
+      intervalOkSBs : List PitchInterval -- list of bass notes with interval (to sop) that pass intervalCheck
       intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
       intervalOkBs = map proj₁ intervalOkSBs
       intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
@@ -249,7 +254,7 @@ chordProg [] = [] ∷ []
 chordProg ((sop , triad) ∷ pts) =
   let pss = chordProg pts
       basses  = bassNotes sop triad
-      intervalOkSBs : List PitchInterval -- list of bass notes with interval up to the corresponding soproano note that pass intervalCheck
+      intervalOkSBs : List PitchInterval -- list of bass notes with interval (to sop) that pass intervalCheck
       intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
       intervalOkBs = map proj₁ intervalOkSBs
       intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss

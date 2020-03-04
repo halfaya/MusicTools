@@ -15,39 +15,125 @@
   \end{figure}
 }
 
+\newcommand{\HarmonizationMT}{
+  \begin{figure}
+    \includegraphics[width=5.5cm]{fig/piston.png}
+    \hspace{1cm}
+    \includegraphics[width=5cm]{fig/fharm.png} \\
+    \begin{flushleft}
+    \begin{small}
+     \hspace{2.35cm} V \ \ \ \ \ \ \ \,I \ \ \ \ \ \ \ \,IV \,VI \ \,III \ IV \ \ \,V
+     \hspace{2.6cm} V \ \ \ \ \ \ \ \,I \ \ \ \ \ \,IV VI \,III\,IV \ \ V
+    \end{small}
+    \end{flushleft}
+    \caption{Harmonization by Music Tools (to be replaced by real figure)}
+    \Description{Harmonization by Music Tools}
+    \label{fig:harmonizationMT}
+  \end{figure}
+}
+
 \section{Harmony}
 \label{sec:harmony}
 
-Harmony is a particularly fundamental area of music theory with numerous texts, for
-example \citet{piston-harmony} and \citet{aldwell2018harmony}, devoted
-to it. It has also been the focus of most of the Haskell-based
-work~\citep{magalhaes-harmtrace,koops-fharm,magalhaes-fcomp}, and as a
-first step into this huge area it worth trying to implement some of
-this functionality in Agda. Indeed \citet{magalhaes-harmtrace} states in its final section
-``It would be interesting to see if we could easily port our system to
-a dependently-typed setting'' and explicitly mentions Agda and Idris
-as candidates. Our work, while currently very preliminary, provides a
-glimpse into what that can look like.
+Harmony refers to simultaneously sounding tones (chords) and its study
+is primarily concerned with the progression of chords throughout a
+piece of music. It is in essence the of dual of counterpoint. In this
+section we formalize a small part of the classic text
+\citet{piston-harmony}, in particular part of Chapter~9 which is
+concerned with techniques for harmonizing a given melody.
 
-\citet{magalhaes-harmtrace} aim to creating a grammar for
-harmonic analysis and a corresponding parser that takes as input a
-series of chords and tries to produce a harmonic analysis that fits
-the progression. The grammar makes crucial use of dependent types and
-is thus awkward to represent in Haskell. We have implemented those
-parts in Agda (\texttt{Fmmh.agda}) and not surprisingly they are simple and
-elegant. However \citet{magalhaes-harmtrace} also makes use of
-sophisticated Haskell libraries for parser combinators and generics,
-which are unavailable in Agda and would either have to be natively
-implemented or called through Agda's Haskell FFI, both of which involve
-considerable work, so we have not yet pursued that route.
+\subsection{Harmonic Progression}
+\label{sec:harmony:prog}
 
-Instead we first focus on \fharm~\citep{koops-fharm}, which aims to create a
-harmonize a given melody. This is the subject of Chapter~9 of 
-\citet{piston-harmony}, and, along with three exercises,
-\fharm harmonizes the main Example~9.1 of the chapter,
-shown in Figure~\ref{fig:harmonization}.
+The primary Example~9.1 in Piston's text is shown on the left
+side of Figure~\ref{fig:harmonization} which shows the melody with a
+sample four part SATB harmonization in C~major. The melody is the
+series of highest notes, the soprano (S) line, while the other four
+parts alto (A), tenor (T) and bass (B) are the melodies below
+it. Roman numerals denote the names of the triads at each vertical
+slice. Note that even though there are four voices there are only
+three distinct pitches sounding at each vertical slice (where tones an
+octave apart are considered to have the same relative pitch). As is
+typical the root of the triad is always doubled. Also note that all
+triads are in root position (meaning the root is in the bass voice),
+as Piston restricts to this case initially in the chapter (he does
+relax it later). The goal of a harmonization is both to create an
+aesthetically pleasing chord progression as well as fluid melodies in
+each voice (called voice leading) and independence of each music
+line (in other words good counterpoint). In this chapter as well as
+throughout the text Piston gives advice on how to achieve these goals.
 
 \Harmonization
+
+We would like to formalize some of this advice and apply it to
+automate harmonization of melodies. We start with selection of the
+sequence of triads, in other words the harmonic progression. Earlier
+in the text on page~23 Piston presents a Table of Usual Root
+Prrogressions, noting which triads usually follow a given one and
+which are sometimes used or rare. It is easy to encode this in Agda.
+
+\begin{alltt}
+data Triad : Set where
+  I : Triad; II : Triad; III : Triad; IV : Triad; V : Triad; VI : Triad; VII : Triad
+
+record NextTriad : Set where
+  constructor nextTriadb
+  field
+    usual : List Triad; sometimes : List Triad; rare : List Triad
+
+rootProgression : Triad \(\rightarrow\) NextTriad
+rootProgression I   = nextTriad (IV :: V :: []) (VI :: []) (II :: III :: [])
+rootProgression II  = nextTriad (V :: []) (IV  :: VI :: []) (I :: III :: [])
+-- other cases omitted for space
+\end{alltt}
+
+It is easiest to create a harmonic progression in reverse, to
+ensure one ends a musical phrase with either a full (V--I) or half (V)
+cadence, and work backward from there. So we would like to invert this
+table to give a list of likely triads to precede a given triad. This
+would normally be straightfoward but here we see a disadvantage of
+using Agda. As is typical with languages based on dependent type
+theories, equality is a very subtle concept and even determing if a
+term is a member of a list is nontrivial.
+
+In Haskell this would be easy--there is an \texttt{Eq} typeclass and a
+method for automatically generating equalities. In the Agda Standard
+Library~\citep{agda-stdlib} is a relation with constructive proof of
+membership, and requires far more effort than we need. Alternatives
+include defining decidable equality for triads (which requires writing
+out 49 cases) or mapping to natural numbers and using already
+implemented decidable or boolean equality for those. For now we simply
+write the inverse function manually, excluding the rare cases.
+
+\begin{alltt}
+previousTriads : Triad → List Triad
+previousTriads I   = V :: IV :: VII :: []
+previousTriads II  = VI :: IV :: []
+-- other cases omitted for space
+\end{alltt}
+
+\subsection{Completing the Harmonization}
+\label{sec:harmony:complete}
+
+TODO: Finish this.
+
+See Figure~\ref{fig:harmonizationMT}, which is currently just a copy of
+the other figure, but included here now for space.
+
+\HarmonizationMT
+
+\subsection{Comparison with Previous Work}
+\label{sec:harmony:compare}
+
+Most of the the Haskell-based
+work~\citep{magalhaes-harmtrace,koops-fharm,magalhaes-fcomp} has
+focused on harmony. In particular \fharm~\citep{koops-fharm} tackles
+the problem of harmonization of a melody, and their harmonization of
+Piston's example is shown on the right side of
+Figure~\ref{fig:harmonization}. Their method is quite different from
+ours. Instead of using Piston's table of root progressions they use a
+more sophisticated hierarchical grammar from previous
+work~\citep{magalhaes-harmtrace}.
 
 Their technique is to first require the melody notes to be members of
 the harmonizing chords, then use their previous work to try to
@@ -62,7 +148,4 @@ harmony it is preferred to double the root note. Also minimizing the
 number of parse errors as a means to choose the best harmonization
 does not necessarily have a musical meaning.
 
-Not having an implementation of the grammar and parser we explore a
-different approach, based closer on Piston's.
-
-TODO: More here.
+TODO: More comparison.

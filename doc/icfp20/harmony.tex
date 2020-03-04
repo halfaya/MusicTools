@@ -48,11 +48,11 @@ sample four part SATB harmonization in C~major. The melody is the
 series of highest notes, i.e., the soprano (S) line, while the other three
 parts alto (A), tenor (T), and bass (B) are the melodies below
 it. Roman numerals denote the names of the triads at each vertical
-slice. Note that even though there are four voices there are only
+slice. Note that even though the example consists of four voices there are only
 three distinct pitches sounding at each vertical slice (where tones an
 octave apart are considered to have the same relative pitch). As is
 typical the root of the triad is always doubled. Also note that all
-triads are in root position (meaning the root is in the bass voice),
+triads are in root position (i.e., the root is in the bass voice),
 as Piston restricts to this case initially in the chapter (he does
 relax it later). The goal of a harmonization is both to create an
 aesthetically pleasing chord progression as well as fluid melodies in
@@ -95,7 +95,7 @@ using Agda. As is typical with languages based on dependent type
 theories, equality is a very subtle concept and even determining if a
 term is a member of a list is nontrivial.
 
-In Haskell this would be easy---there is an \texttt{Eq} typeclass and a
+In Haskell this would be easy---there is an \texttt{Eq} type class and a
 method for automatically generating equalities. In the Agda Standard
 Library~\citep{agda-stdlib} list membership is a relation with
 constructive evidence of membership, and requires far more effort we
@@ -137,7 +137,7 @@ Piston's example (\texttt{filter halfCadence}). This results in 25
 candidate progressions. For each pitch and triad pair we construct a
 \texttt{harmonizingChord} in root position with the root doubled. The
 function \texttt{voiceChord} spaces the notes nicely. All of this work
-ins done in the function \texttt{voicedHarmonizations}.
+is done in the function \texttt{voicedHarmonizations}.
 
 \begin{alltt}
 voicedHarmonizations : \{n : N\} \(\rightarrow\) Vec Pitch n \(\rightarrow\) List (Vec (Vec Pitch 4) n)
@@ -152,8 +152,8 @@ voicedHarmonizations \{n\} ps =
 To determine the ``best'' of these harmonizations, we now make use of
 \texttt{motionCheck} from the counterpoint work. We compare all six
 pairs of melodies, count the number of motion errors present, and pick
-the harmonization which minimizes these flaws. The functon to
-determine all errors is straightfoward.
+the harmonization which minimizes these flaws. The function to
+determine all errors is straightforward.
 
 \begin{alltt}
 motionErrors : \{n : N\} \(\rightarrow\) Vec (Vec Pitch 4) n \(\rightarrow\) List MotionError

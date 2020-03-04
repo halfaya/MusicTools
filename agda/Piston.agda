@@ -147,13 +147,6 @@ pitches117s = g 5 ∷ g 5 ∷ e 5 ∷ g 5 ∷ a 5 ∷ c 6 ∷ b 5 ∷ a 5 ∷ g 
 vhs117 : List (Vec (Vec Pitch 4) 9)
 vhs117 = voicedHarmonizations pitches117s
 
---vhs117m : List (Vec (Vec Pitch 4) 9)
---vhs117m = filter motionOkFilter vhs117
-
-yy : List (Vec (Vec Pitch 4) 9) → List MotionError
-yy [] = []
-yy (x ∷ xs) = motionErrors x
-
 best : Maybe (List (Vec Pitch 4))
 best = Data.Maybe.map toList (listMin (length ∘ motionErrors) vhs117)
 

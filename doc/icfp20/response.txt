@@ -1,0 +1,20 @@
+We would like to thank the reviewers for their thorough reading and
+valuable feedback.  The reviewers are right to point out our limited
+use of dependent types; ...
+
+Below is our answer to other questions.
+
+### To Reviewer A
+
+### To Reviewer B
+
+* The best way to understand Line 315 is to look at the example in
+  Figure 4.  In bar 5, the counterpoint line moves downwards from
+  C to E (unison).  Then, in the next bar, it moves upwards from E to
+  F.  We call a motion "step-wise" when its endpoints are adjacent
+  notes, such as E-F.
+
+### To Reviewer C
+
+* The word "unspecified" in Line 87 is not a typo.  The unit of time is
+  specified when the music is played at a particular tempo.  

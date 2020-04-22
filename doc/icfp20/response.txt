@@ -1,6 +1,43 @@
 We would like to thank the reviewers for their thorough reading and
-valuable feedback.  The reviewers are right to point out our limited
-use of dependent types; ...
+valuable feedback. We agree with the reviewers that the use of
+dependent types in the paper is not sufficient to demonstrate their
+true value in the context of music theory. There is additional use of
+dependent types in the code that did not make it into the paper due to
+space limitations and the difficulty of fitting it into the main
+narrative, but likely this would not have been enough to change
+anyone's mind. We have much more planned that should demononstrate how
+compelling dependent types are in this context, but this is still
+future work.
+
+All reviewers raise other interesting points that we intend to
+address, and we thank them for pointing these out. Reviewers B and C
+raise doubts about whether the extrinsic approach in this paper is
+really superior to the intrinsic approach of our previous
+work. Although our experience so far has indicated the extrinsic
+approach seems both more flexible and more user-friendly, a more
+detailed comparison is warranted. We were unaware that Agda's
+reflection mechanism allows custom error messages, so thanks to
+Reviewer B for mentioning this and we will try it out. It is enticing
+to take advantage of the built-in type checker as much as possible,
+but it can also be constraining if one wants to for example explore
+multiple rule systems at once. The two approaches are not so different
+as indices can be represented as predicates attached to a sigma
+(record) type, and with an appropriate equivalence can be converted
+back and forth, which we also intend to explore. As Reviewer C notes
+we need to be more clear about what advantages there are to running
+the check at compile time rather than run-time in Haskell.
+
+Reviewers B and C also mention constraint-based search in which the type
+system may be used to partially constrain the search, and this is also
+planned future work.
+
+Reviewer A suggests implementing previoudTriads as a relation instead
+of a function, and the tradeoff between these approaches, and indeed
+many other aspects of practical programming using dependent types, are
+areas we hope to explore in detail going forward.
+
+[Note to Youyou: We could just leave out specific answers to questions
+unless you think the reviewers are really interested in this.]
 
 Below is our answer to other questions.
 

@@ -5,14 +5,18 @@ true value in the context of music theory. There is additional use of
 dependent types in the code that did not make it into the paper due to
 space limitations and the difficulty of fitting it into the main
 narrative, but likely this would not have been enough to change
-anyone's mind. We have much more planned that should demononstrate how
+anyone's mind. We have many more plans that should demonstrate how
 compelling dependent types are in this context, but this is still
 future work.
 
 All reviewers raise other interesting points that we intend to
-address, and we thank them for pointing these out. Reviewers B and C
-raise doubts about whether the extrinsic approach in this paper is
-really superior to the intrinsic approach of our previous
+address, and we thank them for pointing these out.  Below we would
+like to respond to the main points.
+
+### Extrinsic vs. intrinsic approaches (Reviewers B and C)
+
+The reviewers raise doubts about whether the extrinsic approach
+in this paper is really superior to the intrinsic approach of previous
 work. Although our experience so far has indicated the extrinsic
 approach seems both more flexible and more user-friendly, a more
 detailed comparison is warranted. We were unaware that Agda's
@@ -21,37 +25,46 @@ Reviewer B for mentioning this and we will try it out. It is enticing
 to take advantage of the built-in type checker as much as possible,
 but it can also be constraining if one wants to for example explore
 multiple rule systems at once. The two approaches are not so different
-as indices can be represented as predicates attached to a sigma
+as indices can be represented as predicates attached to a $\Sigma$
 (record) type, and with an appropriate equivalence can be converted
 back and forth, which we also intend to explore. As Reviewer C notes
 we need to be more clear about what advantages there are to running
 the check at compile time rather than run-time in Haskell.
 
-Reviewers B and C also mention constraint-based search in which the type
-system may be used to partially constrain the search, and this is also
+### Constraint-based search (Reviewers B and C)
+
+The reviewers also mention constraint-based search in which the type
+system may be used to partially constrain the search.  This is also
 planned future work.
 
-Reviewer A suggests implementing previoudTriads as a relation instead
-of a function, and the tradeoff between these approaches, and indeed
+### Triads as a relation (Reviewer A)
+
+The reviewer suggests implementing previousTriads as a relation instead
+of a function. The tradeoff between these approaches, and indeed
 many other aspects of practical programming using dependent types, are
 areas we hope to explore in detail going forward.
 
 [Note to Youyou: We could just leave out specific answers to questions
 unless you think the reviewers are really interested in this.]
 
-Below is our answer to other questions.
+[Note to John: I agree that these questions are not very important,
+but I would prefer not to ignore them.]
 
-### To Reviewer A
+Lastly, let us answer some minor questions.
 
 ### To Reviewer B
 
-* The best way to understand Line 315 is to look at the example in
-  Figure 4.  In bar 5, the counterpoint line moves downwards from
-  C to E (unison).  Then, in the next bar, it moves upwards from E to
-  F.  We call a motion "step-wise" when its endpoints are adjacent
-  notes, such as E-F.
+* The reviewer asks how to interpret the sentence in Line 315.  The
+  best way to understand it is to look at the example in Figure 4.
+  In bar 5, the counterpoint line moves downwards from C to E (unison).
+  Then, in the next bar, it moves upwards from E to F. We call a motion
+  "step-wise" when its endpoints are adjacent notes, such as E-F.
+
+* The reviewers wonders in what way harmony is dual to counterpoint.
+  As Cong and Leo [FARM '19] suggest, we may view harmony as a
+  horizontal view of a musical score, and counterpoint as a vertical view.
 
 ### To Reviewer C
 
-* The word "unspecified" in Line 87 is not a typo.  The unit of time is
+* The word "unspecified" in Line 87 is not a typo. The unit of time is
   specified when the music is played at a particular tempo.  

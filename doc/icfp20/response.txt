@@ -25,7 +25,7 @@ Reviewer B for mentioning this and we will try it out. It is enticing
 to take advantage of the built-in type checker as much as possible,
 but it can also be constraining if one wants to for example explore
 multiple rule systems at once. The two approaches are not so different
-as indices can be represented as predicates attached to a $\Sigma$
+as indices can be represented as predicates attached to a sigma
 (record) type, and with an appropriate equivalence can be converted
 back and forth, which we also intend to explore. As Reviewer C notes
 we need to be more clear about what advantages there are to running
@@ -44,12 +44,6 @@ of a function. The tradeoff between these approaches, and indeed
 many other aspects of practical programming using dependent types, are
 areas we hope to explore in detail going forward.
 
-[Note to Youyou: We could just leave out specific answers to questions
-unless you think the reviewers are really interested in this.]
-
-[Note to John: I agree that these questions are not very important,
-but I would prefer not to ignore them.]
-
 Lastly, let us answer some minor questions.
 
 ### To Reviewer B
@@ -60,7 +54,7 @@ Lastly, let us answer some minor questions.
   Then, in the next bar, it moves upwards from E to F. We call a motion
   "step-wise" when its endpoints are adjacent notes, such as E-F.
 
-* The reviewers wonders in what way harmony is dual to counterpoint.
+* The reviewer wonders in what way harmony is dual to counterpoint.
   As Cong and Leo [FARM '19] suggest, we may view harmony as a
   horizontal view of a musical score, and counterpoint as a vertical view.
 

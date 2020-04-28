@@ -14,6 +14,7 @@ open import Function        using (_∘_)
 
 open import BitVec          using (BitVec; empty; insert; elements; _∩_; _∈_)
 open import Counterpoint
+open import Diatonic        using (DiatonicDegree; diatonicDegree; undd; thirdUp; _≡ᵈ_; degree→PitchClass; major; pitch→DegreeCMajor)
 open import Interval
 open import Music
 open import Note
@@ -162,7 +163,7 @@ halfCadence (_ ∷ t ∷ ts) = halfCadence (t ∷ ts)
 pitchLower : Pitch → DiatonicDegree → Pitch
 pitchLower p d =
   let (c , o) = absoluteToRelative p
-      c'      = degreeToPitchClassMajor d
+      c'      = degree→PitchClass major d
   in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
 
 -- Given a soporano voice s a pitch and the other voices
@@ -171,9 +172,9 @@ pitchLower p d =
 voiceChord : Pitch → Vec DiatonicDegree 3 → Vec Pitch 3
 voiceChord s (a ∷ t ∷ b ∷ [])  =
   let (s' , o) = absoluteToRelative s
-      a'       = degreeToPitchClassMajor a
-      t'       = degreeToPitchClassMajor t
-      b'       = degreeToPitchClassMajor b
+      a'       = degree→PitchClass major a
+      t'       = degree→PitchClass major t
+      b'       = degree→PitchClass major b
       ao       = downOctave a' s' o
       to       = downOctave t' a' ao
       bo       = downOctave b' t' to
@@ -192,7 +193,7 @@ voiceChord s (a ∷ t ∷ b ∷ [])  =
 -- Each bass note is pitched 1-2 octaves below p.
 bassNotes : Pitch → Triad → List Pitch
 bassNotes p t =
-  let sop  = pitchToDegreeCMajor p
+  let sop  = pitch→DegreeCMajor p
       root = triadRoot t
       ds   = toList (triadDegrees t)
       ds'  = filter (λ d → (sop ≡ᵈ root) ∨ not (sop ≡ᵈ d)) ds
@@ -207,7 +208,7 @@ bassNotes p t =
 -- Currently root or third is preferred for alto.
 harmonizingChord : Pitch → Triad → Vec Pitch 3
 harmonizingChord p t =
-  let sop   = pitchToDegreeCMajor p
+  let sop   = pitch→DegreeCMajor p
       root  = triadRoot t
       third = thirdUp root
       fifth = thirdUp third
@@ -223,7 +224,7 @@ harmonizingChord p t =
 -- Create 4 part harmonizations ending in V for a melody in C major.
 voicedHarmonizations : {n : ℕ} → Vec Pitch n → List (Vec (Vec Pitch 4) n)
 voicedHarmonizations {n} ps =
-  let ds = Data.Vec.map pitchToDegreeCMajor ps
+  let ds = Data.Vec.map pitch→DegreeCMajor ps
       hs : List (Vec Triad n)
       hs = filter halfCadence (harmonizations ds)
   in map (λ ts → Data.Vec.map (λ pt → proj₁ pt ∷ harmonizingChord (proj₁ pt) (proj₂ pt))

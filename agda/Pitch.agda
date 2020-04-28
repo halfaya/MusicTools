@@ -79,55 +79,6 @@ indexInScale (pc ∷ pcs) p with (unPitchClass pc ≟ p)
 ... | yes _ = just fz
 ... | no  _ = mmap fs (indexInScale pcs p)
 
-data DiatonicDegree : Set where
-  diatonicDegree : Fin diatonicScaleSize → DiatonicDegree
-
-undd : DiatonicDegree → Fin diatonicScaleSize
-undd (diatonicDegree d) = d
-
-infix 4 _≡ᵈ_
-_≡ᵈ_ : DiatonicDegree → DiatonicDegree → Bool
-diatonicDegree d ≡ᵈ diatonicDegree e = toℕ d ≡ᵇ toℕ e
-
--- round down
-pitchClassToDegreeMajor : PitchClass → DiatonicDegree
-pitchClassToDegreeMajor (pitchClass fz)                                                        = diatonicDegree (# 0)
-pitchClassToDegreeMajor (pitchClass (fs fz))                                                   = diatonicDegree (# 0)
-pitchClassToDegreeMajor (pitchClass (fs (fs fz)))                                              = diatonicDegree (# 1)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs fz))))                                         = diatonicDegree (# 1)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs fz)))))                                    = diatonicDegree (# 2)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs fz))))))                               = diatonicDegree (# 3)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs fz)))))))                          = diatonicDegree (# 3)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs fz))))))))                     = diatonicDegree (# 4)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))                = diatonicDegree (# 4)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))))           = diatonicDegree (# 5)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))      = diatonicDegree (# 5)
-pitchClassToDegreeMajor (pitchClass (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))) = diatonicDegree (# 6)
-
-degreeToPitchClassMajor : DiatonicDegree → PitchClass
-degreeToPitchClassMajor (diatonicDegree fz)                               = pitchClass (# 0)
-degreeToPitchClassMajor (diatonicDegree (fs fz))                          = pitchClass (# 2)
-degreeToPitchClassMajor (diatonicDegree (fs (fs fz)))                     = pitchClass (# 4)
-degreeToPitchClassMajor (diatonicDegree (fs (fs (fs fz))))                = pitchClass (# 5)
-degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs fz)))))           = pitchClass (# 7)
-degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = pitchClass (# 9)
-degreeToPitchClassMajor (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = pitchClass (# 11)
-
-pitchToDegreeCMajor : Pitch → DiatonicDegree
-pitchToDegreeCMajor = pitchClassToDegreeMajor ∘ pitchToClass
-
-d1 d2 d3 d4 d5 d6 d7 : DiatonicDegree
-d1 = diatonicDegree (# 0)
-d2 = diatonicDegree (# 1)
-d3 = diatonicDegree (# 2)
-d4 = diatonicDegree (# 3)
-d5 = diatonicDegree (# 4)
-d6 = diatonicDegree (# 5)
-d7 = diatonicDegree (# 6)
-
-thirdUp : DiatonicDegree → DiatonicDegree
-thirdUp (diatonicDegree d) = diatonicDegree ((toℕ d + 2) mod diatonicScaleSize)
-
 scaleSize : {n : ℕ} → Scale n → ℕ
 scaleSize {n} _ = n
 

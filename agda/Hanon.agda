@@ -1,21 +1,20 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Hanon where
 
-open import Data.Fin     using (Fin; #_)
-open import Data.Integer using (+_; -[1+_]; ℤ)
-open import Data.List    using (List; _∷_; []; map; concat; _++_; replicate; zip; length; take; foldr)
-open import Data.Nat     using (ℕ; zero; suc; _+_)
+open import Data.Fin     using (#_)
+open import Data.Integer using (+_)
+open import Data.List    using (List; _∷_; []; map; concat; _++_)
+open import Data.Nat     using (ℕ; zero; suc)
 open import Data.Product using (_,_; map₁)
 open import Data.Vec     using (fromList)
 open import Function     using (_∘_)
 
-open import Pitch
-open import Note
-open import Music
-open import MidiEvent
-open import ScaleDegree
-open import Util
+open import Pitch        using (Pitch; octave; relativeToAbsolute; majorScale)
+open import Note         using (8th)
+open import Music        using (Melody; Counterpoint; cp; pitches→melody; transposeMelody)
+open import MidiEvent    using (Channel-1; InstrumentNumber-1; MidiTrack; track; counterpoint→events; defaultVelocity)
+open import ScaleDegree  using (ScaleDegreeOctave; scaleDegree; transposeScaleDegree; scaleDegreeToPitchClass)
 
 cell : List (ScaleDegreeOctave 7)
 cell = map (_, octave 3) (map (scaleDegree) (# 0 ∷ # 2 ∷ # 3 ∷ # 4 ∷ # 5 ∷ # 4 ∷ # 3 ∷ # 2 ∷ []))

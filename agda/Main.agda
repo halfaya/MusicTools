@@ -2,25 +2,15 @@
 
 module Main where
 
-open import Data.List
+open import Data.List using (map)
 
-open import Midi
-open import Note
+open import Midi using (IO; Unit; exportTracks; track→htrack)
 
-open import Frog
-open import Piston
+open import Hanon using (hanonTrack)
 
 main : IO Unit
 main =
-  let channel      = 0
---      ticksPerBeat = 4 -- 16th notes
-      ticksPerBeat = 1 -- quarter notes
---      file         = "/tmp/test.mid"
+  let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
---      file         = "/Users/youyou/Music/test.mid"
--- counterpoint
---      song         = cfcpTracks1
---      song         = cfcpTracks2
--- harmony
-      song         = testHTracks
+      song         = hanonTrack
   in exportTracks file ticksPerBeat (map track→htrack song)

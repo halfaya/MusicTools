@@ -5,13 +5,11 @@ module Midi where
 open import Agda.Builtin.String using (String)
 open import Data.Fin using (toℕ)
 open import Data.Nat using (ℕ)
-open import Data.List
+open import Data.List using (List; []; _∷_; concatMap)
 open import Data.Product using (_,_)
 
-open import Note
-open import Pitch
-open import MidiEvent
-open import Music
+open import Pitch using (pitch)
+open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 
 {-# FOREIGN GHC
   import Codec.Midi
@@ -106,10 +104,9 @@ data MidiMessage : Set where
 {-# COMPILE GHC MidiMessage = data HsMidiMessage (HsNoteOn | HsNoteOff) #-}
 
 event→messages : MidiEvent → List MidiMessage
-event→messages (midiEvent p start stop v) =
+event→messages (midiEvent (pitch p) start stop v) =
   let v' = toℕ v
-      p' = unpitch p
-  in noteOn v' start p' ∷ noteOff v' stop p' ∷ [] 
+  in noteOn v' start p ∷ noteOff v' stop p ∷ [] 
 
 data HMidiTrack : Set where
   htrack : String → HInstrument → HChannel → HTempo → List MidiMessage → HMidiTrack

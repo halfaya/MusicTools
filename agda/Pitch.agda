@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Pitch where
 
@@ -15,8 +15,6 @@ open import Function        using (_∘_)
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert)
-open import Lemmas          using (revMod; -_mod_; -_div_)
-open import Util            using (findIndex)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)

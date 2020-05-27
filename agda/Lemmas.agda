@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Lemmas where
 
@@ -29,6 +29,7 @@ revMod {n} k = fromℕ< (s≤s (k≤n⇒n-k≤n (toℕ k) n (suc≤-injective (f
 
 ----
 
+{-
 -- mod for negative numbers
 {-# TERMINATING #-}
 -_mod_ : (dividend divisor : ℕ) {≢0 : False (divisor ≟ 0)} → Fin divisor
@@ -40,3 +41,5 @@ revMod {n} k = fromℕ< (s≤s (k≤n⇒n-k≤n (toℕ k) n (suc≤-injective (f
 -_div_ : (dividend divisor : ℕ) {≢0 : False (divisor ≟ 0)} → ℤ
 (- zero  div n) {≢0} = + 0
 (- suc k div n) {≢0} = -[1+ _div_ k n {≢0} ]
+-}
+

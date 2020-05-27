@@ -272,4 +272,19 @@ triadNotes k root =
       ns = scaleNotes k
   in lookup ns (undd d1) ∷ lookup ns (undd d2) ∷ lookup ns (undd d3) ∷ []
 
-aaa = triadNotes (key (D ♮) major) V
+diatonic7thNotes : Key → Root → Vec PC 4
+diatonic7thNotes k root =
+  let d1 = root→DiatonicDegree root
+      d2 = thirdUp d1
+      d3 = thirdUp d2
+      d4 = thirdUp d3
+      ns = scaleNotes k
+  in lookup ns (undd d1) ∷ lookup ns (undd d2) ∷ lookup ns (undd d3) ∷ lookup ns (undd d4) ∷ []
+
+a1 = triadNotes (key (G ♭) major) III
+a2 = diatonic7thNotes (key (G ♯) major) V
+a3 = diatonic7thNotes (key (E ♮) major) V
+a4 = diatonic7thNotes (key (B ♭) major) VII
+a5 = scaleNotes (key (G ♯) major)
+a6 = scaleNotes (key (G ♭) major)
+a7 = scaleNotes (key (B ♮) minor)

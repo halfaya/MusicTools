@@ -1,11 +1,3 @@
-```agda
-module AIM32 where
-
-open import Pitch
-open import Note
-open import Music
-```
-
 # Music Tools Demo, AIM 32
 
 Joint work with Youyou Cong
@@ -36,6 +28,6 @@ Joint work with Youyou Cong
 * Harmonizaton of melodies.
 
 * Coming up:
-** More formalization of music theory.
-** Integration with Cubical and exploration of equivalences, as well as ornaments.
-** Exploration of tradeoffs: indexed types vs records, functions vs relations, 
+  * More formalization of music theory.
+  * Integration with Cubical and exploration of equivalences, as well as ornaments.
+  * Exploration of tradeoffs: indexed types vs records, functions vs relations, 

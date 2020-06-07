@@ -6,7 +6,7 @@ open import Data.Bool       using (Bool; false; true; if_then_else_; _∧_)
 open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
 open import Data.Nat        using (ℕ; _+_; zero; suc; _≡ᵇ_; _∸_)
 open import Data.Nat.DivMod using (_mod_)
-open import Data.Vec        using (Vec; []; _∷_; head; foldl; take; reverse; lookup)
+open import Data.Vec        using (Vec; []; _∷_; head; foldl; take; reverse; lookup; updateAt)
 
 open import Function using (_∘_)
 
@@ -144,12 +144,24 @@ accidental (E x) = x
 accidental (F x) = x
 accidental (G x) = x
 
+modifyAccidental : (Accidental → Accidental) → PC →  PC
+modifyAccidental f (A x) = A (f x)
+modifyAccidental f (B x) = B (f x)
+modifyAccidental f (C x) = C (f x)
+modifyAccidental f (D x) = D (f x)
+modifyAccidental f (E x) = E (f x)
+modifyAccidental f (F x) = F (f x)
+modifyAccidental f (G x) = G (f x)
+
 -- Convert PC to PitchClass with C♮ normalized to 0.
 pcToC : PC → PitchClass
 pcToC pc = pitchClass ((letter→ℕ pc + accMod (accidental pc) + 10) mod 12)
 
 data Key : Set where
   key : PC → Mode → Key
+
+keyMode : Key → Mode
+keyMode (key _ mode) = mode
 
 data Step : Set where
   half  : Step
@@ -243,6 +255,15 @@ rootQuality minor V   = min
 rootQuality minor VI  = maj
 rootQuality minor VII = maj
 
+root→PitchClass : Key → Root → PitchClass
+root→PitchClass (key _ mode) = degree→PitchClass mode ∘ root→DiatonicDegree
+
+diatonicDegree→PC : Key → DiatonicDegree → PC
+diatonicDegree→PC k dd = lookup (scaleNotes k) (undd dd)
+
+root→PC : Key → Root → PC
+root→PC k = diatonicDegree→PC k ∘ root→DiatonicDegree
+
 -- Lower interval is first.
 triadQuality : Interval → Interval → Quality
 triadQuality i1 i2 =
@@ -281,6 +302,17 @@ diatonic7thNotes k root =
       ns = scaleNotes k
   in lookup ns (undd d1) ∷ lookup ns (undd d2) ∷ lookup ns (undd d3) ∷ lookup ns (undd d4) ∷ []
 
+_V/_ : Key → Root → Vec PC 3
+k V/ r = triadNotes (key (root→PC k r) major) V
+
+_V⁷/_ : Key → Root → Vec PC 4
+k V⁷/ r = diatonic7thNotes (key (root→PC k r) major) V
+
+_viiᵒ⁷/_ : Key → Root → Vec PC 4
+k viiᵒ⁷/ r = updateAt (# 3) (modifyAccidental flatten) (diatonic7thNotes (key (root→PC k r) major) VII)
+
+----------
+
 a1 = triadNotes (key (G ♭) major) III
 a2 = diatonic7thNotes (key (G ♯) major) V
 a3 = diatonic7thNotes (key (E ♮) major) V
@@ -288,3 +320,7 @@ a4 = diatonic7thNotes (key (B ♭) major) VII
 a5 = scaleNotes (key (G ♯) major)
 a6 = scaleNotes (key (G ♭) major)
 a7 = scaleNotes (key (B ♮) minor)
+a8 = (key (G ♮) major) V/ V
+a9 = (key (C ♮) major) V⁷/ III
+
+a10 = (key (F ♯) minor) viiᵒ⁷/ III

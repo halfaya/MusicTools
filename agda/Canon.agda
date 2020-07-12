@@ -31,7 +31,7 @@ line1 line2 line3 line4 : List Note
 line1 = subject ++ subject ++ subject
 line2 = map (transposeNoteDown per5) (rest half  ∷ line1)
 line3 = map (transposeNoteDown per8) (rest whole ∷ line1)
-line4 = map (transposeNoteDown per8) (rest half  ∷ rest whole ∷ line2)
+line4 = map (transposeNoteDown per8) (rest whole ∷ line2)
 
 --------------
 

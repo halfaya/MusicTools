@@ -4,8 +4,10 @@ module Note where
 
 open import Data.Integer using (ℤ)
 open import Data.Nat     using (ℕ; _*_)
+open import Function     using (_∘_)
 
 open import Pitch        using (Pitch; transposePitch)
+open import Interval     using (Interval; transposePitchUp; transposePitchDown)
 
 data Duration : Set where
   duration : ℕ → Duration
@@ -23,9 +25,18 @@ noteDuration : Note → ℕ
 noteDuration (tone d _) = unduration d
 noteDuration (rest d)   = unduration d
 
+liftPitch : (Pitch → Pitch) → Note → Note
+liftPitch f (tone d p) = tone d (f p)
+liftPitch f (rest d)   = rest d
+
 transposeNote : ℤ → Note → Note
-transposeNote k (tone d p) = tone d (transposePitch k p)
-transposeNote k (rest d)   = rest d
+transposeNote = liftPitch ∘ transposePitch
+
+transposeNoteUp : Interval → Note → Note
+transposeNoteUp = liftPitch ∘ transposePitchUp
+
+transposeNoteDown : Interval → Note → Note
+transposeNoteDown = liftPitch ∘ transposePitchDown
 
 -- duration in 16th notes
 -- assume duration of a 16th note is 1

@@ -2,16 +2,20 @@
 
 module Diatonic where
 
-open import Data.Bool       using (Bool; false; true; if_then_else_; _∧_)
-open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
-open import Data.Nat        using (ℕ; _+_; zero; suc; _≡ᵇ_; _∸_)
-open import Data.Nat.DivMod using (_mod_)
-open import Data.Vec        using (Vec; []; _∷_; head; foldl; take; reverse; lookup; updateAt)
+open import Data.Bool           using (Bool; false; true; if_then_else_; _∧_)
+open import Data.Empty          using (⊥)
+open import Data.Fin            using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
+open import Data.Integer        using (ℤ; +_; -[1+_]; _+_)
+open import Data.Integer.DivMod using (_modℕ_)
+open import Data.Nat            using (ℕ; zero; suc; _≡ᵇ_; _∸_) renaming (_+_ to _+ℕ_)
+open import Data.Nat.DivMod     using (_mod_)
+open import Data.Unit           using (⊤)
+open import Data.Vec            using (Vec; []; _∷_; head; foldl; take; reverse; lookup; updateAt)
 
-open import Function using (_∘_)
+open import Function            using (_∘_)
 
-open import Interval        using (Interval; interval; maj3; min3; _==_)
-open import Pitch
+open import Interval            using (Interval; interval; maj3; min3; _==_)
+open import Pitch               using (Pitch; diatonicScaleSize; PitchClass; pitchClass; unPitchClass; pitchToClass)
 
 data Mode : Set where
   major : Mode
@@ -87,11 +91,13 @@ d6 = diatonicDegree (# 5)
 d7 = diatonicDegree (# 6)
 
 data Accidental : Set where
-  𝄫 : Accidental
-  ♭ : Accidental
-  ♮ : Accidental
-  ♯ : Accidental
-  𝄪 : Accidental
+  ♭3 : ℕ → Accidental -- 3+n flats
+  𝄫  : Accidental
+  ♭  : Accidental
+  ♮  : Accidental
+  ♯  : Accidental
+  𝄪  : Accidental
+  ♯3 : ℕ → Accidental -- 3+n sharps
 
 -- pitch class letter name with accidental
 data PC : Set where
@@ -103,27 +109,35 @@ data PC : Set where
   F : Accidental → PC
   G : Accidental → PC
 
--- Accidental modifier. To stay in ℕ we map 𝄫 to 0.
-accMod : Accidental → ℕ
-accMod 𝄫 = 0
-accMod ♭ = 1
-accMod ♮ = 2
-accMod ♯ = 3
-accMod 𝄪 = 4
+-- Accidental modifier.
+accMod : Accidental → ℤ
+accMod (♭3 n) = -[1+ (n +ℕ 2) ]
+accMod 𝄫      = -[1+ 1 ]
+accMod ♭      = -[1+ 0 ]
+accMod ♮      = + 0
+accMod ♯      = + 1
+accMod 𝄪      = + 2
+accMod (♯3 n) = + (n +ℕ 3)
 
-flatten : Accidental → Accidental
-flatten 𝄫 = 𝄫 -- should make this an error
-flatten ♭ = 𝄫
-flatten ♮ = ♭
-flatten ♯ = ♮
-flatten 𝄪 = ♯
+flatten : (a : Accidental) → Accidental
+flatten (♭3 n)       = ♭3 (suc n)
+flatten 𝄫            = ♭3 zero
+flatten ♭            = 𝄫
+flatten ♮            = ♭
+flatten ♯            = ♮
+flatten 𝄪            = ♯
+flatten (♯3 zero)    = 𝄪
+flatten (♯3 (suc n)) = ♯3 n
 
 sharpen : Accidental → Accidental
-sharpen 𝄫 = ♭
-sharpen ♭ = ♮
-sharpen ♮ = ♯
-sharpen ♯ = 𝄪
-sharpen 𝄪 = 𝄪 -- should make this an error
+sharpen (♭3 (suc n)) = ♭3 n
+sharpen (♭3 zero)    = 𝄫
+sharpen 𝄫            = ♭
+sharpen ♭            = ♮
+sharpen ♮            = ♯
+sharpen ♯            = 𝄪
+sharpen 𝄪            = ♯3 zero
+sharpen (♯3 n)       = ♯3 (suc n)
 
 -- Convert raw PC letter to ℕ (in range [0,11]); C normalized to 0
 letter→ℕ : PC → ℕ
@@ -155,7 +169,7 @@ modifyAccidental f (G x) = G (f x)
 
 -- Convert PC to PitchClass with C♮ normalized to 0.
 pcToC : PC → PitchClass
-pcToC pc = pitchClass ((letter→ℕ pc + accMod (accidental pc) + 10) mod 12)
+pcToC pc = pitchClass ((((+ (letter→ℕ pc)) + accMod (accidental pc)) modℕ 12) mod 12)
 
 data Key : Set where
   key : PC → Mode → Key
@@ -211,7 +225,7 @@ data Quality : Set where
   dim : Quality
 
 _dd+_ : DiatonicDegree → ℕ → DiatonicDegree
-(diatonicDegree d) dd+ n = diatonicDegree ((toℕ d + n) mod diatonicScaleSize)
+(diatonicDegree d) dd+ n = diatonicDegree ((toℕ d +ℕ n) mod diatonicScaleSize)
 
 thirdUp : DiatonicDegree → DiatonicDegree
 thirdUp d = d dd+ 2
@@ -281,17 +295,9 @@ makeTriad m r =
       p1 = unPitchClass (degree→PitchClass m d1)
       p2 = unPitchClass (degree→PitchClass m d2)
       p3 = unPitchClass (degree→PitchClass m d3)
-      i1 = interval (toℕ p2 ∸ toℕ p1)
+      i1 = interval (toℕ p2 ∸ toℕ p1) -- TODO: See if want to use ℤ
       i2 = interval (toℕ p3 ∸ toℕ p2)
   in triad r (triadQuality i1 i2)
-
-triadNotes : Key → Root → Vec PC 3
-triadNotes k root =
-  let d1 = root→DiatonicDegree root
-      d2 = thirdUp d1
-      d3 = thirdUp d2
-      ns = scaleNotes k
-  in lookup ns (undd d1) ∷ lookup ns (undd d2) ∷ lookup ns (undd d3) ∷ []
 
 diatonic7thNotes : Key → Root → Vec PC 4
 diatonic7thNotes k root =
@@ -301,6 +307,9 @@ diatonic7thNotes k root =
       d4 = thirdUp d3
       ns = scaleNotes k
   in lookup ns (undd d1) ∷ lookup ns (undd d2) ∷ lookup ns (undd d3) ∷ lookup ns (undd d4) ∷ []
+
+triadNotes : Key → Root → Vec PC 3
+triadNotes k = take 3 ∘ diatonic7thNotes k
 
 _V/_ : Key → Root → Vec PC 3
 k V/ r = triadNotes (key (root→PC k r) major) V
@@ -316,11 +325,11 @@ k viiᵒ⁷/ r = updateAt (# 3) (modifyAccidental flatten) (diatonic7thNotes (ke
 a1 = triadNotes (key (G ♭) major) III
 a2 = diatonic7thNotes (key (G ♯) major) V
 a3 = diatonic7thNotes (key (E ♮) major) V
-a4 = diatonic7thNotes (key (B ♭) major) VII
+a4 = diatonic7thNotes (key (B ♭) major) VI
 a5 = scaleNotes (key (G ♯) major)
 a6 = scaleNotes (key (G ♭) major)
 a7 = scaleNotes (key (B ♮) minor)
 a8 = (key (G ♮) major) V/ V
-a9 = (key (C ♮) major) V⁷/ III
+a9 = (key (B ♭) major) V⁷/ II
 
 a10 = (key (F ♯) minor) viiᵒ⁷/ III

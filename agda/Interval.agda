@@ -5,7 +5,7 @@ module Interval where
 open import Pitch
 
 open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
-open import Data.Integer    using (+_; _-_; sign; ∣_∣)
+open import Data.Integer    using (+_; _-_; sign; ∣_∣; -_)
 open import Data.Fin        using (toℕ)
 open import Data.Nat        using (ℕ; _≡ᵇ_)
 open import Data.Nat.DivMod using (_mod_)
@@ -134,3 +134,10 @@ moveDown p q with pitchPairToSignedInterval (p , q)
 -- Check if q is left by step in the opposite direction from its approach
 isOppositeStep : Pitch → Pitch → Pitch → Bool
 isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)
+
+transposePitchUp : Interval → Pitch → Pitch
+transposePitchUp (interval i) p = transposePitch (+ i) p
+
+transposePitchDown : Interval → Pitch → Pitch
+transposePitchDown (interval i) p = transposePitch (- (+ i)) p
+

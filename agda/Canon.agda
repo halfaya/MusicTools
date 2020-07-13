@@ -49,8 +49,14 @@ subject =
 transpositions : List SignedInterval
 transpositions = map (makeSigned s-) (per5 ∷ per8 ∷ per12 ∷ [])
 
+repeats : ℕ
+repeats = 3
+
+delay : Duration
+delay = half
+
 canon : List (List Note)
-canon = makeCanon subject 3 half transpositions
+canon = makeCanon subject repeats delay transpositions
 
 --------------
 
@@ -63,15 +69,16 @@ tempo = 120
 velocity : Velocity
 velocity = # 60
 
-makeTrack : Fin 16 → List Note → MidiTrack
+makeTrack : Channel-1 → List Note → MidiTrack
 makeTrack n notes = track (show (suc (toℕ n))) piano n tempo (notes→events velocity notes)
 
 -- Combines tracks onto channels if more than 16 tracks.
+-- Note that channel 10 (9 as Channel-1) is percussion, so best to keep under 9 channels.
 makeTracks : List (List Note) → List MidiTrack
 makeTracks lines = mt 0 lines where
   mt : ℕ → List (List Note) → List MidiTrack
   mt index [] = []
-  mt index (notes ∷ lines) = makeTrack (index mod 16) notes ∷ mt (suc index) lines
+  mt index (notes ∷ lines) = makeTrack (index mod maxChannels) notes ∷ mt (suc index) lines
 
 canonTracks : List MidiTrack
 canonTracks = makeTracks canon

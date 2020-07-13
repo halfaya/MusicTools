@@ -28,9 +28,12 @@ Velocity  = Fin 128
 defaultVelocity : Velocity
 defaultVelocity = # 60
 
+maxChannels : ℕ
+maxChannels = 16
+
 -- percussion is channel 10, so 9 as Channel-1
 Channel-1 : Set
-Channel-1 = Fin 16
+Channel-1 = Fin maxChannels
 
 -- in bpm
 Tempo : Set

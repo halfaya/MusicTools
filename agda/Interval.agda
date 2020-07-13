@@ -51,6 +51,9 @@ min9  = interval 13
 maj9  = interval 14
 min10 = interval 15
 maj10 = interval 16
+per11 = interval 17
+aug11 = interval 18
+per12 = interval 19
 
 isConsonant : Interval → Bool
 isConsonant iv =

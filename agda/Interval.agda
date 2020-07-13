@@ -5,12 +5,12 @@ module Interval where
 open import Pitch
 
 open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
-open import Data.Integer    using (+_; _-_; sign; ∣_∣; -_)
+open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
 open import Data.Fin        using (toℕ)
-open import Data.Nat        using (ℕ; _≡ᵇ_)
+open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc)
 open import Data.Nat.DivMod using (_mod_)
-open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
 open import Data.Sign       using (Sign)
+open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
 
 open import Function        using (_∘_)
 
@@ -30,8 +30,16 @@ _==_ : Interval → Interval → Bool
 intervalWithinOctave : Interval → Interval
 intervalWithinOctave (interval i) = interval (toℕ (i mod chromaticScaleSize))
 
-SignedInterval : Set
-SignedInterval = Sign × Interval
+data SignedInterval : Set where
+  signedInterval : ℤ → SignedInterval
+
+absoluteInterval : SignedInterval → Interval
+absoluteInterval (signedInterval i) = interval ∣ i ∣
+
+makeSigned : Sign → Interval → SignedInterval
+makeSigned Sign.- (interval zero)    = signedInterval (+ 0)
+makeSigned Sign.- (interval (suc i)) = signedInterval -[1+ i ]
+makeSigned Sign.+ (interval i)       = signedInterval (+ i)
 
 -- Names for intervals
 per1  = interval 0
@@ -51,7 +59,7 @@ min9  = interval 13
 maj9  = interval 14
 min10 = interval 15
 maj10 = interval 16
-per11 = interval 17
+aper11 = interval 17
 aug11 = interval 18
 per12 = interval 19
 
@@ -99,48 +107,40 @@ secondPitch : PitchInterval → Pitch
 secondPitch = proj₂ ∘ pitchIntervalToPitchPair
 
 pitchPairToSignedInterval : PitchPair → SignedInterval
-pitchPairToSignedInterval (pitch p , pitch q) =
-  let d = (+ q) - (+ p)
-  in sign d , interval ∣ d ∣
+pitchPairToSignedInterval (pitch p , pitch q) = signedInterval ((+ q) - (+ p))
 
 -- Assumes p ≤ q
 pitchPairToPitchInterval : PitchPair → PitchInterval
-pitchPairToPitchInterval pq = proj₁ pq , proj₂ (pitchPairToSignedInterval pq)
+pitchPairToPitchInterval pq = proj₁ pq , absoluteInterval (pitchPairToSignedInterval pq)
 
 stepUp : Pitch → Pitch → Bool
 stepUp p q with pitchPairToSignedInterval (p , q)
-... | Sign.- , _ = false
-... | Sign.+ , i = isStep i
+... | signedInterval (+_     n) = isStep (interval n)
+... | signedInterval (-[1+_] n) = false
 
 stepDown : Pitch → Pitch → Bool
 stepDown p q with pitchPairToSignedInterval (p , q)
-... | Sign.- , i = isStep i
-... | Sign.+ , _ = false
+... | signedInterval (+_     n) = false
+... | signedInterval (-[1+_] n) = isStep (interval n)
 
 -- Check if q is a passing tone between p and r
 -- The interval between end points need to be a 3rd
 isPassingTone : Pitch → Pitch → Pitch → Bool
 isPassingTone p q r =
   (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r) ∨
-  (isThird (proj₂ (pitchPairToSignedInterval (p , r))))
+  (isThird (absoluteInterval (pitchPairToSignedInterval (p , r))))
 
 moveUp : Pitch → Pitch → Bool
 moveUp p q with pitchPairToSignedInterval (p , q)
-... | Sign.- , _ = false
-... | Sign.+ , i = true
+... | signedInterval (+_     _) = true
+... | signedInterval (-[1+_] _) = false
 
 moveDown : Pitch → Pitch → Bool
-moveDown p q with pitchPairToSignedInterval (p , q)
-... | Sign.- , i = true
-... | Sign.+ , _ = false
+moveDown p q = not (moveUp p q)
 
 -- Check if q is left by step in the opposite direction from its approach
 isOppositeStep : Pitch → Pitch → Pitch → Bool
 isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)
 
-transposePitchUp : Interval → Pitch → Pitch
-transposePitchUp (interval i) p = transposePitch (+ i) p
-
-transposePitchDown : Interval → Pitch → Pitch
-transposePitchDown (interval i) p = transposePitch (- (+ i)) p
-
+transposePitchInterval : SignedInterval → Pitch → Pitch
+transposePitchInterval (signedInterval z) p = transposePitch z p

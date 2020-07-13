@@ -7,7 +7,7 @@ open import Data.Nat     using (ℕ; _*_)
 open import Function     using (_∘_)
 
 open import Pitch        using (Pitch; transposePitch)
-open import Interval     using (Interval; transposePitchUp; transposePitchDown)
+open import Interval     using (Interval; SignedInterval; transposePitchInterval)
 
 data Duration : Set where
   duration : ℕ → Duration
@@ -32,11 +32,8 @@ liftPitch f (rest d)   = rest d
 transposeNote : ℤ → Note → Note
 transposeNote = liftPitch ∘ transposePitch
 
-transposeNoteUp : Interval → Note → Note
-transposeNoteUp = liftPitch ∘ transposePitchUp
-
-transposeNoteDown : Interval → Note → Note
-transposeNoteDown = liftPitch ∘ transposePitchDown
+transposeNoteInterval : SignedInterval → Note → Note
+transposeNoteInterval = liftPitch ∘ transposePitchInterval
 
 -- duration in 16th notes
 -- assume duration of a 16th note is 1

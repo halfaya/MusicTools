@@ -9,6 +9,7 @@ open import Data.Nat        using (_*_; ℕ; suc; _+_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Nat.Show   using (show)
 open import Data.Product    using (_,_; uncurry)
+open import Data.Sign       renaming (+ to s+ ; - to s-)
 open import Data.Vec        using (fromList; Vec; _∷_; []) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
 open import Function        using (_∘_)
 
@@ -18,9 +19,9 @@ open import Pitch
 open import MidiEvent
 open import Util            using (repeat)
 
-makeImitations : List Note → List Interval → List (List Note)
+makeImitations : List Note → List SignedInterval → List (List Note)
 makeImitations subject []       = []
-makeImitations subject (i ∷ is) = map (transposeNoteDown i) subject ∷ makeImitations subject is
+makeImitations subject (i ∷ is) = map (transposeNoteInterval i) subject ∷ makeImitations subject is
 
 addDelays : Duration → List (List Note) → List (List Note)
 addDelays (duration d) lines = ads 0 lines where
@@ -28,7 +29,7 @@ addDelays (duration d) lines = ads 0 lines where
   ads n []              = []
   ads n (notes ∷ lines) = (rest (duration n) ∷ notes) ∷ ads (n + d) lines 
 
-makeCanon : List Note → ℕ → Duration → List Interval → List (List Note)
+makeCanon : List Note → ℕ → Duration → List SignedInterval → List (List Note)
 makeCanon subject n d = addDelays d ∘ map (repeat n) ∘ (subject ∷_) ∘ makeImitations subject
 
 --------------
@@ -45,8 +46,8 @@ subject =
   tone half (e 5) ∷
   []
 
-transpositions : List Interval
-transpositions = per5 ∷ per8 ∷ per12 ∷ []
+transpositions : List SignedInterval
+transpositions = map (makeSigned s-) (per5 ∷ per8 ∷ per12 ∷ [])
 
 canon : List (List Note)
 canon = makeCanon subject 3 half transpositions

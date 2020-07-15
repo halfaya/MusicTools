@@ -33,6 +33,9 @@ intervalWithinOctave (interval i) = interval (toℕ (i mod chromaticScaleSize))
 data SignedInterval : Set where
   signedInterval : ℤ → SignedInterval
 
+signedIntervalInt : SignedInterval → ℤ
+signedIntervalInt (signedInterval k) = k
+
 absoluteInterval : SignedInterval → Interval
 absoluteInterval (signedInterval i) = interval ∣ i ∣
 
@@ -40,6 +43,9 @@ makeSigned : Sign → Interval → SignedInterval
 makeSigned Sign.- (interval zero)    = signedInterval (+ 0)
 makeSigned Sign.- (interval (suc i)) = signedInterval -[1+ i ]
 makeSigned Sign.+ (interval i)       = signedInterval (+ i)
+
+invertSignedInterval : SignedInterval → SignedInterval
+invertSignedInterval (signedInterval k) = signedInterval (- k)
 
 -- Names for intervals
 per1  = interval 0

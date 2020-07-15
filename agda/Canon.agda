@@ -3,7 +3,7 @@
 module Canon where
 
 open import Data.Fin        using (Fin; #_; toℕ)
-open import Data.Integer    using (+_; -[1+_])
+open import Data.Integer    using (ℤ; +_; -[1+_]; _-_)
 open import Data.List       using (List; _∷_; []; map; concat; _++_; replicate; zip; length; take; drop)
 open import Data.Nat        using (_*_; ℕ; suc; _+_)
 open import Data.Nat.DivMod using (_mod_)
@@ -18,6 +18,7 @@ open import Note
 open import Pitch
 open import MidiEvent
 open import Util            using (repeat)
+open import Transformation
 
 makeImitations : List Note → List SignedInterval → List (List Note)
 makeImitations subject []       = []
@@ -30,7 +31,10 @@ addDelays (duration d) lines = ads 0 lines where
   ads n (notes ∷ lines) = (rest (duration n) ∷ notes) ∷ ads (n + d) lines 
 
 makeCanon : List Note → ℕ → Duration → List SignedInterval → List (List Note)
-makeCanon subject n d = addDelays d ∘ map (repeat n) ∘ (subject ∷_) ∘ makeImitations subject
+makeCanon subject n d = addDelays d ∘ map (repeat n) ∘ makeImitations subject
+
+makeCanon2 : List Note → Duration → List SignedInterval → List (List Note)
+makeCanon2 subject d is = addDelays d (makeImitations (subject ++ inversion subject ++ retrograde subject ++ (retrograde ∘ inversion) subject) is)
 
 --------------
 
@@ -47,7 +51,7 @@ subject =
   []
 
 transpositions : List SignedInterval
-transpositions = map (makeSigned s-) (per5 ∷ per8 ∷ per12 ∷ [])
+transpositions = map (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ per12 ∷ [])
 
 repeats : ℕ
 repeats = 3
@@ -56,7 +60,8 @@ delay : Duration
 delay = half
 
 canon : List (List Note)
-canon = makeCanon subject repeats delay transpositions
+--canon = makeCanon subject repeats delay transpositions
+canon = makeCanon2 subject delay transpositions
 
 --------------
 

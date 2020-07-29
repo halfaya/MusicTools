@@ -34,7 +34,13 @@ makeCanon : List Note → ℕ → Duration → List SignedInterval → List (Lis
 makeCanon subject n d = addDelays d ∘ map (repeat n) ∘ makeImitations subject
 
 makeCanon2 : List Note → Duration → List SignedInterval → List (List Note)
-makeCanon2 subject d is = addDelays d (makeImitations (subject ++ inversion subject ++ retrograde subject ++ (retrograde ∘ inversion) subject) is)
+makeCanon2 subject d is =
+  addDelays d (makeImitations (
+    repeat 2 subject ++
+    inversion subject ++
+    retrograde subject ++
+    (retrograde ∘ inversion) subject)
+    is)
 
 --------------
 
@@ -74,16 +80,16 @@ tempo = 120
 velocity : Velocity
 velocity = # 60
 
-makeTrack : Channel-1 → List Note → MidiTrack
-makeTrack n notes = track (show (suc (toℕ n))) piano n tempo (notes→events velocity notes)
+makeTrack : ℕ → Channel-1 → List Note → MidiTrack
+makeTrack tempo n notes = track (show (suc (toℕ n))) piano n tempo (notes→events velocity notes)
 
 -- Combines tracks onto channels if more than 16 tracks.
 -- Note that channel 10 (9 as Channel-1) is percussion, so best to keep under 9 channels.
-makeTracks : List (List Note) → List MidiTrack
-makeTracks lines = mt 0 lines where
+makeTracks : ℕ → List (List Note) → List MidiTrack
+makeTracks tempo lines = mt 0 lines where
   mt : ℕ → List (List Note) → List MidiTrack
   mt index [] = []
-  mt index (notes ∷ lines) = makeTrack (index mod maxChannels) notes ∷ mt (suc index) lines
+  mt index (notes ∷ lines) = makeTrack tempo (index mod maxChannels) notes ∷ mt (suc index) lines
 
 canonTracks : List MidiTrack
-canonTracks = makeTracks canon
+canonTracks = makeTracks tempo canon

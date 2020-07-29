@@ -8,10 +8,11 @@ open import Midi using (IO; Unit; exportTracks; track→htrack)
 
 open import Hanon using (hanonTrack)
 open import Canon using (canonTracks)
+open import Fugue using (fugueTracks)
 
 main : IO Unit
 main =
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
-      song         = canonTracks
+      song         = fugueTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

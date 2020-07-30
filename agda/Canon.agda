@@ -44,38 +44,8 @@ makeCanon2 subject d is =
 
 --------------
 
-subject : List Note
-subject =
-  tone qtr  (c 5) ∷
-  tone qtr  (d 5) ∷
-  tone half (e 5) ∷
-  tone 8th  (e 5) ∷
-  tone 8th  (e 5) ∷
-  tone 8th  (d 5) ∷
-  tone 8th  (d 5) ∷
-  tone half (e 5) ∷
-  []
-
-transpositions : List SignedInterval
-transpositions = map (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ per12 ∷ [])
-
-repeats : ℕ
-repeats = 3
-
-delay : Duration
-delay = half
-
-canon : List (List Note)
---canon = makeCanon subject repeats delay transpositions
-canon = makeCanon2 subject delay transpositions
-
---------------
-
 piano : InstrumentNumber-1
 piano   = # 0
-
-tempo : ℕ
-tempo = 120
 
 velocity : Velocity
 velocity = # 60
@@ -90,6 +60,3 @@ makeTracks tempo lines = mt 0 lines where
   mt : ℕ → List (List Note) → List MidiTrack
   mt index [] = []
   mt index (notes ∷ lines) = makeTrack tempo (index mod maxChannels) notes ∷ mt (suc index) lines
-
-canonTracks : List MidiTrack
-canonTracks = makeTracks tempo canon

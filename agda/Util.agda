@@ -3,13 +3,13 @@
 module Util where
 
 open import Agda.Primitive       using (Level)
-open import Data.Fin             using (Fin; #_) renaming (suc to fsuc)
+open import Data.Fin             using (Fin; #_; toℕ; inject) renaming (zero to fz; suc to fsuc)
 open import Data.Bool            using (Bool; true; false; if_then_else_)
 open import Data.List            using (List; concat; replicate; []; _∷_)
 open import Data.Maybe           using (Maybe; just; nothing)
-open import Data.Nat             using (ℕ; suc; _*_; _<ᵇ_)
+open import Data.Nat             using (ℕ; zero; suc; _*_; _<ᵇ_)
 open import Data.Product         using (_×_; _,_)
-open import Data.Vec             using (Vec; _∷_; []) renaming (concat to cat; replicate to rep)
+open import Data.Vec             using (Vec; _∷_; []; map; zip) renaming (concat to cat; replicate to rep)
 open import Function             using (_∘_)
 open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Unary       using (Pred; Decidable)
@@ -53,4 +53,14 @@ listMin : {ℓ : Level} {A : Set ℓ} → (A → ℕ) → List A → Maybe A
 listMin f [] = nothing
 listMin f (x ∷ xs) with listMin f xs
 ... | nothing = just x
-... | just y  = if f x <ᵇ f y then just x else just y 
+... | just y  = if f x <ᵇ f y then just x else just y
+
+fins : (k : ℕ) → Vec (Fin k) k
+fins zero    = []
+fins (suc k) = fz ∷ map fsuc (fins k)
+
+fins' : (n : ℕ) → (k : Fin n) → Vec (Fin n) (toℕ k)
+fins' n k = map inject (fins (toℕ k))
+
+zipWithIndex : {ℓ : Level} {A : Set ℓ} {k : ℕ} → Vec A k → Vec (Fin k × A) k
+zipWithIndex {k = k} = zip (fins k)

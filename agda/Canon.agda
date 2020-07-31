@@ -10,30 +10,30 @@ open import Data.Nat.DivMod using (_mod_)
 open import Data.Nat.Show   using (show)
 open import Data.Product    using (_,_; uncurry)
 open import Data.Sign       renaming (+ to s+ ; - to s-)
-open import Data.Vec        using (fromList; Vec; _∷_; []) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
+open import Data.Vec        using (fromList; toList; Vec; _∷_; []) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
 open import Function        using (_∘_)
 
 open import Interval
 open import Note
 open import Pitch
 open import MidiEvent
-open import Util            using (repeat)
+open import Util            using (repeat; fins')
 open import Transformation
 
-makeImitations : List Note → List SignedInterval → List (List Note)
+makeImitations : {k : ℕ} → List Note → Vec SignedInterval k → Vec (List Note) k
 makeImitations subject []       = []
 makeImitations subject (i ∷ is) = map (transposeNoteInterval i) subject ∷ makeImitations subject is
 
-addDelays : Duration → List (List Note) → List (List Note)
+addDelays : {k : ℕ} → Duration → Vec (List Note) k → Vec (List Note) k
 addDelays (duration d) lines = ads 0 lines where
-  ads : ℕ → List (List Note) → List (List Note)
+  ads : {k : ℕ} → ℕ → Vec (List Note) k → Vec (List Note) k
   ads n []              = []
   ads n (notes ∷ lines) = (rest (duration n) ∷ notes) ∷ ads (n + d) lines 
 
-makeCanon : List Note → ℕ → Duration → List SignedInterval → List (List Note)
-makeCanon subject n d = addDelays d ∘ map (repeat n) ∘ makeImitations subject
+makeCanon : {k : ℕ} → List Note → ℕ → Duration → Vec SignedInterval k → Vec (List Note) k
+makeCanon subject reps d = addDelays d ∘ vmap (repeat reps) ∘ makeImitations subject
 
-makeCanon2 : List Note → Duration → List SignedInterval → List (List Note)
+makeCanon2 : {k : ℕ} → List Note → Duration → Vec SignedInterval k → Vec (List Note) k
 makeCanon2 subject d is =
   addDelays d (makeImitations (
     repeat 2 subject ++
@@ -53,10 +53,9 @@ velocity = # 60
 makeTrack : ℕ → Channel-1 → List Note → MidiTrack
 makeTrack tempo n notes = track (show (suc (toℕ n))) piano n tempo (notes→events velocity notes)
 
--- Combines tracks onto channels if more than 16 tracks.
--- Note that channel 10 (9 as Channel-1) is percussion, so best to keep under 9 channels.
-makeTracks : ℕ → List (List Note) → List MidiTrack
-makeTracks tempo lines = mt 0 lines where
-  mt : ℕ → List (List Note) → List MidiTrack
-  mt index [] = []
-  mt index (notes ∷ lines) = makeTrack tempo (index mod maxChannels) notes ∷ mt (suc index) lines
+-- Note that channel 10 (9 as Channel-1) is percussion, so best to stay under 10 channels.
+makeTracks : {k : Fin maxChannels} → ℕ → Vec (List Note) (toℕ k) → Vec MidiTrack (toℕ k)
+makeTracks {k} tempo lines = vmap (uncurry (makeTrack tempo)) (vzip (fins' maxChannels k) lines)
+
+makeTrackList : {k : Fin maxChannels} → ℕ → Vec (List Note) (toℕ k) → List MidiTrack
+makeTrackList tempo lines = toList (makeTracks tempo lines)

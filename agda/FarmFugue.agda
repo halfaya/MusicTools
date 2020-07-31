@@ -3,11 +3,14 @@
 module FarmFugue where
 
 open import Data.List       using (List; _∷_; []; map; _++_)
-open import Data.Nat        using (ℕ)
-open import Data.Sign       renaming (+ to s+ ; - to s-)
+open import Data.Nat        using (ℕ; _*_)
+open import Data.Sign       using () renaming (+ to s+ ; - to s-)
+open import Data.Vec        using (Vec; _∷_; []) renaming (map to vmap)
+open import Function        using (_∘_)
 
-open import Canon           using (makeCanon; makeTracks)
+open import Canon           using (makeCanon; makeTrackList)
 open import Interval
+open import Music
 open import Note
 open import Pitch
 open import MidiEvent
@@ -114,14 +117,22 @@ countersubject = map (transposeNoteInterval (makeSigned s- per5)) (b5 ++ b6 ++ b
 extra = b8 ++ b10 ++ b9 ++ b10
 line1 = subject ++ countersubject ++ extra
 
-transpositions : List SignedInterval
-transpositions = map (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
+transpositions : Vec SignedInterval 3
+transpositions = vmap (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
 
-fugue : List (List Note)
-fugue = makeCanon line1 2 (whole d+ whole d+ whole d+ whole) transpositions
+-- Exposition is a truncated canon
+expo : Vec (List Note) 3
+expo = makeCanon line1 2 (whole d+ whole d+ whole d+ whole) transpositions
+
+-- Truncate to first 18 bars (16 16th notes per bar in 4/4 time)
+exposition : Vec (Melody (18 * 16)) 3
+exposition = vmap (fixLength (18 * 16) ∘ notes→melody) expo
+
+exposition' : Vec (List Note) 3
+exposition' = vmap (melody→notes) exposition
 
 tempo : ℕ
 tempo = 160
 
 fugueTracks : List MidiTrack
-fugueTracks = makeTracks tempo fugue
+fugueTracks = makeTrackList tempo exposition'

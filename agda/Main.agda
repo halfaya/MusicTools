@@ -4,11 +4,10 @@ module Main where
 
 open import Data.List using (map)
 
-open import Midi using (IO; Unit; exportTracks; track→htrack)
+open import Midi      using (IO; Unit; exportTracks; track→htrack)
 
-open import Hanon using (hanonTrack)
-open import Canon using (canonTracks)
-open import Fugue using (fugueTracks)
+open import FarmCanon using (canonTracks)
+open import FarmFugue using (fugueTracks)
 
 main : IO Unit
 main =

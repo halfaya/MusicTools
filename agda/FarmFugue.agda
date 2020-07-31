@@ -124,9 +124,9 @@ transpositions = vmap (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
 expo : Vec (List Note) 3
 expo = makeCanon line1 2 (whole d+ whole d+ whole d+ whole) transpositions
 
--- Truncate to first 18 bars (16 16th notes per bar in 4/4 time)
-exposition : Vec (Melody (18 * 16)) 3
-exposition = vmap (fixLength (18 * 16) ∘ notes→melody) expo
+-- Truncate to first 20 bars (16 16th notes per bar in 4/4 time)
+exposition : Vec (Melody (20 * 16)) 3
+exposition = vmap (fixLength (20 * 16) ∘ notes→melody) expo
 
 exposition' : Vec (List Note) 3
 exposition' = vmap (melody→notes) exposition

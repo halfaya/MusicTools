@@ -13,5 +13,5 @@ main : IO Unit
 main =
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
-      song         = fugueTracks
+      song         = canonTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

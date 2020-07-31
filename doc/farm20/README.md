@@ -1,7 +1,7 @@
 # FARM Canon and Fugue
 
 These are two short pieces composed with
-[MusicTools](https://github.com/halfaya/MusicTools) a toolkit for the
+[MusicTools](https://github.com/halfaya/MusicTools), a toolkit for the
 creation and analysis of music using functional techniques. It is
 written in Agda and was inspired by the Haskell [Euterpea](http://www.euterpea.com/) library.
 

@@ -21,6 +21,7 @@ open import Transformation
 --------------
 
 b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 : List Note
+b4' : List Note
 
 b1 =
   tone 8th  (c 5) ∷
@@ -54,7 +55,15 @@ b3 =
 b4 =
   tone dqtr (e 5) ∷
   tone 8th  (e 5) ∷
-  tone half (g 4) ∷
+  tone qtr  (g 4) ∷
+  tone qtr  (b 4) ∷
+  []
+
+b4' =
+  tone dqtr (e 5) ∷
+  tone 8th  (e 5) ∷
+  tone qtr  (g 4) ∷
+  tone half (b 4) ∷
   []
 
 b5 =
@@ -81,7 +90,10 @@ b7 =
   rest 8th        ∷
   tone 8th  (e 5) ∷
   rest 8th        ∷
-  tone half (f 5) ∷
+  tone 8th  (f 5) ∷
+  rest 8th        ∷
+  tone 8th  (d 5) ∷
+  rest 8th        ∷
   []
 
 b8 =
@@ -130,12 +142,20 @@ transpositions : Vec SignedInterval 3
 transpositions = vmap (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
 
 -- Exposition is a truncated canon
-expo : Vec (List Note) 3
+expo exposition : Vec (List Note) 3
 expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
-
 -- Truncate to first 20 bars (16 16th notes per bar in 4/4 time)
-exposition : Vec (List Note) 3
 exposition = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo
+
+-- Variation
+subject' base' : List Note
+
+subject' = b1 ++ b3 ++ b1 ++ b4'
+base' = subject' ++ countersubject ++ extra
+
+expo' exposition' : Vec (List Note) 3
+expo' = makeCanon base' 2 (whole d+ whole d+ whole d+ whole) transpositions
+exposition' = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo'
 
 -- Some basic development
 -- Development is still a work in progress. Right now the piece abruptly ends after the exposition.
@@ -154,9 +174,9 @@ dev3 =
   map (transposeNoteInterval (makeSigned s- per8)) b1
   ++ tone whole (c 4) ∷ []
 
-line1 = lookup exposition (# 0) ++ dev1
-line2 = lookup exposition (# 1) ++ dev2
-line3 = lookup exposition (# 2) ++ dev3
+line1 = lookup exposition (# 0) ++ lookup exposition' (# 0) ++ dev1
+line2 = lookup exposition (# 1) ++ lookup exposition' (# 1) ++ dev2
+line3 = lookup exposition (# 2) ++ lookup exposition' (# 2) ++ dev3
 
 fugue : Vec (List Note) 3
 fugue = line1 ∷ line2 ∷ line3 ∷ []

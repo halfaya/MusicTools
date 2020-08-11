@@ -157,26 +157,53 @@ expo' exposition' : Vec (List Note) 3
 expo' = makeCanon base' 2 (whole d+ whole d+ whole d+ whole) transpositions
 exposition' = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo'
 
--- Some basic development
--- Development is still a work in progress. Right now the piece abruptly ends after the exposition.
-
-dev1 dev2 dev3 line1 line2 line3 : List Note
+dev1 dev2 dev3 end1 end2 end3 line1 line2 line3 : List Note
 
 dev1 =
+  map (transposeNoteInterval (makeSigned s+ per12)) countersubject ++
+  map (transposeNoteInterval (makeSigned s+ per12)) subject ++
+  map (transposeNoteInterval (makeSigned s+ per12)) b8 ++
+  map (transposeNoteInterval (makeSigned s+ per8))  b8 ++
+  map (transposeNoteInterval (makeSigned s+ per4))  b8 ++
+  map (transposeNoteInterval (makeSigned s- maj2))  b9 ++
+  map (transposeNoteInterval (makeSigned s- per4))  subject ++
+  map (transposeNoteInterval (makeSigned s- per5))  countersubject
+
+dev2 =
+  map (transposeNoteInterval (makeSigned s+ per8)) subject ++
+  map (transposeNoteInterval (makeSigned s+ per8)) countersubject ++
+  map (transposeNoteInterval (makeSigned s+ per8)) b8 ++
+  map (transposeNoteInterval (makeSigned s+ per4)) b8 ++
+  map (transposeNoteInterval (makeSigned s- maj2)) b8 ++
+  map (transposeNoteInterval (makeSigned s- maj6)) b9 ++
+  map (transposeNoteInterval (makeSigned s- per8)) countersubject ++
+  map (transposeNoteInterval (makeSigned s- per8)) subject
+
+dev3 =
+  map (transposeNoteInterval (makeSigned s+ per5))  countersubject ++
+  map (transposeNoteInterval (makeSigned s+ per5))  subject ++
+  map (transposeNoteInterval (makeSigned s+ per5))  b8 ++
+  map (transposeNoteInterval (makeSigned s+ per1))  b8 ++
+  map (transposeNoteInterval (makeSigned s- per5))  b8 ++
+  map (transposeNoteInterval (makeSigned s- maj9))  b9 ++
+  map (transposeNoteInterval (makeSigned s- per12)) subject ++
+  map (transposeNoteInterval (makeSigned s- per12)) countersubject
+
+end1 =
   map (transposeNoteInterval (makeSigned s+ per8)) b1
   ++ tone whole (e 6) ∷ []
 
-dev2 =
+end2 =
   map (transposeNoteInterval (makeSigned s+ per1)) b1
   ++ tone whole (g 5) ∷ []
 
-dev3 = 
+end3 = 
   map (transposeNoteInterval (makeSigned s- per8)) b1
   ++ tone whole (c 4) ∷ []
 
-line1 = lookup exposition (# 0) ++ lookup exposition' (# 0) ++ dev1
-line2 = lookup exposition (# 1) ++ lookup exposition' (# 1) ++ dev2
-line3 = lookup exposition (# 2) ++ lookup exposition' (# 2) ++ dev3
+line1 = lookup exposition (# 0) ++ dev1 ++ lookup exposition' (# 0) ++ end1
+line2 = lookup exposition (# 1) ++ dev2 ++ lookup exposition' (# 1) ++ end2
+line3 = lookup exposition (# 2) ++ dev3 ++ lookup exposition' (# 2) ++ end3
 
 fugue : Vec (List Note) 3
 fugue = line1 ∷ line2 ∷ line3 ∷ []

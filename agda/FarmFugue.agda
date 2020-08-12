@@ -2,11 +2,12 @@
 
 module FarmFugue where
 
+open import Data.Bool       using (Bool; true; false; if_then_else_)
 open import Data.Fin        using (#_)
 open import Data.List       using (List; _∷_; []; map; _++_)
 open import Data.Nat        using (ℕ; _*_)
 open import Data.Sign       using () renaming (+ to s+ ; - to s-)
-open import Data.Vec        using (Vec; _∷_; []; lookup) renaming (map to vmap)
+open import Data.Vec        using (Vec; _∷_; []; lookup; foldl₁) renaming (map to vmap)
 open import Function        using (_∘_)
 
 open import Canon           using (makeCanon; makeTrackList)
@@ -20,8 +21,7 @@ open import Transformation
 
 --------------
 
-b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 : List Note
-b4' : List Note
+b1 b2 b3 b4 b5 b6 b7 b8 b9 b10 b11 b12 b13 : List Note
 
 b1 =
   tone 8th  (c 5) ∷
@@ -57,13 +57,6 @@ b4 =
   tone 8th  (e 5) ∷
   tone qtr  (g 4) ∷
   tone qtr  (b 4) ∷
-  []
-
-b4' =
-  tone dqtr (e 5) ∷
-  tone 8th  (e 5) ∷
-  tone qtr  (g 4) ∷
-  tone half (b 4) ∷
   []
 
 b5 =
@@ -131,6 +124,19 @@ b11 =
   tone qtr  (f 5) ∷
   []
 
+b12 =
+  tone qtr (c 4) ∷
+  tone qtr (c 4) ∷
+  []
+
+b13 =
+  tone 8th (c 4) ∷
+  tone 8th (c 4) ∷
+  tone 8th (c 4) ∷
+  tone 8th (c 4) ∷
+  []
+
+
 subject countersubject extra base : List Note
 
 subject = b1 ++ b3 ++ b1 ++ b4
@@ -148,14 +154,34 @@ expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
 exposition = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo
 
 -- Variation
-subject' base' : List Note
 
-subject' = b1 ++ b3 ++ b1 ++ b4'
-base' = subject' ++ countersubject ++ extra
+doubleLastDuration : List Note → List Note
+doubleLastDuration []                         = []
+doubleLastDuration (m ∷ n ∷ ns)               = m ∷ doubleLastDuration (n ∷ ns)
+doubleLastDuration (tone (duration d) p ∷ []) = tone (duration (2 * d)) p ∷ []
+doubleLastDuration (rest (duration d)   ∷ []) = rest (duration (2 * d)) ∷ []
 
-expo' exposition' : Vec (List Note) 3
-expo' = makeCanon base' 2 (whole d+ whole d+ whole d+ whole) transpositions
-exposition' = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo'
+makeVariation : List Note → List Note → List Note → Vec (List Note) 3
+makeVariation s c e =
+  let base = s ++ c ++ e
+      expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
+  in vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo
+
+makeVariation' : List Note → List Note → List Note → Vec (List Note) 3
+makeVariation' s c e =
+  let base = s ++ c ++ e
+      expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
+  in vmap (melody→notes ∘ dropPoints (2 * 16) ∘ fixLength (16 * 16) ∘ notes→melody) expo
+
+v1 v2 v3 variations : Vec (List Note) 3
+v1 = makeVariation (doubleLastDuration subject) countersubject extra
+v2 = makeVariation' (doubleLastDuration countersubject) extra subject
+v3 = makeVariation' (doubleLastDuration extra) subject countersubject 
+variations = v1
+--  (lookup v1 (# 0) ++ {- lookup v2 (# 0) ++ -} lookup v3 (# 0)) ∷
+--  (lookup v1 (# 1) ++ {- lookup v2 (# 1) ++ -} lookup v3 (# 1)) ∷
+--  (lookup v1 (# 2) ++ {- lookup v2 (# 2) ++ -} lookup v3 (# 2)) ∷
+--  []
 
 dev1 dev2 dev3 end1 end2 end3 line1 line2 line3 : List Note
 
@@ -167,7 +193,11 @@ dev1 =
   map (transposeNoteInterval (makeSigned s+ per4))  b8 ++
   map (transposeNoteInterval (makeSigned s- maj2))  b9 ++
   map (transposeNoteInterval (makeSigned s- per4))  subject ++
-  map (transposeNoteInterval (makeSigned s- per5))  countersubject
+  map (transposeNoteInterval (makeSigned s- per5))  countersubject ++
+  map (transposeNoteInterval (makeSigned s+ min3))  b12 ++
+  map (transposeNoteInterval (makeSigned s+ maj3))  b12 ++
+  map (transposeNoteInterval (makeSigned s+ min3))  b12 ++
+  map (transposeNoteInterval (makeSigned s+ maj3))  b13
 
 dev2 =
   map (transposeNoteInterval (makeSigned s+ per8)) subject ++
@@ -177,7 +207,8 @@ dev2 =
   map (transposeNoteInterval (makeSigned s- maj2)) b8 ++
   map (transposeNoteInterval (makeSigned s- maj6)) b9 ++
   map (transposeNoteInterval (makeSigned s- per8)) countersubject ++
-  map (transposeNoteInterval (makeSigned s- per8)) subject
+  map (transposeNoteInterval (makeSigned s- per8)) subject ++
+  map (transposeNoteInterval (makeSigned s- per4)) (b12 ++ b12 ++ b12 ++ b13)
 
 dev3 =
   map (transposeNoteInterval (makeSigned s+ per5))  countersubject ++
@@ -187,7 +218,11 @@ dev3 =
   map (transposeNoteInterval (makeSigned s- per5))  b8 ++
   map (transposeNoteInterval (makeSigned s- maj9))  b9 ++
   map (transposeNoteInterval (makeSigned s- per12)) subject ++
-  map (transposeNoteInterval (makeSigned s- per12)) countersubject
+  map (transposeNoteInterval (makeSigned s- per12)) countersubject ++
+  map (transposeNoteInterval (makeSigned s- maj6))  b12 ++
+  map (transposeNoteInterval (makeSigned s- min6))  b12 ++
+  map (transposeNoteInterval (makeSigned s- maj6))  b12 ++
+  map (transposeNoteInterval (makeSigned s- min6))  b13
 
 end1 =
   map (transposeNoteInterval (makeSigned s+ per8)) b1
@@ -201,9 +236,9 @@ end3 =
   map (transposeNoteInterval (makeSigned s- per8)) b1
   ++ tone whole (c 4) ∷ []
 
-line1 = lookup exposition (# 0) ++ dev1 ++ lookup exposition' (# 0) ++ end1
-line2 = lookup exposition (# 1) ++ dev2 ++ lookup exposition' (# 1) ++ end2
-line3 = lookup exposition (# 2) ++ dev3 ++ lookup exposition' (# 2) ++ end3
+line1 = lookup exposition (# 0) ++ dev1 ++ lookup variations (# 0) ++ end1
+line2 = lookup exposition (# 1) ++ dev2 ++ lookup variations (# 1) ++ end2
+line3 = lookup exposition (# 2) ++ dev3 ++ lookup variations (# 2) ++ end3
 
 fugue : Vec (List Note) 3
 fugue = line1 ∷ line2 ∷ line3 ∷ []

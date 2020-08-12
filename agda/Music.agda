@@ -7,7 +7,7 @@ open import Data.Integer using (ℤ; +_)
 open import Data.List    using (List; foldr; []; _∷_; reverse; sum; map)
 open import Data.Product using (_×_; _,_)
 open import Data.Sum     using (_⊎_; inj₁; inj₂)
-open import Data.Vec     using (Vec; []; _∷_; replicate; concat; zipWith; toList; _++_; foldr₁; take) renaming (map to vmap)
+open import Data.Vec     using (Vec; []; _∷_; replicate; concat; zipWith; toList; _++_; foldr₁; take; drop) renaming (map to vmap)
 open import Function     using (_∘_)
 
 open import Data.Nat.Properties using (<⇒≤)
@@ -131,3 +131,16 @@ fixLength : {m : ℕ} → (n : ℕ) → Melody m → Melody n
 fixLength {m} n (melody ns) with <-∨-≥ n m
 ... | inj₁ n<m = melody (take n (subst (Vec Point) (sym (m+n-m=n n m {<⇒≤ n<m})) ns))
 ... | inj₂ m≤n = melody (subst (Vec Point) (m+n-m=n m n) (ns ++ replicate {n = n - m ⟨ m≤n ⟩} rest))
+
+holdToTone : Point → Point
+holdToTone (tone p) = tone p
+holdToTone (hold p) = tone p
+holdToTone rest     = rest
+
+firstHoldToTone : {n : ℕ} → Melody n → Melody n
+firstHoldToTone (melody [])       = melody []
+firstHoldToTone (melody (x ∷ xs)) = melody (holdToTone x ∷ xs)
+
+-- Drop points, but convert any held tones to tones.
+dropPoints : {n : ℕ} → (m : ℕ) → Melody (m + n) → Melody n
+dropPoints m = firstHoldToTone ∘ melody ∘ drop m ∘ unmelody

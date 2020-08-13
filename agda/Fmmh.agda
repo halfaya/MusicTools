@@ -1,18 +1,15 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --cubical --safe #-}
 
 module Fmmh where
 
 open import Data.List using (List)
 
+open import Diatonic
 open import Pitch
 
 -- Reconstruction of "Functional Modelling of Musical Harmony" (ICFP 2011)
 -- using similar notation. Original code:
 -- https://github.com/chordify/HarmTrace-Base
-
-data Mode : Set where
-  maj : Mode
-  min : Mode
 
 data ChordQuality : Set where
   maj  : ChordQuality
@@ -24,14 +21,14 @@ data Chord : DiatonicDegree → ChordQuality → Set where
   chord : (d : DiatonicDegree) → (q : ChordQuality) → Chord d q
 
 data Ton : Mode → Set where
-  maj : Chord d1 maj → Ton maj
-  min : Chord d1 min → Ton min
+  major : Chord d1 maj → Ton major
+  minor : Chord d1 min → Ton minor
 
 data SDom : Mode → Set where
-  ii     : Chord d2 min → SDom maj
-  iv-maj : Chord d4 maj → SDom maj
-  iii-iv : Chord d3 min → Chord d4 maj → SDom maj
-  iv-min : Chord d4 min → SDom min
+  ii     : Chord d2 min → SDom major
+  iv-maj : Chord d4 maj → SDom major
+  iii-iv : Chord d3 min → Chord d4 maj → SDom major
+  iv-min : Chord d4 min → SDom minor
 
 data Dom (m : Mode) : Set where
   v7   : Chord d5 dom7 → Dom m

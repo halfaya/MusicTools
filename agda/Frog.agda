@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --cubical #-}
 
 -- First and second species counterpoint for Frog's song
 module Frog where

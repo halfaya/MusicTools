@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --cubical --safe #-}
 
 -- Counterpoint Exercises
 

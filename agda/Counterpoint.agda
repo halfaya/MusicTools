@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K #-}
+{-# OPTIONS --cubical --safe #-}
 
 -- First and second species counterpoint
 module Counterpoint where

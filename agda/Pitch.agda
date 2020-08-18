@@ -11,17 +11,16 @@ open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section;
 
 open import Data.Bool       using (Bool; false; true)
 open import Data.Integer    using (ℤ; +_; -[1+_])
-open import Data.Nat.DivMod using (_mod_; _div_; DivMod; _divMod_)
 open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
-open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_)
-open import Data.Nat.DivMod using (_mod_; _div_)
+open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
 open import Data.Product    using (_×_; _,_; proj₁)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
 
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert)
+open import DivMod          using (_mod_; _div_; DivMod)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -127,7 +126,7 @@ rel→abs (pitchClass n , octave o) =
 
 abs→rel : Pitch → PitchOctave
 abs→rel (pitch  n) =
-  (pitchClass (n mod chromaticScaleSize) , octave (n div chromaticScaleSize))
+  pitchClass (n mod chromaticScaleSize) , octave (n div chromaticScaleSize)
 
 {-
 rel→abs→rel : (p : PitchOctave) → (abs→rel ∘ rel→abs) p ≡ p

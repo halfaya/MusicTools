@@ -4,7 +4,7 @@ module DivMod where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
+open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1; hcomp; primPOr; _∨_)
 open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
@@ -14,21 +14,6 @@ open import Data.Product    using (_×_)
 open import Data.Sum        using (_⊎_; inj₁; inj₂)
 
 open import Fin
-
--- From Data.Fin.Properites
-fromℕ<-toℕ : ∀ {m} (i : Fin m) (i<m : toℕ i < m) → fromℕ< i<m ≡ i
-fromℕ<-toℕ fz     (s≤s z≤n)       = refl
-fromℕ<-toℕ (fs i) (s≤s (s≤s m≤n)) = cong fs (fromℕ<-toℕ i (s≤s m≤n))
-
-toℕ-fromℕ< : ∀ {m n} (m<n : m < n) → toℕ (fromℕ< m<n) ≡ m
-toℕ-fromℕ< (s≤s z≤n)       = refl
-toℕ-fromℕ< (s≤s (s≤s m<n)) = cong suc (toℕ-fromℕ< (s≤s m<n))
-
-toℕ<n : ∀ {n} (i : Fin n) → toℕ i < n
-toℕ<n fz     = s≤s z≤n
-toℕ<n (fs i) = s≤s (toℕ<n i)
-
--------------------
 
 +-assoc : (m n o : ℕ) → (m + n) + o ≡ m + (n + o)
 +-assoc zero    _ _ = refl
@@ -87,7 +72,7 @@ lemma2 n m a {m≤n} x = subst (λ y → y ≡ m + a) (lemma1 n m {m≤n} ) (con
 lemma3 : (n m d r : ℕ) → {m≤n : m ≤ n} → n - m ⟨ m≤n ⟩ ≡ d * m + r → n ≡ (suc d) * m + r
 lemma3 n m d r {m≤n} x = lemma2 n m (d * m + r) x ∙ sym (+-assoc m (d * m) r)
 
-infixl 7 _div_ _mod_
+infixl 7 _div_ _mod_ _mod'_
 
 record DivMod (n m : ℕ) : Type where
   constructor divMod
@@ -96,6 +81,13 @@ record DivMod (n m : ℕ) : Type where
     r       : ℕ
     r<m     : r < m
     n=q*m+r : n ≡ q * m + r
+
+record DivMod1 (n m : ℕ) : Type where
+  constructor divMod1
+  field
+    q       : ℕ
+    r       : Fin1 m
+    n=q*m+r : n ≡ q * m + Fin1.r r
 
 record DivModFin (n m : ℕ) : Type where
   constructor divModFin
@@ -115,45 +107,70 @@ divmod1 (suc c) n (suc m) n≤c with <-∨-≥ n (suc m)
 divmod : (n m : ℕ) → {m > 0} → DivMod n m
 divmod n (suc m) = divmod1 n n (suc m) ≤-refl {s≤s z≤n}
 
-_div_ : (n m : ℕ) → {m > 0} → ℕ
+-- NOTE: We can't use {m > 0} here because Agda can't figure out
+-- the implicit proof (even for constants), so use {NonZero m} instead.
+
+_div_ : (n m : ℕ) → {NonZero m} → ℕ
 n div (suc m) = DivMod.q (divmod n (suc m) {s≤s z≤n})
 
-_mod_ : (n m : ℕ) → {m > 0} → ℕ
-n mod (suc m) = DivMod.r (divmod n (suc m) {s≤s z≤n})
+_mod_ : (n m : ℕ) → {NonZero m} → Fin m
+n mod (suc m) = fromℕ< (DivMod.r<m (divmod n (suc m) {s≤s z≤n}))
+
+_mod'_ : (n m : ℕ) → {NonZero m} → ℕ
+n mod' (suc m) = DivMod.r (divmod n (suc m) {s≤s z≤n})
 
 ---------
+
+dm→dm1 : {m n : ℕ} → DivMod n m → DivMod1 n m
+dm→dm1 {m} {n} (divMod q r r<m n=q*m+r) =
+  divMod1 q (fin1 r r<m) n=q*m+r
+
+dm1→dm : {m n : ℕ} → DivMod1 n m → DivMod n m
+dm1→dm (divMod1 q r n=q*m+r) = divMod q (Fin1.r r) (Fin1.r<n r) n=q*m+r
+
+dm→dm1→dm : {m n : ℕ} → (dm : DivMod n m) → (dm1→dm ∘ dm→dm1) dm ≡ dm
+dm→dm1→dm _ = refl
+
+dm1→dm→dm1 : {m n : ℕ} → (dm1 : DivMod1 n m) → (dm→dm1 ∘ dm1→dm) dm1 ≡ dm1
+dm1→dm→dm1 _ = refl
+
+dm≃dm1 : {n m : ℕ} → Iso (DivMod n m) (DivMod1 n m)
+dm≃dm1 = iso dm→dm1 dm1→dm dm1→dm→dm1 dm→dm1→dm
+
+dm≡dm1 : {n m : ℕ} → DivMod n m ≡ DivMod1 n m
+dm≡dm1 = isoToPath dm≃dm1
+
+---------
+
+dm1→dmf : {m n : ℕ} → DivMod1 n m → DivModFin n m
+dm1→dmf {m} {n} (divMod1 q r n=q*m+r) =
+  divModFin q (fin1→fin r) (subst (λ x → n ≡ q * m + x) (sym (Fin1r≡toℕ1 r)) n=q*m+r)
+
+dmf→dm1 : {m n : ℕ} → DivModFin n m → DivMod1 n m
+dmf→dm1 {m} {n} (divModFin q r n=q*m+r) = divMod1 q (fin→fin1 r) (subst (λ x → n ≡ q * m + x) (toℕ≡Fin1r1 r) n=q*m+r)
 
 {-
-dm→dmf : {m n : ℕ} → DivMod n m → DivModFin n m
-dm→dmf {m} {n} (divMod q r r<m n=q*m+r) =
-  divModFin q (fin1→fin (fin1 r r<m)) (subst (λ x → n ≡ q * m + x) (sym (toℕ-fromℕ< r<m)) n=q*m+r)
+dm1→dmf→dm1 : {m n : ℕ} → (dm1 : DivMod1 n m) → (dmf→dm1 ∘ dm1→dmf) dm1 ≡ dm1
+dm1→dmf→dm1 {m} {n} (divMod1 q r n=q*m+r) i = divMod1 q (fin1→fin→fin1 r i) {!!}
 
-dmf→dm : {m n : ℕ} → DivModFin n m → DivMod n m
-dmf→dm (divModFin q r n=q*m+r) = divMod q (toℕ r) (toℕ<n r) n=q*m+r
+dmf→dm1→dmf : {m n : ℕ} → (dmf : DivModFin n m) → (dm1→dmf ∘ dmf→dm1) dmf ≡ dmf
+dmf→dm1→dmf (divModFin q r n=q*m+r) i = divModFin q (fin→fin1→fin r i) {!!}
 
-dm→dmf→dm : {m n : ℕ} → (dm : DivMod n m) → (dmf→dm ∘ dm→dmf) dm ≡ dm
-dm→dmf→dm (divMod q r r<m n=q*m+r) i = divMod q (toℕ-fromℕ< r<m i) {!!} {!!}
+dm1≃dmf : {n m : ℕ} → Iso (DivMod1 n m) (DivModFin n m)
+dm1≃dmf = iso dm1→dmf dmf→dm1 dmf→dm1→dmf dm1→dmf→dm1
 
-dmf→dm→dmf : {m n : ℕ} → (dmf : DivModFin n m) → (dm→dmf ∘ dmf→dm) dmf ≡ dmf
-dmf→dm→dmf (divModFin q r n=q*m+r) i = divModFin q (fromℕ<-toℕ r (toℕ<n r) i) {!!}
-
-dm≃dmf : {n m : ℕ} → Iso (DivMod n m) (DivModFin n m)
-dm≃dmf = iso dm→dmf dmf→dm dmf→dm→dmf dm→dmf→dm
-
-dm≡dmf : {n m : ℕ} → DivMod n m ≡ DivModFin n m
-dm≡dmf = isoToPath dm≃dmf
--}
+dm1≡dmf : {n m : ℕ} → DivMod1 n m ≡ DivModFin n m
+dm1≡dmf = isoToPath dm1≃dmf
 
 ---------
 
-x1 : (n m : ℕ) {m>0 : m > 0} → _mod_ n m {m>0} < m
-x1 n (suc m) = DivMod.r<m (divmod n (suc m) {s≤s z≤n})
+dm≡dmf : {n m : ℕ} → DivMod n m ≡ DivModFin n m
+dm≡dmf = dm≡dm1 ∙ dm1≡dmf
+-}
+---------
 
-x2 : (n m : ℕ) {m>0 : m > 0} → n ≡ (_div_ n m {m>0}) * m + (_mod_ n m {m>0})
-x2 n (suc m) = DivMod.n=q*m+r (divmod n (suc m) {s≤s z≤n})
+n%m<m : (n m : ℕ) {m≠0 : NonZero m} → _mod'_ n m {m≠0} < m
+n%m<m n (suc m) = DivMod.r<m (divmod n (suc m) {s≤s z≤n})
 
-aa = divmod 73 12
-bb = 73 div 12
-cc = 73 mod 12
-
-
+n≡divmod : (n m : ℕ) {m≠0 : NonZero m} → n ≡ (_div_ n m {m≠0}) * m + (_mod'_ n m {m≠0})
+n≡divmod n (suc m) = DivMod.n=q*m+r (divmod n (suc m) {s≤s z≤n})

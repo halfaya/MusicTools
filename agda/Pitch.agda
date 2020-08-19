@@ -13,14 +13,14 @@ open import Data.Bool       using (Bool; false; true)
 open import Data.Integer    using (ℤ; +_; -[1+_])
 open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
-open import Data.Nat        using (ℕ; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
+open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
 open import Data.Product    using (_×_; _,_; proj₁)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
 
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert)
-open import DivMod          using (_mod_; _div_; DivMod)
+open import DivMod          using (_mod_; _div_; DivMod; n≡divmod {-; divUnique; modUnique -})
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -53,7 +53,7 @@ Scale : ℕ → Type
 Scale = Vec PitchClass
 
 -- Which octave one is in.
-data Octave : Type₀ where
+data Octave : Type where
   octave : ℕ → Octave
 
 unoctave : Octave → ℕ
@@ -121,24 +121,23 @@ b  = standardMidiPitch (# 11)
 -- Equivalences
 
 rel→abs : PitchOctave → Pitch
-rel→abs (pitchClass n , octave o) =
-  pitch (o * chromaticScaleSize + (toℕ n))
+rel→abs = relativeToAbsolute
 
 abs→rel : Pitch → PitchOctave
-abs→rel (pitch  n) =
-  pitchClass (n mod chromaticScaleSize) , octave (n div chromaticScaleSize)
+abs→rel = absoluteToRelative
 
 {-
 rel→abs→rel : (p : PitchOctave) → (abs→rel ∘ rel→abs) p ≡ p
-rel→abs→rel (pitchClass p , octave o) = {!!}
+rel→abs→rel (pitchClass p , octave o) i =
+  let a = cong pitchClass (modUnique chromaticScaleSize o p)
+      b = cong octave     (divUnique chromaticScaleSize o p)
+  in a i , b i
+-}
 
 abs→rel→abs : (p : Pitch) → (rel→abs ∘ abs→rel) p ≡ p
-abs→rel→abs (pitch p) =
-  let a = DivMod.property (p divMod chromaticScaleSize)
-  in cong pitch {!!}
+abs→rel→abs (pitch p) = cong pitch (sym (n≡divmod p chromaticScaleSize))
 
--- p / 12 * 12 + p % 12 = p
-
+{-
 abs≃rel : Iso Pitch PitchOctave
 abs≃rel = iso abs→rel rel→abs rel→abs→rel abs→rel→abs
 

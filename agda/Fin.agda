@@ -8,17 +8,8 @@ open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; trans
 open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract)
 
-open import Data.Empty using (⊥)
 open import Data.Fin   using (Fin; toℕ; fromℕ<; #_; _≟_) renaming (zero to fz; suc to fs)
 open import Data.Nat   using (ℕ; zero; suc; _<_; _>_; z≤n; s≤s)
-open import Data.Unit  using (⊤; tt)
-
-NonZero : ℕ → Type
-NonZero zero    = ⊥
-NonZero (suc n) = ⊤
-
-nonZero→pos : (n : ℕ) → NonZero n → n > 0
-nonZero→pos (suc n) tt = s≤s z≤n
 
 -- Alternate representation of Fin as a number and proof of its upper bound.
 record Fin1 (n : ℕ) : Type where
@@ -82,4 +73,3 @@ Fin1r≡toℕ1 (fin1 r r<n) = toℕ-fromℕ< r<n
 
 Fin1r≡toℕ : {n : ℕ} → toℕ {n} ∘ fin1→fin ≡ Fin1.r
 Fin1r≡toℕ = funExt Fin1r≡toℕ1
-

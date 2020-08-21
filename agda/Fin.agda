@@ -22,6 +22,7 @@ fin1suc : {n : ℕ} → Fin1 n → Fin1 (suc n)
 fin1suc (fin1 r r<n) = fin1 (suc r) (s≤s r<n)
 
 -- From Data.Fin.Properites
+-- They need to be re-defined here since Cubical uses a different ≡
 
 fromℕ<-toℕ : ∀ {m} (i : Fin m) (i<m : toℕ i < m) → fromℕ< i<m ≡ i
 fromℕ<-toℕ fz     (s≤s z≤n)       = refl
@@ -34,6 +35,7 @@ toℕ-fromℕ< (s≤s (s≤s m<n)) = cong suc (toℕ-fromℕ< (s≤s m<n))
 toℕ<n : ∀ {n} (i : Fin n) → toℕ i < n
 toℕ<n fz     = s≤s z≤n
 toℕ<n (fs i) = s≤s (toℕ<n i)
+
 
 -------------------
 -- Equivalence of Fin and Fin1

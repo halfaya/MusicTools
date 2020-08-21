@@ -1,6 +1,6 @@
 {-# OPTIONS --cubical --safe #-}
 
-module DivMod where
+module DivModAlt where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
@@ -10,7 +10,7 @@ open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section;
 
 open import Data.Empty      using (⊥)
 open import Data.Fin        using (Fin; toℕ; fromℕ<; #_; _≟_) renaming (zero to fz; suc to fs)
-open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _≤_ ; _>_; _<_; _≥_; z≤n; s≤s)
+open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _≤_ ; _>_; _<_; _≥_; z≤n; s≤s; NonZero)
 open import Data.Product    using (_×_)
 open import Data.Sum        using (_⊎_; inj₁; inj₂)
 open import Data.Unit       using (⊤; tt)
@@ -109,10 +109,6 @@ divmod n (suc m) = divmod1 n n (suc m) ≤-refl {s≤s z≤n}
 -- NOTE: We can't use {m > 0} here because Agda can't figure out
 -- the implicit proof (even for constants), so use {NonZero m} instead.
 
-NonZero : ℕ → Type
-NonZero zero    = ⊥
-NonZero (suc n) = ⊤
-
 _div_   : (n m : ℕ) → {NonZero m} → ℕ
 n div (suc m) = DivMod.q (divmod n (suc m) {s≤s z≤n})
 
@@ -177,14 +173,3 @@ n%m<m n (suc m) = toℕ<n (DivMod.r (divmod n (suc m) {s≤s z≤n}))
 
 n≡divmod : (n m : ℕ) {m≠0 : NonZero m} → n ≡ ((n div m) {m≠0}) * m + toℕ ((n mod m) {m≠0})
 n≡divmod n (suc m) = DivMod.n=q*m+r (divmod n (suc m) {s≤s z≤n})
-
-{-
-modUnique : (m q : ℕ) (r : Fin (suc m)) → (q * suc m + toℕ r) mod (suc m) ≡ r
-modUnique m zero fz     = refl
-modUnique m zero (fs r) = {!!}
-modUnique m (suc q) r = {!!}
-
-divUnique : (m q : ℕ) (r : Fin (suc m)) → (q * suc m + toℕ r) div (suc m) ≡ q
-divUnique m zero    r = {!!}
-divUnique m (suc q) r = {!!}
--}

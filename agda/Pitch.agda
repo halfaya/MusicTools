@@ -14,13 +14,13 @@ open import Data.Integer    using (ℤ; +_; -[1+_])
 open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
+open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.Product    using (_×_; _,_; proj₁)
 open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
 
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert)
-open import DivMod          using (_mod_; _div_; DivMod; n≡divmod {-; divUnique; modUnique -})
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -132,12 +132,10 @@ rel→abs→rel (pitchClass p , octave o) i =
   let a = cong pitchClass (modUnique chromaticScaleSize o p)
       b = cong octave     (divUnique chromaticScaleSize o p)
   in a i , b i
--}
 
 abs→rel→abs : (p : Pitch) → (rel→abs ∘ abs→rel) p ≡ p
 abs→rel→abs (pitch p) = cong pitch (sym (n≡divmod p chromaticScaleSize))
 
-{-
 abs≃rel : Iso Pitch PitchOctave
 abs≃rel = iso abs→rel rel→abs rel→abs→rel abs→rel→abs
 

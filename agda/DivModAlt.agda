@@ -148,12 +148,12 @@ dm1→dm {m} {n} (divMod1 q r n=q*m+r) =
 dm→dm1 : {m n : ℕ} → DivMod n m → DivMod1 n m
 dm→dm1 {m} {n} (divMod q r n=q*m+r) = divMod1 q (fin→fin1 r) (subst (λ x → n ≡ q * m + x) (toℕ≡Fin1r1 r) n=q*m+r)
 
-{-
 dm1→dm→dm1 : {m n : ℕ} → (dm1 : DivMod1 n m) → (dm→dm1 ∘ dm1→dm) dm1 ≡ dm1
 dm1→dm→dm1 {m} {n} (divMod1 q r n=q*m+r) i = divMod1 q (fin1→fin→fin1 r i) {!!}
 
 dm→dm1→dm : {m n : ℕ} → (dm : DivMod n m) → (dm1→dm ∘ dm→dm1) dm ≡ dm
-dm→dm1→dm (divMod q r n=q*m+r) i = divMod q (fin→fin1→fin r i) {!!}
+dm→dm1→dm (divMod q r n=q*m+r) i = divMod q (fin→fin1→fin r i)
+  (λ j → {!n=q*m+r j!})
 
 dm1≃dm : {n m : ℕ} → Iso (DivMod1 n m) (DivMod n m)
 dm1≃dm = iso dm1→dm dm→dm1 dm→dm1→dm dm1→dm→dm1
@@ -165,7 +165,7 @@ dm1≡dm = isoToPath dm1≃dm
 
 dm0≡dm : {n m : ℕ} → DivMod0 n m ≡ DivMod n m
 dm0≡dm = dm0≡dm1 ∙ dm1≡dm
--}
+
 ---------
 
 n%m<m : (n m : ℕ) {m≠0 : NonZero m} → toℕ ((n mod m) {m≠0})  < m

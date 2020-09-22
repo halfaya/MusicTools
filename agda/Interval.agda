@@ -6,8 +6,8 @@ open import Pitch
 
 open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
 open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
-open import Data.Fin        using (toℕ)
-open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc)
+open import Data.Fin        using (Fin; toℕ)
+open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc; _⊓_; _∸_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Sign       using (Sign)
 open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
@@ -16,11 +16,24 @@ open import Function        using (_∘_)
 
 open import Relation.Binary.PropositionalEquality using (_≡_)
 
+-- Half of chromaticScaleSize
+intervalClassSize : ℕ
+intervalClassSize = 6
+
 PitchPair : Set
 PitchPair = Pitch × Pitch
 
 data Interval : Set where
   interval : ℕ → Interval
+
+unInterval : Interval → ℕ
+unInterval (interval x) = x
+
+data IntervalClass : Set where
+  intervalClass : Fin intervalClassSize → IntervalClass
+
+unIntervalClass : IntervalClass → Fin intervalClassSize
+unIntervalClass (intervalClass x) = x
 
 infix 4 _==_
 
@@ -114,6 +127,11 @@ secondPitch = proj₂ ∘ pitchIntervalToPitchPair
 
 pitchPairToSignedInterval : PitchPair → SignedInterval
 pitchPairToSignedInterval (pitch p , pitch q) = signedInterval ((+ q) - (+ p))
+
+pitchPairToIntervalClass : PitchPair → IntervalClass
+pitchPairToIntervalClass (pitch p , pitch q) =
+  let x = toℕ (∣ (+ q) - (+ p) ∣ mod chromaticScaleSize)
+  in intervalClass (x ⊓ (chromaticScaleSize ∸ x) mod intervalClassSize) -- TODO: Remove need for mod
 
 -- Assumes p ≤ q
 pitchPairToPitchInterval : PitchPair → PitchInterval

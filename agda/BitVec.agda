@@ -2,6 +2,8 @@
 
 module BitVec where
 
+open import Cubical.Core.Everything using (Type)
+
 open import Data.Bool       using (Bool; false; true; _∨_; _∧_)
 open import Data.Fin        using (Fin; toℕ)
 open import Data.List       using (List; []; _∷_; foldr)
@@ -14,7 +16,7 @@ open import Function        using (_∘_)
 
 -- Bit vector representation of finite sets
 
-BitVec : ℕ → Set
+BitVec : ℕ → Type
 BitVec = Vec Bool
 
 show : {n : ℕ} → BitVec n → String
@@ -47,3 +49,10 @@ elements {n} bv = foldr f [] (toList (zip bv indices))
   where f : Bool × Fin n → List (Fin n) → List (Fin n)
         f (false , _) xs = xs
         f (true  , x) xs = x ∷ xs
+
+_==_ : {n : ℕ} → BitVec n → BitVec n → Bool
+[]          == []            = true
+(false ∷ xs) == (false ∷ ys) = xs == ys
+(false ∷ xs) == (true  ∷ ys) = false
+(true  ∷ xs) == (false ∷ ys) = false
+(true  ∷ xs) == (true  ∷ ys) = xs == ys

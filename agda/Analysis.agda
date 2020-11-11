@@ -1,3 +1,5 @@
+{-# OPTIONS --cubical --safe #-}
+
 module Analysis where
 
 open import Data.List       using (List; []; _∷_; map)
@@ -15,7 +17,7 @@ accompF : List Pitch
 accompF = f 4 ∷ a 4 ∷ c 5 ∷ []
 
 xx = pitchClassListToSet (map pitchToClass accompF)
-yy = showPitchClassSet xx
+--yy = showPitchClassSet xx
 
 zz : xx ≡ IV-maj
 zz = refl

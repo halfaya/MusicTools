@@ -3,11 +3,11 @@
 module Util where
 
 open import Agda.Primitive       using (Level)
-open import Data.Fin             using (Fin; #_; toℕ; inject) renaming (zero to fz; suc to fsuc)
+open import Data.Fin             using (Fin; #_; toℕ; inject; fromℕ<) renaming (zero to fz; suc to fsuc)
 open import Data.Bool            using (Bool; true; false; if_then_else_)
 open import Data.List            using (List; concat; replicate; []; _∷_)
 open import Data.Maybe           using (Maybe; just; nothing)
-open import Data.Nat             using (ℕ; zero; suc; _*_; _<ᵇ_)
+open import Data.Nat             using (ℕ; zero; suc; _*_; _<ᵇ_; _≡ᵇ_; _<?_)
 open import Data.Product         using (_×_; _,_)
 open import Data.Vec             using (Vec; _∷_; []; map; zip) renaming (concat to cat; replicate to rep)
 open import Function             using (_∘_)
@@ -61,6 +61,15 @@ fins (suc k) = fz ∷ map fsuc (fins k)
 
 fins' : (n : ℕ) → (k : Fin n) → Vec (Fin n) (toℕ k)
 fins' n k = map inject (fins (toℕ k))
+
+finSuc : {n : ℕ} → Fin (suc n) → Fin (suc n)
+finSuc {n} m with suc (toℕ m) <? suc n
+... | yes x = fromℕ< x
+... | no y  = fz
+
+_+N_ : {n : ℕ} → Fin (suc n) → ℕ → Fin (suc n)
+a +N zero  = a
+a +N suc b = finSuc a +N b
 
 zipWithIndex : {ℓ : Level} {A : Set ℓ} {k : ℕ} → Vec A k → Vec (Fin k × A) k
 zipWithIndex {k = k} = zip (fins k)

@@ -3,7 +3,8 @@
 To compile and run the main program, do the following in the `agda` directory.
 Note that you will need to modify `Main.agda` as it hardcodes some local information.
 Also you will need to `cabal install HCodecs` for the MIDI libraries if not already installed.
-I am using Agda 2.6.2 (development) and GHC 8.6.5 but it probably works with other versions as well.
+I am using the latest development versions of Agda/Agda-Stdlib/Cubical and GHC 8.10.2 but it may work with other versions as well.
+No support is provided if it doesn't work.
 * `agda -c Main.agda`
 * `./Main`
 

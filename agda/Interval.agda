@@ -2,38 +2,64 @@
 
 module Interval where
 
-open import Pitch
+open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
+
+open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
+open import Cubical.Foundations.Function    using (_∘_)
+open import Cubical.Foundations.Univalence  using (ua)
+open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
 open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
 open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
-open import Data.Fin        using (Fin; toℕ)
+open import Data.Integer.DivMod using (_modℕ_)
+open import Data.Fin        using (Fin; toℕ; #_)
+open import Data.List       using (List; []; _∷_; foldl)
 open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc; _⊓_; _∸_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Sign       using (Sign)
 open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
+open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList; updateAt)
 
-open import Function        using (_∘_)
+open import Pitch
+open import Util using (allPairs)
 
-open import Relation.Binary.PropositionalEquality using (_≡_)
+-- Maximum number of interval classes (0 to 6).
+ic7 : ℕ
+ic7 = 7
 
--- Half of chromaticScaleSize
-intervalClassSize : ℕ
-intervalClassSize = 6
-
-PitchPair : Set
+PitchPair : Type
 PitchPair = Pitch × Pitch
 
-data Interval : Set where
+PitchClassPair : Type
+PitchClassPair = PitchClass × PitchClass
+
+-- Absolute distance in semitones between two pitches.
+-- Also known as unordered pitch interval (upi).
+data Interval : Type where
   interval : ℕ → Interval
 
 unInterval : Interval → ℕ
 unInterval (interval x) = x
 
-data IntervalClass : Set where
-  intervalClass : Fin intervalClassSize → IntervalClass
+-- Relative distance in semitones between two pitches.
+-- Also known as ordered pitch interval (opi).
+data OrderedInterval : Type where
+  orderedInterval : ℤ → OrderedInterval
 
-unIntervalClass : IntervalClass → Fin intervalClassSize
+-- Also known as unodered pitch-class interval (upci).
+data IntervalClass : Type where
+  intervalClass : Fin ic7 → IntervalClass
+
+unIntervalClass : IntervalClass → Fin ic7
 unIntervalClass (intervalClass x) = x
+
+-- Also known as ordered pitch-class interval (opci).
+data OrderedIntervalClass : Type where
+  orderedIntervalClass : Fin s12 → OrderedIntervalClass
+
+unOrderedIntervalClass : OrderedIntervalClass → Fin s12
+
+unOrderedIntervalClass (orderedIntervalClass x) = x
 
 infix 4 _==_
 
@@ -41,9 +67,11 @@ _==_ : Interval → Interval → Bool
 (interval a) == (interval b) = a ≡ᵇ b
 
 intervalWithinOctave : Interval → Interval
-intervalWithinOctave (interval i) = interval (toℕ (i mod chromaticScaleSize))
+intervalWithinOctave (interval i) = interval (toℕ (i mod s12))
 
-data SignedInterval : Set where
+-- Relative interval between a base pitch and a second pitch.
+-- Also known as ordered pitch interval (opi).
+data SignedInterval : Type where
   signedInterval : ℤ → SignedInterval
 
 signedIntervalInt : SignedInterval → ℤ
@@ -110,13 +138,13 @@ isUnison i = i == per1
 isThird : Interval → Bool
 isThird i = (i == min3) ∨ (i == maj3)
 
--- Half or whole step; ignores key for now.
+-- Half or whole step.
 isStep : Interval → Bool
 isStep i =
   (i == min2)  ∨
   (i == maj2)
 
-PitchInterval : Set
+PitchInterval : Type
 PitchInterval = Pitch × Interval
 
 pitchIntervalToPitchPair : PitchInterval → PitchPair
@@ -128,10 +156,14 @@ secondPitch = proj₂ ∘ pitchIntervalToPitchPair
 pitchPairToSignedInterval : PitchPair → SignedInterval
 pitchPairToSignedInterval (pitch p , pitch q) = signedInterval ((+ q) - (+ p))
 
-pitchPairToIntervalClass : PitchPair → IntervalClass
-pitchPairToIntervalClass (pitch p , pitch q) =
-  let x = toℕ (∣ (+ q) - (+ p) ∣ mod chromaticScaleSize)
-  in intervalClass (x ⊓ (chromaticScaleSize ∸ x) mod intervalClassSize) -- TODO: Remove need for mod
+unorderedPitchClassInterval : PitchClassPair → IntervalClass
+unorderedPitchClassInterval (pitchClass p , pitchClass q) =
+  let x = toℕ (∣ (+ (toℕ q)) - (+ (toℕ p)) ∣ mod s12)
+  in intervalClass (x ⊓ (s12 ∸ x) mod ic7)
+
+orderedPitchClassInterval : PitchClassPair → OrderedIntervalClass
+orderedPitchClassInterval (pitchClass p , pitchClass q) =
+ orderedIntervalClass ((((+ (toℕ q)) - (+ (toℕ p))) modℕ s12) mod s12)
 
 -- Assumes p ≤ q
 pitchPairToPitchInterval : PitchPair → PitchInterval
@@ -168,3 +200,21 @@ isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepU
 
 transposePitchInterval : SignedInterval → Pitch → Pitch
 transposePitchInterval (signedInterval z) p = transposePitch z p
+
+----------
+
+-- Interval Class Vector
+ICVector : Type
+ICVector = Vec ℕ ic7
+
+emptyICVector : ICVector
+emptyICVector = 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ []
+
+icVector : List PitchClass → ICVector
+icVector pcs =
+  foldl
+    (λ icv pc → updateAt (unIntervalClass (unorderedPitchClassInterval pc)) suc icv)
+    emptyICVector
+    (allPairs pcs)
+
+ab = icVector (toList ryukyuScale)

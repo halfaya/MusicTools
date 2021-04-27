@@ -2,9 +2,6 @@
 
 module Chord where
 
-open import Interval
-open import Pitch
-
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
 open import Data.Fin        using (Fin; toℕ) renaming (zero to fz; suc to fs)
@@ -38,16 +35,16 @@ showRoot (root (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))      = "♭
 showRoot (root (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))))) = "VII"
 
 data Quality : Type where
-  Maj  : Quality
-  Min  : Quality
-  Dom7 : Quality
-  Maj7 : Quality
+  maj  : Quality
+  min  : Quality
+  dom7 : Quality
+  maj7 : Quality
 
 showQuality : Quality → String
-showQuality Maj  = "maj"
-showQuality Min  = "min"
-showQuality Dom7 = "⁷"
-showQuality Maj7 = "maj⁷"
+showQuality maj  = "maj"
+showQuality min  = "min"
+showQuality dom7 = "⁷"
+showQuality maj7 = "maj⁷"
 
 RootQuality : Type
 RootQuality = Root × Quality
@@ -68,10 +65,10 @@ makeChord (root n) (x ∷ xs) = BitVec.insert (n +N x) (makeChord (root n) xs)
 
 -- The list should not include the root.
 qualityNotes : Quality → List ℕ
-qualityNotes Maj  = 4 ∷ 7 ∷ []
-qualityNotes Min  = 3 ∷ 7 ∷ []
-qualityNotes Dom7 = 4 ∷ 7 ∷ 10 ∷ []
-qualityNotes Maj7 = 4 ∷ 7 ∷ 11 ∷ []
+qualityNotes maj  = 4 ∷ 7 ∷ []
+qualityNotes min  = 3 ∷ 7 ∷ []
+qualityNotes dom7 = 4 ∷ 7 ∷ 10 ∷ []
+qualityNotes maj7 = 4 ∷ 7 ∷ 11 ∷ []
 
 makeChordQuality : RootQuality → Notes
 makeChordQuality (r , q) = makeChord r (qualityNotes q)
@@ -81,7 +78,7 @@ makeChordQuality (r , q) = makeChord r (qualityNotes q)
 
 --addMajor
 
-aa = show (makeChordQuality (root fz , Maj))
+aa = show (makeChordQuality (root fz , maj))
 
 {-
 allPairs : {A : Type} → List A → List (A × A)

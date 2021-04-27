@@ -11,7 +11,8 @@ open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section;
 
 open import Data.Bool       using (Bool; false; true)
 open import Data.Integer    using (ℤ; +_; -[1+_])
-open import Data.Fin        using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
+open import Data.Fin        using (Fin; toℕ; #_; _≟_; fromℕ<) renaming (zero to fz; suc to fs)
+open import Data.List       using (List; []; _∷_; foldr)
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
 open import Data.Nat.DivMod using (_mod_; _div_)
@@ -20,7 +21,8 @@ open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%
 
 open import Relation.Nullary using (yes; no)
 
-open import BitVec          using (BitVec; insert)
+open import BitVec          using (BitVec; insert; empty; show)
+open import Util            using (n∸k<n)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -35,18 +37,19 @@ unpitch : Pitch → ℕ
 unpitch (pitch p) = p
 
 -- Number of notes in the chromatic scale.
-chromaticScaleSize : ℕ
-chromaticScaleSize = 12
+s12 : ℕ
+s12 = 12
 
 -- Number of notes in the diatonic scale.
-diatonicScaleSize : ℕ
-diatonicScaleSize = 7
+s7 : ℕ
+s7 = 7
 
--- Position of a pitch within an octave, in the range [0..chromaticScaleSize-1].
+-- Position of a pitch within an octave, in the range [0..s12-1].
+-- Pitch class 0 corresponds to C (assuming pitch 0 is Midi C0), which is standard.
 data PitchClass : Type where
-  pitchClass : Fin chromaticScaleSize → PitchClass
+  pitchClass : Fin s12 → PitchClass
 
-unPitchClass : PitchClass → Fin chromaticScaleSize
+unPitchClass : PitchClass → Fin s12
 unPitchClass (pitchClass p) = p
 
 Scale : ℕ → Type
@@ -64,20 +67,34 @@ PitchOctave = PitchClass × Octave
 
 relativeToAbsolute : PitchOctave → Pitch
 relativeToAbsolute (pitchClass n , octave o) =
-  pitch (o * chromaticScaleSize + (toℕ n))
+  pitch (o * s12 + (toℕ n))
 
 absoluteToRelative : Pitch → PitchOctave
 absoluteToRelative (pitch  n) =
-  (pitchClass (n mod chromaticScaleSize) , octave (n div chromaticScaleSize))
+  (pitchClass (n mod s12) , octave (n div s12))
 
 pitchToClass : Pitch → PitchClass
 pitchToClass = proj₁ ∘ absoluteToRelative
 
-majorScale harmonicMinorScale : Scale diatonicScaleSize
+majorScale harmonicMinorScale : Scale s7
 majorScale         = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
 harmonicMinorScale = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
 
-indexInScale : {n : ℕ} → Vec PitchClass n → Fin chromaticScaleSize → Maybe (Fin n)
+wholeTone0Scale wholeTone1Scale : Scale 6
+wholeTone0Scale    = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 6 ∷ # 8 ∷ # 10 ∷ [])
+wholeTone1Scale    = map pitchClass (# 1 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
+
+octatonic01Scale octatonic02Scale octatonic12Scale : Scale 8
+octatonic01Scale   = map pitchClass (# 0 ∷ # 1 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 7 ∷ # 9 ∷ # 10 ∷ [])
+octatonic02Scale   = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 6 ∷ # 8 ∷ # 9 ∷ # 11 ∷ [])
+octatonic12Scale   = map pitchClass (# 1 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 10 ∷ # 11 ∷ [])
+
+majorPentatonicScale : Scale 5
+majorPentatonicScale = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
+minorPentatonicScale = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
+ryukyuScale          = map pitchClass (# 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ [])
+
+indexInScale : {n : ℕ} → Vec PitchClass n → Fin s12 → Maybe (Fin n)
 indexInScale []         p = nothing
 indexInScale (pc ∷ pcs) p with (unPitchClass pc ≟ p)
 ... | yes _ = just fz
@@ -92,16 +109,26 @@ transposePitch (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
 
 -- Set of pitch classes represented as a bit vector.
 PitchClassSet : Type
-PitchClassSet = BitVec chromaticScaleSize
+PitchClassSet = BitVec s12
 
 addToPitchClassSet : PitchClass → PitchClassSet → PitchClassSet
 addToPitchClassSet (pitchClass p) ps = insert p ps
+
+toPitchClassSet : List PitchClass → PitchClassSet
+toPitchClassSet = foldr addToPitchClassSet empty
+
+fromPitchClassSet : PitchClassSet → List PitchClass
+fromPitchClassSet pcs = fromPCS s12 pcs
+  where fromPCS : (n : ℕ) → BitVec n → List PitchClass
+        fromPCS zero []              = []
+        fromPCS (suc n) (false ∷ xs) = fromPCS n xs
+        fromPCS (suc n) (true  ∷ xs) = pitchClass (fromℕ< (n∸k<n 11 n)) ∷ fromPCS n xs
 
 -- Standard Midi pitches
 
 -- first argument is relative pitch within octave
 -- second argument is octave (C5 = middle C for Midi)
-standardMidiPitch : Fin chromaticScaleSize → ℕ → Pitch
+standardMidiPitch : Fin s12 → ℕ → Pitch
 standardMidiPitch p o = relativeToAbsolute (pitchClass p , octave o)
 
 c c♯ d d♯ e f f♯ g g♯ a b♭ b : ℕ → Pitch
@@ -129,12 +156,12 @@ abs→rel = absoluteToRelative
 {-
 rel→abs→rel : (p : PitchOctave) → (abs→rel ∘ rel→abs) p ≡ p
 rel→abs→rel (pitchClass p , octave o) i =
-  let a = cong pitchClass (modUnique chromaticScaleSize o p)
-      b = cong octave     (divUnique chromaticScaleSize o p)
+  let a = cong pitchClass (modUnique s12 o p)
+      b = cong octave     (divUnique s12 o p)
   in a i , b i
 
 abs→rel→abs : (p : Pitch) → (rel→abs ∘ abs→rel) p ≡ p
-abs→rel→abs (pitch p) = cong pitch (sym (n≡divmod p chromaticScaleSize))
+abs→rel→abs (pitch p) = cong pitch (sym (n≡divmod p s12))
 
 abs≃rel : Iso Pitch PitchOctave
 abs≃rel = iso abs→rel rel→abs rel→abs→rel abs→rel→abs

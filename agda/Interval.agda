@@ -13,15 +13,15 @@ open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then
 open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
 open import Data.Integer.DivMod using (_modℕ_)
 open import Data.Fin        using (Fin; toℕ; #_)
-open import Data.List       using (List; []; _∷_; foldl)
+open import Data.List       using (List; []; _∷_; foldl; map)
 open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc; _⊓_; _∸_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Sign       using (Sign)
 open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
-open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList; updateAt)
+open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList; updateAt) renaming (map to vmap)
 
 open import Pitch
-open import Util using (allPairs)
+open import Util using (allPairs; ◯pairs)
 
 -- Maximum number of interval classes (0 to 6).
 ic7 : ℕ
@@ -169,6 +169,10 @@ orderedPitchClassInterval (pitchClass p , pitchClass q) =
 pitchPairToPitchInterval : PitchPair → PitchInterval
 pitchPairToPitchInterval pq = proj₁ pq , absoluteInterval (pitchPairToSignedInterval pq)
 
+-- Note that the first and last pitches are compared in normal order, not circular order.
+◯pcIntervals : List PitchClass → List OrderedIntervalClass
+◯pcIntervals = map orderedPitchClassInterval ∘ ◯pairs
+
 stepUp : Pitch → Pitch → Bool
 stepUp p q with pitchPairToSignedInterval (p , q)
 ... | signedInterval (+_     n) = isStep (interval n)
@@ -218,3 +222,7 @@ icVector pcs =
     (allPairs pcs)
 
 ab = icVector (toList ryukyuScale)
+
+----------
+
+

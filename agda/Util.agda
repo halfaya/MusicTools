@@ -44,11 +44,22 @@ pairs []           = []
 pairs (x ∷ [])     = []
 pairs (x ∷ y ∷ xs) = (x , y) ∷ pairs (y ∷ xs)
 
-
 -- Returns a list of all pairs in the original list.
 allPairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
 allPairs [] = []
 allPairs (x ∷ xs) = map (x ,_) xs ++ allPairs xs
+
+-- Returns a singleton list of the pair of the first and last element if the list has at least 2 elements,
+-- or the empty list otherwise.
+firstLast : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
+firstLast []       = []
+firstLast (x ∷ xs) with reverse xs
+... | []     = []
+... | y ∷ ys = (x , y) ∷ []
+
+-- Returns a list of all adjacent pairs in the original list, prepended by the pair of the first and last elements.
+◯pairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
+◯pairs xs = firstLast xs ++ pairs xs
 
 -- Basic Boolean Filter and Elem
 filter : {ℓ : Level} {A : Type ℓ} → (A → Bool) → List A → List A

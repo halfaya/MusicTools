@@ -36,8 +36,8 @@ _≤[]_ : List ℕ → List ℕ → Bool
 
 _≤[opci]_ : List PitchClass → List PitchClass → Bool
 _≤[opci]_ xs ys =
-  (map (toℕ ∘ unOrderedIntervalClass) (◯pcIntervals xs)) ≤[]
-  (map (toℕ ∘ unOrderedIntervalClass) (◯pcIntervals ys))
+  (map (toℕ ∘ unOrderedIntervalClass) (pcIntervals xs)) ≤[]
+  (map (toℕ ∘ unOrderedIntervalClass) (pcIntervals ys))
 
 bestPitchClassList : List PitchClass → List (List PitchClass) → List PitchClass
 bestPitchClassList xs         []         = xs
@@ -47,17 +47,31 @@ bestPitchClassList xs@(_ ∷ _) (ys ∷ yss) =
   then bestPitchClassList xs yss
   else bestPitchClassList ys yss
 
-
 normalForm : PitchClassSet → List PitchClass
 normalForm pcs =
   let xs  = fromPitchClassSet pcs
   in bestPitchClassList [] (iter rotateLeft (pred (length xs)) xs)
 
+bestNormalForm : PitchClassSet → List PitchClass
+bestNormalForm pcs =
+  let xs = normalForm pcs
+      ys = normalForm pcs
+  in if xs ≤[opci] ys then xs else ys
+
+primeForm : PitchClassSet → List PitchClass
+primeForm pcs with bestNormalForm pcs
+... | []                    = []
+... | xs@(pitchClass p ∷ _) = map (T (toℕ (opposite p))) xs
+
 -- Test
 
 aa = show (toPitchClassSet (toList ryukyuScale))
 bb = fromPitchClassSet (toPitchClassSet (toList ryukyuScale))
-cc = normalForm (toPitchClassSet (toList ryukyuScale))
+cc = map (toℕ ∘ unPitchClass) (primeForm (toPitchClassSet (toList ryukyuScale)))
+--4 ∷ 5 ∷ 7 ∷ 11 ∷ 0 ∷ []
+--0 1 3 7 8
+--11 ∷ 0 ∷ 4 ∷ 5 ∷ 7 ∷ []
+--0 1 5 6 8
 
 --41241
 --1241 (1421)

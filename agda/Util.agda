@@ -61,6 +61,11 @@ firstLast (x ∷ xs) with reverse xs
 ◯pairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
 ◯pairs xs = firstLast xs ++ pairs xs
 
+-- Returns a list of the first element paired with all later elements, in order.
+firstPairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
+firstPairs []       = []
+firstPairs (x ∷ xs) = map (x ,_) xs
+
 -- Basic Boolean Filter and Elem
 filter : {ℓ : Level} {A : Type ℓ} → (A → Bool) → List A → List A
 filter f []       = []

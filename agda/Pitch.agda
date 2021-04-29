@@ -4,7 +4,7 @@ module Pitch where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
+open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp)
 open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
@@ -12,17 +12,17 @@ open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section;
 open import Data.Bool       using (Bool; false; true)
 open import Data.Integer    using (ℤ; +_; -[1+_])
 open import Data.Fin        using (Fin; toℕ; #_; _≟_; fromℕ<) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; []; _∷_; foldr)
+open import Data.List       using (List; []; _∷_; foldr; map)
 open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
 open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.Product    using (_×_; _,_; proj₁)
-open import Data.Vec        using (Vec; []; _∷_; map; lookup; replicate; _[_]%=_; toList)
+open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList) renaming (map to vmap)
 
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert; empty; show)
-open import Util            using (n∸k<n)
+open import Util            using (n∸k<n; _+N_; opposite)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -77,22 +77,22 @@ pitchToClass : Pitch → PitchClass
 pitchToClass = proj₁ ∘ absoluteToRelative
 
 majorScale harmonicMinorScale : Scale s7
-majorScale         = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
-harmonicMinorScale = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
+majorScale         = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
+harmonicMinorScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
 
 wholeTone0Scale wholeTone1Scale : Scale 6
-wholeTone0Scale    = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 6 ∷ # 8 ∷ # 10 ∷ [])
-wholeTone1Scale    = map pitchClass (# 1 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
+wholeTone0Scale    = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 6 ∷ # 8 ∷ # 10 ∷ [])
+wholeTone1Scale    = vmap pitchClass (# 1 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
 
 octatonic01Scale octatonic02Scale octatonic12Scale : Scale 8
-octatonic01Scale   = map pitchClass (# 0 ∷ # 1 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 7 ∷ # 9 ∷ # 10 ∷ [])
-octatonic02Scale   = map pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 6 ∷ # 8 ∷ # 9 ∷ # 11 ∷ [])
-octatonic12Scale   = map pitchClass (# 1 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 10 ∷ # 11 ∷ [])
+octatonic01Scale   = vmap pitchClass (# 0 ∷ # 1 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 7 ∷ # 9 ∷ # 10 ∷ [])
+octatonic02Scale   = vmap pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 6 ∷ # 8 ∷ # 9 ∷ # 11 ∷ [])
+octatonic12Scale   = vmap pitchClass (# 1 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 10 ∷ # 11 ∷ [])
 
 majorPentatonicScale : Scale 5
-majorPentatonicScale = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
-minorPentatonicScale = map pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
-ryukyuScale          = map pitchClass (# 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ [])
+majorPentatonicScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
+minorPentatonicScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
+ryukyuScale          = vmap pitchClass (# 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ [])
 
 indexInScale : {n : ℕ} → Vec PitchClass n → Fin s12 → Maybe (Fin n)
 indexInScale []         p = nothing
@@ -106,6 +106,14 @@ scaleSize {n} _ = n
 transposePitch : ℤ → Pitch → Pitch
 transposePitch (+_     k) (pitch n) = pitch (n + k)
 transposePitch (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
+
+-- transpose pitch class
+T : ℕ  → PitchClass → PitchClass
+T n (pitchClass pc) = pitchClass (pc +N n)
+
+-- invert pitch class
+I : PitchClass → PitchClass
+I (pitchClass pc) = pitchClass (opposite pc)
 
 -- Set of pitch classes represented as a bit vector.
 PitchClassSet : Type
@@ -123,6 +131,10 @@ fromPitchClassSet pcs = fromPCS s12 pcs
         fromPCS zero []              = []
         fromPCS (suc n) (false ∷ xs) = fromPCS n xs
         fromPCS (suc n) (true  ∷ xs) = pitchClass (fromℕ< (n∸k<n 11 n)) ∷ fromPCS n xs
+
+-- invert pitch class set
+Is : PitchClassSet → PitchClassSet
+Is = toPitchClassSet ∘ map I ∘ fromPitchClassSet
 
 -- Standard Midi pitches
 

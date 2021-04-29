@@ -55,7 +55,7 @@ normalForm pcs =
 bestNormalForm : PitchClassSet → List PitchClass
 bestNormalForm pcs =
   let xs = normalForm pcs
-      ys = normalForm pcs
+      ys = normalForm (Is pcs)
   in if xs ≤[opci] ys then xs else ys
 
 primeForm : PitchClassSet → List PitchClass
@@ -68,11 +68,3 @@ primeForm pcs with bestNormalForm pcs
 aa = show (toPitchClassSet (toList ryukyuScale))
 bb = fromPitchClassSet (toPitchClassSet (toList ryukyuScale))
 cc = map (toℕ ∘ unPitchClass) (primeForm (toPitchClassSet (toList ryukyuScale)))
---4 ∷ 5 ∷ 7 ∷ 11 ∷ 0 ∷ []
---0 1 3 7 8
---11 ∷ 0 ∷ 4 ∷ 5 ∷ 7 ∷ []
---0 1 5 6 8
-
---41241
---1241 (1421)
---1412 (2141)

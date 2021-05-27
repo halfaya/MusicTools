@@ -14,40 +14,40 @@ open import Function        using (_∘_)
 
 open import BitVec          using (BitVec; empty; insert; elements; _∩_; _∈_)
 open import Counterpoint
-open import Diatonic        using (DiatonicDegree; diatonicDegree; undd; thirdUp; _≡ᵈ_; degree→PitchClass; major; pitch→DegreeCMajor)
+open import Diatonic        using (DiatonicDegree; thirdUp; _≡ᵈ_; degree→PC; major; pitch→DegreeCMajor)
 open import Interval
 open import Music
 open import Note
-open import Pitch
+open import Pitch           hiding (I)
 open import Util            using (filter; concatMaybe)
 
 -- either 0 or 1 pitch class
-pointToPitchClass : Point → List PitchClass
-pointToPitchClass (tone p) = pitchToClass p ∷ []
-pointToPitchClass (hold p) = pitchToClass p ∷ []
-pointToPitchClass rest     = []
+pointToPC : Point → List PC
+pointToPC (tone p) = pitchToClass p ∷ []
+pointToPC (hold p) = pitchToClass p ∷ []
+pointToPC rest     = []
 
-chordToPitchClasses : {n : ℕ} → Chord n → List PitchClass
-chordToPitchClasses (chord ps) = concatMap pointToPitchClass (toList ps) 
+chordToPCes : {n : ℕ} → Chord n → List PC
+chordToPCes (chord ps) = concatMap pointToPC (toList ps) 
 
-pitchClassListToSet : List PitchClass → PitchClassSet
-pitchClassListToSet = foldr addToPitchClassSet empty
+pitchClassListToSet : List PC → PCSet
+pitchClassListToSet = foldr insert empty
 
-pitchClassSetToList : PitchClassSet → List PitchClass
+pitchClassSetToList : PCSet → List PC
 pitchClassSetToList ps = fn 0 (toList ps)
-  where fn : ℕ → List Bool → List PitchClass
+  where fn : ℕ → List Bool → List PC
         fn i []           = []
         fn i (false ∷ bs) = fn (suc i) bs
-        fn i (true  ∷ bs) = pitchClass (i mod chromaticScaleSize) ∷ fn (suc i) bs
+        fn i (true  ∷ bs) = i mod s12 ∷ fn (suc i) bs
 
 -- Primary chords, assuming the tonic is pitch class 0.
 
-I-maj I-min IV-maj V-maj : PitchClassSet
+I-maj I-min IV-maj V-maj : PCSet
 
-I-maj  = pitchClassListToSet (map pitchClass (# 0 ∷ # 4 ∷ # 7  ∷ []))
-I-min  = pitchClassListToSet (map pitchClass (# 0 ∷ # 3 ∷ # 7  ∷ []))
-IV-maj = pitchClassListToSet (map pitchClass (# 0 ∷ # 5 ∷ # 9  ∷ []))
-V-maj  = pitchClassListToSet (map pitchClass (# 2 ∷ # 7 ∷ # 11 ∷ []))
+I-maj  = pitchClassListToSet (# 0 ∷ # 4 ∷ # 7  ∷ [])
+I-min  = pitchClassListToSet (# 0 ∷ # 3 ∷ # 7  ∷ [])
+IV-maj = pitchClassListToSet (# 0 ∷ # 5 ∷ # 9  ∷ [])
+V-maj  = pitchClassListToSet (# 2 ∷ # 7 ∷ # 11 ∷ [])
 
 -- Triads, without quality
 data Triad : Set where
@@ -66,22 +66,22 @@ allTriads : List Triad
 allTriads = I ∷ II ∷ III ∷ IV ∷ V ∷ VI ∷ VII ∷ []
 
 triadRoot : Triad → DiatonicDegree
-triadRoot I   = diatonicDegree (# 0)
-triadRoot II  = diatonicDegree (# 1)
-triadRoot III = diatonicDegree (# 2)
-triadRoot IV  = diatonicDegree (# 3)
-triadRoot V   = diatonicDegree (# 4)
-triadRoot VI  = diatonicDegree (# 5)
-triadRoot VII = diatonicDegree (# 6)
+triadRoot I   = (# 0)
+triadRoot II  = (# 1)
+triadRoot III = (# 2)
+triadRoot IV  = (# 3)
+triadRoot V   = (# 4)
+triadRoot VI  = (# 5)
+triadRoot VII = (# 6)
 
 rootTriad : DiatonicDegree → Triad
-rootTriad (diatonicDegree fz)                               = I
-rootTriad (diatonicDegree (fs fz))                          = II
-rootTriad (diatonicDegree (fs (fs fz)))                     = III
-rootTriad (diatonicDegree (fs (fs (fs fz))))                = IV
-rootTriad (diatonicDegree (fs (fs (fs (fs fz)))))           = V
-rootTriad (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = VI
-rootTriad (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = VII
+rootTriad fz                                 = I
+rootTriad ((fs fz))                          = II
+rootTriad ((fs (fs fz)))                     = III
+rootTriad ((fs (fs (fs fz))))                = IV
+rootTriad ((fs (fs (fs (fs fz)))))           = V
+rootTriad ((fs (fs (fs (fs (fs fz))))))      = VI
+rootTriad ((fs (fs (fs (fs (fs (fs fz))))))) = VII
 
 triadDegrees : Triad → Vec DiatonicDegree 3
 triadDegrees t =
@@ -95,23 +95,23 @@ _≡ᵗ_ : Triad → Triad → Bool
 t ≡ᵗ u = triadRoot t ≡ᵈ triadRoot u
 
 TriadSet : Set
-TriadSet = BitVec diatonicScaleSize
+TriadSet = BitVec s7
 
 triadListToSet : List Triad → TriadSet
 triadListToSet []       = empty
-triadListToSet (t ∷ ts) = insert (undd (triadRoot t)) (triadListToSet ts)
+triadListToSet (t ∷ ts) = insert (triadRoot t) (triadListToSet ts)
 
 triadSetToList : TriadSet → List Triad
-triadSetToList ts = map (rootTriad ∘ diatonicDegree) (elements ts)
+triadSetToList ts = map rootTriad (elements ts)
 
 containingTriads : DiatonicDegree → List Triad
-containingTriads (diatonicDegree fz)                               = I   ∷ IV  ∷ VI  ∷ []
-containingTriads (diatonicDegree (fs fz))                          = II  ∷ V   ∷ VII ∷ []
-containingTriads (diatonicDegree (fs (fs fz)))                     = III ∷ VI  ∷ I   ∷ []
-containingTriads (diatonicDegree (fs (fs (fs fz))))                = IV  ∷ VII ∷ II  ∷ []
-containingTriads (diatonicDegree (fs (fs (fs (fs fz)))))           = V   ∷ I   ∷ III ∷ []
-containingTriads (diatonicDegree (fs (fs (fs (fs (fs fz))))))      = VI  ∷ II  ∷ IV  ∷ []
-containingTriads (diatonicDegree (fs (fs (fs (fs (fs (fs fz))))))) = VII ∷ III ∷ V   ∷ []
+containingTriads fz                                 = I   ∷ IV  ∷ VI  ∷ []
+containingTriads ((fs fz))                          = II  ∷ V   ∷ VII ∷ []
+containingTriads ((fs (fs fz)))                     = III ∷ VI  ∷ I   ∷ []
+containingTriads ((fs (fs (fs fz))))                = IV  ∷ VII ∷ II  ∷ []
+containingTriads ((fs (fs (fs (fs fz)))))           = V   ∷ I   ∷ III ∷ []
+containingTriads ((fs (fs (fs (fs (fs fz))))))      = VI  ∷ II  ∷ IV  ∷ []
+containingTriads ((fs (fs (fs (fs (fs (fs fz))))))) = VII ∷ III ∷ V   ∷ []
 
 -- from Table of Usual Root Progressions (Major Mode), Harmony (Piston 5e), page 23
 record NextTriad : Set where
@@ -149,7 +149,7 @@ harmonizations (d ∷ d' ∷ ds) =
   in concatMap (λ t → concatMaybe (map (prependTriad t) tss)) dTriads
   where
     prevOk : Triad → Triad → Bool
-    prevOk t x = undd (triadRoot t) ∈ triadListToSet (previousTriads x)
+    prevOk t x = (triadRoot t) ∈ triadListToSet (previousTriads x)
     prependTriad : {n : ℕ} → Triad → Vec Triad (suc n) → Maybe (Vec Triad (suc (suc n)))
     prependTriad t ts = if prevOk t (Data.Vec.head ts) then just (t ∷ ts) else nothing
 
@@ -163,8 +163,8 @@ halfCadence (_ ∷ t ∷ ts) = halfCadence (t ∷ ts)
 pitchLower : Pitch → DiatonicDegree → Pitch
 pitchLower p d =
   let (c , o) = absoluteToRelative p
-      c'      = degree→PitchClass major d
-  in relativeToAbsolute (c' , octave (unoctave o ∸ 2))
+      c'      = degree→PC major d
+  in relativeToAbsolute (c' , o ∸ 2)
 
 -- Given a soporano voice s a pitch and the other voices
 -- as diatonic degrees of a major scale, voice the
@@ -172,19 +172,19 @@ pitchLower p d =
 voiceChord : Pitch → Vec DiatonicDegree 3 → Vec Pitch 3
 voiceChord s (a ∷ t ∷ b ∷ [])  =
   let (s' , o) = absoluteToRelative s
-      a'       = degree→PitchClass major a
-      t'       = degree→PitchClass major t
-      b'       = degree→PitchClass major b
+      a'       = degree→PC major a
+      t'       = degree→PC major t
+      b'       = degree→PC major b
       ao       = downOctave a' s' o
       to       = downOctave t' a' ao
       bo       = downOctave b' t' to
   in relativeToAbsolute (a' , ao) ∷
      relativeToAbsolute (t' , to) ∷
      relativeToAbsolute (b' , bo) ∷ []
-  where downOctave : PitchClass → PitchClass → Octave → Octave
+  where downOctave : PC → PC → Octave → Octave
         downOctave pc₁ pc₂ o =
-          if toℕ (unPitchClass pc₁) <ᵇ toℕ (unPitchClass pc₂) then o
-          else octave (unoctave o  ∸ 1)
+          if toℕ pc₁ <ᵇ toℕ pc₂ then o
+          else (o ∸ 1)
 
 -- Given a soprano pitch p and a triad harmonization t,
 -- generate a list of possible bass notes.
@@ -233,7 +233,7 @@ voicedHarmonizations {n} ps =
 -- Check interval between each pair of voices.
 intervalsOkFilter : Vec Pitch 4 → Bool
 intervalsOkFilter (s ∷ a ∷ t ∷ b ∷ []) =
-  null (concatMaybe (map (intervalCheck ∘ pitchPairToPitchInterval)
+  null (concatMaybe (map (intervalCheck ∘ toPitchInterval)
 --                         ((s , a) ∷ (s , t) ∷ (s , b) ∷ (a , t) ∷ (a , b) ∷ (t , b) ∷ [])))
                          ((s , a) ∷ (s , b) ∷ (s , t) ∷ [])))
 
@@ -250,12 +250,12 @@ motionErrors xs =
       ts = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail) xs
       bs = Data.Vec.map (Data.Vec.head ∘ Data.Vec.tail ∘ Data.Vec.tail ∘ Data.Vec.tail) xs
 
-      sas = map pitchPairToPitchInterval (toList (Data.Vec.zip as ss))
-      sts = map pitchPairToPitchInterval (toList (Data.Vec.zip ts ss))
-      sbs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs ss))
-      ats = map pitchPairToPitchInterval (toList (Data.Vec.zip ts as))
-      abs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs as))
-      tbs = map pitchPairToPitchInterval (toList (Data.Vec.zip bs ts))
+      sas = map toPitchInterval (toList (Data.Vec.zip as ss))
+      sts = map toPitchInterval (toList (Data.Vec.zip ts ss))
+      sbs = map toPitchInterval (toList (Data.Vec.zip bs ss))
+      ats = map toPitchInterval (toList (Data.Vec.zip ts as))
+      abs = map toPitchInterval (toList (Data.Vec.zip bs as))
+      tbs = map toPitchInterval (toList (Data.Vec.zip bs ts))
   in concatMap checkMotion (sas ∷ sts ∷ sbs ∷ ats ∷ abs ∷ tbs ∷ [])
 
 --filterSBMotionOk : {n : ℕ} → List (Vec (Vec Pitch 4) n) → List (Vec (Vec Pitch 4) n)
@@ -274,7 +274,7 @@ bassLines ((sop , triad) ∷ pts) =
   let pss = bassLines pts
       basses  = bassNotes sop triad
       intervalOkSBs : List PitchInterval -- list of bass notes with interval (to sop) that pass intervalCheck
-      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
+      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (toPitchInterval ∘ (_, sop)) basses)
       intervalOkBs = map proj₁ intervalOkSBs
       intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
   in filter (mCheck sop (Data.Maybe.map proj₁ (head pts))) intervalOkBassLines
@@ -288,8 +288,8 @@ bassLines ((sop , triad) ∷ pts) =
     mCheck _ (just _) []              = true
     mCheck _ (just _) (_ ∷ [])        = true
     mCheck s₁ (just s₂) (b₁ ∷ b₂ ∷ _) =
-      let sb₁ = pitchPairToPitchInterval (b₁ , s₁)
-          sb₂ = pitchPairToPitchInterval (b₂ , s₂)
+      let sb₁ = toPitchInterval (b₁ , s₁)
+          sb₂ = toPitchInterval (b₂ , s₂)
       in (is-nothing ∘ uncurry motionCheck) (sb₁ , sb₂)
 
 -- Given a soprano line with harmonization, generate
@@ -305,7 +305,7 @@ chordProg ((sop , triad) ∷ pts) =
   let pss = chordProg pts
       basses  = bassNotes sop triad
       intervalOkSBs : List PitchInterval -- list of bass notes with interval (to sop) that pass intervalCheck
-      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (pitchPairToPitchInterval ∘ (_, sop)) basses)
+      intervalOkSBs = filter (is-nothing ∘ intervalCheck) (map (toPitchInterval ∘ (_, sop)) basses)
       intervalOkBs = map proj₁ intervalOkSBs
       intervalOkBassLines = concatMap (λ ps → (map (_∷ ps) intervalOkBs)) pss
   in filter (mCheck sop (Data.Maybe.map proj₁ (head pts))) intervalOkBassLines
@@ -319,6 +319,6 @@ chordProg ((sop , triad) ∷ pts) =
     mCheck _ (just _) []              = true
     mCheck _ (just _) (_ ∷ [])        = true
     mCheck s₁ (just s₂) (b₁ ∷ b₂ ∷ _) =
-      let sb₁ = pitchPairToPitchInterval (b₁ , s₁)
-          sb₂ = pitchPairToPitchInterval (b₂ , s₂)
+      let sb₁ = toPitchInterval (b₁ , s₁)
+          sb₂ = toPitchInterval (b₂ , s₂)
       in (is-nothing ∘ uncurry motionCheck) (sb₁ , sb₂)

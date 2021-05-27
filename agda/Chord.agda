@@ -18,7 +18,7 @@ open import Pitch
 open import Util            using (_+N_)
 
 data Root : Type where
-  root : Fin chromaticScaleSize → Root
+  root : Fin s12 → Root
 
 showRoot : Root → String
 showRoot (root fz)                                                        = "I"
@@ -53,7 +53,7 @@ showRootQuality : RootQuality → String
 showRootQuality (r , q) = showRoot r ++s showQuality q
 
 Notes : Type
-Notes = BitVec chromaticScaleSize
+Notes = BitVec s12
 
 ChordList : Type
 ChordList = AList Notes RootQuality

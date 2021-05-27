@@ -4,7 +4,7 @@ module NormalForm where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
+open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; i0; i1)
 open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
@@ -17,7 +17,7 @@ open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; zero; suc; pred; _+_; _*_; _∸_; _≡ᵇ_; _>_; _<ᵇ_)
 open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.Product    using (_×_; _,_; proj₁)
-open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList)
+open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList) renaming (map to vmap)
 
 open import Relation.Nullary using (yes; no)
 
@@ -55,16 +55,26 @@ normalForm pcs =
 bestNormalForm : PitchClassSet → List PitchClass
 bestNormalForm pcs =
   let xs = normalForm pcs
-      ys = normalForm (Is pcs)
+      ys = normalForm (I pcs)
   in if xs ≤[opci] ys then xs else ys
 
 primeForm : PitchClassSet → List PitchClass
 primeForm pcs with bestNormalForm pcs
 ... | []                    = []
-... | xs@(pitchClass p ∷ _) = map (T (toℕ (opposite p))) xs
+... | xs@(pitchClass p ∷ _) = map (Tp (toℕ (opposite p))) xs
 
 -- Test
 
-aa = show (toPitchClassSet (toList ryukyuScale))
-bb = fromPitchClassSet (toPitchClassSet (toList ryukyuScale))
-cc = map (toℕ ∘ unPitchClass) (primeForm (toPitchClassSet (toList ryukyuScale)))
+--ss = vmap pitchClass (# 4 ∷ # 7 ∷ # 9 ∷ [])
+ss = vmap pitchClass (# 2 ∷ # 0 ∷ # 5 ∷ # 6 ∷ [])
+--ss = vmap pitchClass (# 8 ∷ # 9 ∷ # 11 ∷ # 0 ∷ # 4 ∷ [])
+--ss = vmap pitchClass (# 8 ∷ # 7 ∷ # 4 ∷ # 3 ∷ # 11 ∷ # 0 ∷ [])
+
+aa = show (toPitchClassSet (toList ss))
+bb = fromPitchClassSet (toPitchClassSet (toList ss))
+cc = map (toℕ ∘ unPitchClass) (normalForm (toPitchClassSet (toList ss)))
+dd = map (toℕ ∘ unPitchClass) (bestNormalForm (toPitchClassSet (toList ss)))
+ee = map (toℕ ∘ unPitchClass) (primeForm (toPitchClassSet (toList ss)))
+ff = icVector (primeForm (toPitchClassSet (toList ss)))
+gg = map (toℕ ∘ unPitchClass) (fromPitchClassSet (T 8 (toPitchClassSet (toList ss))))
+

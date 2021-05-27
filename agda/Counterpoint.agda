@@ -8,7 +8,7 @@ open import Data.Fin using (Fin; #_)
 open import Data.Integer using (+_)
 open import Data.List using (List; []; _∷_; mapMaybe; map; zip; _++_; concatMap)
 open import Data.Maybe using (Maybe; just; nothing)
-open import Data.Nat using (suc; _+_; _≡ᵇ_; _<ᵇ_; compare; _∸_; ℕ; zero)
+open import Data.Nat using (suc; _+_; _<ᵇ_; compare; _∸_; ℕ; zero) renaming (_≡ᵇ_ to _==_)
 open import Data.Product using (_×_; _,_; proj₁; proj₂; uncurry)
 open import Data.Vec using ([]; _∷_; Vec; lookup; drop; reverse)
 
@@ -40,8 +40,8 @@ checkBeginning pi@(_ , i) =
 
 -- Intervals in middle bars must be consonant and non-unison
 data IntervalError : Set where
-  dissonant : Interval → IntervalError
-  unison    : Pitch    → IntervalError
+  dissonant : Upi   → IntervalError
+  unison    : Pitch → IntervalError
 
 intervalCheck : PitchInterval → Maybe IntervalError
 intervalCheck (p , i) with isConsonant i | isUnison i
@@ -62,10 +62,10 @@ data Motion : Set where
   oblique  : Motion
 
 motion : PitchInterval → PitchInterval → Motion
-motion (pitch p , interval i) (pitch q , interval j) =
+motion (p , i) (q , j) =
   let p' = p + i; q' = q + j
-  in if i ≡ᵇ j then parallel
-     else (if (p ≡ᵇ q) ∨ (p' ≡ᵇ q') then oblique
+  in if i == j then parallel
+     else (if (p == q) ∨ (p' == q') then oblique
            else (if p <ᵇ q then (if p' <ᵇ q' then similar  else contrary)
                  else           (if p' <ᵇ q' then contrary else similar)))
 
@@ -94,10 +94,10 @@ data EndingError : Set where
   tooShort : List PitchInterval → EndingError
 
 endingCheck : PitchInterval → PitchInterval → Maybe EndingError
-endingCheck pi1@(pitch p , i) (pitch q , interval 0)  = 
-  if ((p + 1 ≡ᵇ q) ∧ (i == min3)) then nothing else just (not27 pi1)
-endingCheck pi1@(pitch p , i) (pitch q , interval 12) =
-  if ((q + 2 ≡ᵇ p) ∧ (i == maj6) ∨ (p + 1 ≡ᵇ q) ∧ (i == min10))
+endingCheck pi1@(p , i) (q , 0)  = 
+  if ((p + 1 == q) ∧ (i == min3)) then nothing else just (not27 pi1)
+endingCheck pi1@(p , i) (q , 12) =
+  if ((q + 2 == p) ∧ (i == maj6) ∨ (p + 1 == q) ∧ (i == min10))
   then nothing
   else just (not27 pi1)
 endingCheck pi1               pi2                     =
@@ -128,7 +128,7 @@ record FirstSpecies : Set where
 -- Second Species
 
 PitchInterval2 : Set
-PitchInterval2 = Pitch × Interval × Interval
+PitchInterval2 = Pitch × Upi × Upi
 
 strongBeat : PitchInterval2 → PitchInterval
 strongBeat (p , i , _) = p , i

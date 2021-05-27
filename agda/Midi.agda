@@ -8,7 +8,6 @@ open import Data.Nat using (ℕ)
 open import Data.List using (List; []; _∷_; concatMap)
 open import Data.Product using (_,_)
 
-open import Pitch using (pitch)
 open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 
 {-# FOREIGN GHC
@@ -104,7 +103,7 @@ data MidiMessage : Set where
 {-# COMPILE GHC MidiMessage = data HsMidiMessage (HsNoteOn | HsNoteOff) #-}
 
 event→messages : MidiEvent → List MidiMessage
-event→messages (midiEvent (pitch p) start stop v) =
+event→messages (midiEvent p start stop v) =
   let v' = toℕ v
   in noteOn v' start p ∷ noteOff v' stop p ∷ [] 
 

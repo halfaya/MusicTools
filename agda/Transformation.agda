@@ -7,7 +7,7 @@ open import Data.List    using (List; _∷_; []; map; reverse)
 open import Data.Product using (_,_)
 
 open import Note         using (Note; tone; rest)
-open import Pitch        using (Pitch; pitch; transposePitch)
+open import Pitch        using (Pitch; transposePitch)
 open import Interval     using (PitchPair)
 
 retrograde : List Note → List Note
@@ -21,7 +21,7 @@ intervals (tone d p ∷ ns) = intervals' p ns where
   intervals' : Pitch → List Note → List ℤ
   intervals' p []                              = []
   intervals' p (rest d ∷ ns)                   = intervals' p ns
-  intervals' (pitch p) (tone d (pitch q) ∷ ns) = (+ q) - (+ p) ∷ intervals' (pitch q) ns
+  intervals' p (tone d q ∷ ns) = (+ q) - (+ p) ∷ intervals' q ns
 
 inversion : List Note → List Note
 inversion []                 = []

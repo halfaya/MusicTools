@@ -144,7 +144,7 @@ countersubject = map (transposeNoteInterval (makeSigned s- per5)) (b5 ++ b6 ++ b
 extra = b8 ++ b10 ++ b9 ++ b10
 base = subject ++ countersubject ++ extra
 
-transpositions : Vec SignedInterval 3
+transpositions : Vec Opi 3
 transpositions = vmap (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
 
 -- Exposition is a truncated canon

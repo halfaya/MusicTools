@@ -17,6 +17,7 @@ open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
 open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
 open import Data.Nat.DivMod using (_mod_; _div_)
 open import Data.Product    using (_×_; _,_; proj₁)
+open import Data.String     using (String; intersperse) renaming (_++_ to _++s_)
 open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList) renaming (map to vmap)
 
 open import Relation.Nullary using (yes; no)
@@ -30,11 +31,8 @@ open import Util            using (n∸k<n; _+N_; opposite)
 -- Pitch is intentially set to match Midi pitch.
 -- However it is fine to let 0 represent some other note and
 -- translate appropriately at the end.
-data Pitch : Type where
-  pitch : ℕ → Pitch
-
-unpitch : Pitch → ℕ
-unpitch (pitch p) = p
+Pitch : Type
+Pitch = ℕ
 
 -- Number of notes in the chromatic scale.
 s12 : ℕ
@@ -44,59 +42,68 @@ s12 = 12
 s7 : ℕ
 s7 = 7
 
--- Position of a pitch within an octave, in the range [0..s12-1].
+-- Pitch Class: position of a pitch within an octave, in the range [0..s12-1].
 -- Pitch class 0 corresponds to C (assuming pitch 0 is Midi C0), which is standard.
-data PitchClass : Type where
-  pitchClass : Fin s12 → PitchClass
+PC : Type
+PC = Fin s12
 
-unPitchClass : PitchClass → Fin s12
-unPitchClass (pitchClass p) = p
+showPC : PC → String
+showPC fz = "0"
+showPC (fs fz) = "1"
+showPC (fs (fs fz)) = "2"
+showPC (fs (fs (fs fz))) = "3"
+showPC (fs (fs (fs (fs fz)))) = "4"
+showPC (fs (fs (fs (fs (fs fz))))) = "5"
+showPC (fs (fs (fs (fs (fs (fs fz)))))) = "6"
+showPC (fs (fs (fs (fs (fs (fs (fs fz))))))) = "7"
+showPC (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))) = "8"
+showPC (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))) = "9"
+showPC (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz)))))))))) = "a"
+showPC (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))))) = "b"
+
+showPCs : List PC → String
+showPCs pcs = intersperse " " (map showPC pcs)
 
 Scale : ℕ → Type
-Scale = Vec PitchClass
+Scale = Vec PC
 
 -- Which octave one is in.
-data Octave : Type where
-  octave : ℕ → Octave
-
-unoctave : Octave → ℕ
-unoctave (octave n) = n
+Octave : Type
+Octave = ℕ
 
 PitchOctave : Type
-PitchOctave = PitchClass × Octave
+PitchOctave = PC × Octave
 
 relativeToAbsolute : PitchOctave → Pitch
-relativeToAbsolute (pitchClass n , octave o) =
-  pitch (o * s12 + (toℕ n))
+relativeToAbsolute (n , o) = (o * s12 + (toℕ n))
 
 absoluteToRelative : Pitch → PitchOctave
-absoluteToRelative (pitch  n) =
-  (pitchClass (n mod s12) , octave (n div s12))
+absoluteToRelative n = (n mod s12 , n div s12)
 
-pitchToClass : Pitch → PitchClass
+pitchToClass : Pitch → PC
 pitchToClass = proj₁ ∘ absoluteToRelative
 
 majorScale harmonicMinorScale : Scale s7
-majorScale         = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
-harmonicMinorScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ [])
+majorScale         = # 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ []
+harmonicMinorScale = # 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 11 ∷ []
 
 wholeTone0Scale wholeTone1Scale : Scale 6
-wholeTone0Scale    = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 6 ∷ # 8 ∷ # 10 ∷ [])
-wholeTone1Scale    = vmap pitchClass (# 1 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ [])
+wholeTone0Scale    = # 0 ∷ # 2 ∷ # 4 ∷ # 6 ∷ # 8 ∷ # 10 ∷ []
+wholeTone1Scale    = # 1 ∷ # 3 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ []
 
 octatonic01Scale octatonic02Scale octatonic12Scale : Scale 8
-octatonic01Scale   = vmap pitchClass (# 0 ∷ # 1 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 7 ∷ # 9 ∷ # 10 ∷ [])
-octatonic02Scale   = vmap pitchClass (# 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 6 ∷ # 8 ∷ # 9 ∷ # 11 ∷ [])
-octatonic12Scale   = vmap pitchClass (# 1 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 10 ∷ # 11 ∷ [])
+octatonic01Scale   = # 0 ∷ # 1 ∷ # 3 ∷ # 4 ∷ # 6 ∷ # 7 ∷ # 9 ∷ # 10 ∷ []
+octatonic02Scale   = # 0 ∷ # 2 ∷ # 3 ∷ # 5 ∷ # 6 ∷ # 8 ∷ # 9 ∷ # 11 ∷ []
+octatonic12Scale   = # 1 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 8 ∷ # 10 ∷ # 11 ∷ []
 
-majorPentatonicScale : Scale 5
-majorPentatonicScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
-minorPentatonicScale = vmap pitchClass (# 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ [])
-ryukyuScale          = vmap pitchClass (# 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ [])
+majorPentatonicScale minorPentatonicScale ryukyuScale : Scale 5
+majorPentatonicScale = # 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ []
+minorPentatonicScale = # 0 ∷ # 2 ∷ # 4 ∷ # 7 ∷ # 9 ∷ []
+ryukyuScale          = # 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ []
 
-indexInScale : {n : ℕ} → Vec PitchClass n → Fin s12 → Maybe (Fin n)
+indexInScale : {n : ℕ} → Vec PC n → Fin s12 → Maybe (Fin n)
 indexInScale []         p = nothing
-indexInScale (pc ∷ pcs) p with (unPitchClass pc ≟ p)
+indexInScale (pc ∷ pcs) p with pc ≟ p
 ... | yes _ = just fz
 ... | no  _ = mmap fs (indexInScale pcs p)
 
@@ -104,44 +111,45 @@ scaleSize : {n : ℕ} → Scale n → ℕ
 scaleSize {n} _ = n
 
 transposePitch : ℤ → Pitch → Pitch
-transposePitch (+_     k) (pitch n) = pitch (n + k)
-transposePitch (-[1+_] k) (pitch n) = pitch (n ∸ suc k)
+transposePitch (+_     k) n = n + k
+transposePitch (-[1+_] k) n = n ∸ suc k
 
 -- transpose pitch class
-T : ℕ  → PitchClass → PitchClass
-T n (pitchClass pc) = pitchClass (pc +N n)
+Tp : ℕ  → PC → PC
+Tp n pc = pc +N n
 
 -- invert pitch class
-I : PitchClass → PitchClass
-I (pitchClass pc) = pitchClass (opposite pc)
+Ip : PC → PC
+Ip = opposite
 
 -- Set of pitch classes represented as a bit vector.
-PitchClassSet : Type
-PitchClassSet = BitVec s12
+PCSet : Type
+PCSet = BitVec s12
 
-addToPitchClassSet : PitchClass → PitchClassSet → PitchClassSet
-addToPitchClassSet (pitchClass p) ps = insert p ps
+toPCSet : List PC → PCSet
+toPCSet = foldr insert empty
 
-toPitchClassSet : List PitchClass → PitchClassSet
-toPitchClassSet = foldr addToPitchClassSet empty
-
-fromPitchClassSet : PitchClassSet → List PitchClass
-fromPitchClassSet pcs = fromPCS s12 pcs
-  where fromPCS : (n : ℕ) → BitVec n → List PitchClass
+fromPCSet : PCSet → List PC
+fromPCSet pcs = fromPCS s12 pcs
+  where fromPCS : (n : ℕ) → BitVec n → List PC
         fromPCS zero []              = []
         fromPCS (suc n) (false ∷ xs) = fromPCS n xs
-        fromPCS (suc n) (true  ∷ xs) = pitchClass (fromℕ< (n∸k<n 11 n)) ∷ fromPCS n xs
+        fromPCS (suc n) (true  ∷ xs) = fromℕ< (n∸k<n 11 n) ∷ fromPCS n xs
+
+-- transpose pitch class set
+T : ℕ → PCSet → PCSet
+T n = toPCSet ∘ map (Tp n) ∘ fromPCSet
 
 -- invert pitch class set
-Is : PitchClassSet → PitchClassSet
-Is = toPitchClassSet ∘ map I ∘ fromPitchClassSet
+I : PCSet → PCSet
+I = toPCSet ∘ map Ip ∘ fromPCSet
 
 -- Standard Midi pitches
 
 -- first argument is relative pitch within octave
 -- second argument is octave (C5 = middle C for Midi)
 standardMidiPitch : Fin s12 → ℕ → Pitch
-standardMidiPitch p o = relativeToAbsolute (pitchClass p , octave o)
+standardMidiPitch p o = relativeToAbsolute (p , o)
 
 c c♯ d d♯ e f f♯ g g♯ a b♭ b : ℕ → Pitch
 c  = standardMidiPitch (# 0)

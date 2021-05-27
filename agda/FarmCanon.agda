@@ -25,7 +25,7 @@ subject =
   tone half (e 5) ∷
   []
 
-transpositions : Vec SignedInterval 4
+transpositions : Vec Opi 4
 transpositions = map (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ per12 ∷ [])
 
 repeats : ℕ

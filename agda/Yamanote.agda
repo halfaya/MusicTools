@@ -32,7 +32,7 @@ cantusFirmus =
   d 6 ∷ []
 
 -- Counterpoint (composed on Aug 2, 2019)
-counterpoint : Vec Interval 40
+counterpoint : Vec Upi 40
 counterpoint =
          maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷
@@ -42,7 +42,7 @@ counterpoint =
   maj6 ∷ []
 
 -- Counterpoint (composed on March 18, 2019)
-counterpoint0 : Vec Interval 40
+counterpoint0 : Vec Upi 40
 counterpoint0 =
          maj6 ∷ min6 ∷ per8 ∷ maj3 ∷ per8 ∷ min3 ∷ maj6 ∷
   maj6 ∷ maj6 ∷ min3 ∷ per5 ∷ maj3 ∷ maj6 ∷ min3 ∷ per8 ∷

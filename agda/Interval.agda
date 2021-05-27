@@ -13,10 +13,11 @@ open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then
 open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
 open import Data.Integer.DivMod using (_modℕ_)
 open import Data.Fin        using (Fin; toℕ; #_)
-open import Data.List       using (List; []; _∷_; foldl; map; reverse)
-open import Data.Nat        using (ℕ; _≡ᵇ_; zero; suc; _⊓_; _∸_)
+open import Data.List       using (List; []; _∷_; foldl; map; reverse; length; _++_)
+open import Data.Nat        using (ℕ; zero; suc; _⊓_; _∸_) renaming (_≡ᵇ_ to _==_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Sign       using (Sign)
+open import Data.String     using (String; intersperse) renaming (_++_ to _++s_)
 open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
 open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList; updateAt) renaming (map to vmap)
 
@@ -30,87 +31,62 @@ ic7 = 7
 PitchPair : Type
 PitchPair = Pitch × Pitch
 
-PitchClassPair : Type
-PitchClassPair = PitchClass × PitchClass
+PCPair : Type
+PCPair = PC × PC
 
+-- Unordered pitch interval
 -- Absolute distance in semitones between two pitches.
--- Also known as unordered pitch interval (upi).
-data Interval : Type where
-  interval : ℕ → Interval
+Upi : Type
+Upi = ℕ
 
-unInterval : Interval → ℕ
-unInterval (interval x) = x
-
+-- Ordered pitch interval
 -- Relative distance in semitones between two pitches.
--- Also known as ordered pitch interval (opi).
-data OrderedInterval : Type where
-  orderedInterval : ℤ → OrderedInterval
+Opi : Type
+Opi = ℤ
 
+-- Interval Class
 -- Also known as unodered pitch-class interval (upci).
-data IntervalClass : Type where
-  intervalClass : Fin ic7 → IntervalClass
+IC : Type
+IC = Fin ic7
 
-unIntervalClass : IntervalClass → Fin ic7
-unIntervalClass (intervalClass x) = x
+-- (Ordered) pitch-class interval (also abbreviated opci)
+PCI : Type
+PCI = Fin s12
 
--- Also known as ordered pitch-class interval (opci).
-data OrderedIntervalClass : Type where
-  orderedIntervalClass : Fin s12 → OrderedIntervalClass
+intervalWithinOctave : Upi → Upi
+intervalWithinOctave i = toℕ (i mod s12)
 
-unOrderedIntervalClass : OrderedIntervalClass → Fin s12
+absoluteInterval : Opi → Upi
+absoluteInterval i = ∣ i ∣
 
-unOrderedIntervalClass (orderedIntervalClass x) = x
-
-infix 4 _==_
-
-_==_ : Interval → Interval → Bool
-(interval a) == (interval b) = a ≡ᵇ b
-
-intervalWithinOctave : Interval → Interval
-intervalWithinOctave (interval i) = interval (toℕ (i mod s12))
-
--- Relative interval between a base pitch and a second pitch.
--- Also known as ordered pitch interval (opi).
-data SignedInterval : Type where
-  signedInterval : ℤ → SignedInterval
-
-signedIntervalInt : SignedInterval → ℤ
-signedIntervalInt (signedInterval k) = k
-
-absoluteInterval : SignedInterval → Interval
-absoluteInterval (signedInterval i) = interval ∣ i ∣
-
-makeSigned : Sign → Interval → SignedInterval
-makeSigned Sign.- (interval zero)    = signedInterval (+ 0)
-makeSigned Sign.- (interval (suc i)) = signedInterval -[1+ i ]
-makeSigned Sign.+ (interval i)       = signedInterval (+ i)
-
-invertSignedInterval : SignedInterval → SignedInterval
-invertSignedInterval (signedInterval k) = signedInterval (- k)
+makeSigned : Sign → Upi → Opi
+makeSigned Sign.- zero    = + 0
+makeSigned Sign.- (suc i) = -[1+ i ]
+makeSigned Sign.+ i       = + i
 
 -- Names for intervals
-per1  = interval 0
-min2  = interval 1
-maj2  = interval 2
-min3  = interval 3
-maj3  = interval 4
-per4  = interval 5
-aug4  = interval 6
-per5  = interval 7
-min6  = interval 8
-maj6  = interval 9
-min7  = interval 10
-maj7  = interval 11
-per8  = interval 12
-min9  = interval 13
-maj9  = interval 14
-min10 = interval 15
-maj10 = interval 16
-per11 = interval 17
-aug11 = interval 18
-per12 = interval 19
+per1  = 0
+min2  = 1
+maj2  = 2
+min3  = 3
+maj3  = 4
+per4  = 5
+aug4  = 6
+per5  = 7
+min6  = 8
+maj6  = 9
+min7  = 10
+maj7  = 11
+per8  = 12
+min9  = 13
+maj9  = 14
+min10 = 15
+maj10 = 16
+per11 = 17
+aug11 = 18
+per12 = 19
 
-isConsonant : Interval → Bool
+isConsonant : Upi → Bool
 isConsonant iv =
   (i == per1)  ∨
   (i == min3)  ∨
@@ -121,10 +97,10 @@ isConsonant iv =
   (i == per8)
   where i = intervalWithinOctave iv
 
-isDissonant : Interval → Bool
+isDissonant : Upi → Bool
 isDissonant = not ∘ isConsonant
 
-isPerfect : Interval → Bool
+isPerfect : Upi → Bool
 isPerfect iv =
   (i == per1)  ∨
   (i == per4)  ∨
@@ -132,72 +108,72 @@ isPerfect iv =
   (i == per8)
   where i = intervalWithinOctave iv
 
-isUnison : Interval → Bool
+isUnison : Upi → Bool
 isUnison i = i == per1
 
-isThird : Interval → Bool
+isThird : Upi → Bool
 isThird i = (i == min3) ∨ (i == maj3)
 
 -- Half or whole step.
-isStep : Interval → Bool
+isStep : Upi → Bool
 isStep i =
   (i == min2)  ∨
   (i == maj2)
 
 PitchInterval : Type
-PitchInterval = Pitch × Interval
+PitchInterval = Pitch × Upi
 
 pitchIntervalToPitchPair : PitchInterval → PitchPair
-pitchIntervalToPitchPair (p , interval n) = (p , transposePitch (+ n)  p)
+pitchIntervalToPitchPair (p , n) = (p , transposePitch (+ n)  p)
 
 secondPitch : PitchInterval → Pitch
 secondPitch = proj₂ ∘ pitchIntervalToPitchPair
 
-pitchPairToSignedInterval : PitchPair → SignedInterval
-pitchPairToSignedInterval (pitch p , pitch q) = signedInterval ((+ q) - (+ p))
+pitchPairToOpi : PitchPair → Opi
+pitchPairToOpi (p , q) = (+ q) - (+ p)
 
-unorderedPitchClassInterval : PitchClassPair → IntervalClass
-unorderedPitchClassInterval (pitchClass p , pitchClass q) =
+toIC : PCPair → IC
+toIC (p , q) =
   let x = toℕ (∣ (+ (toℕ q)) - (+ (toℕ p)) ∣ mod s12)
-  in intervalClass (x ⊓ (s12 ∸ x) mod ic7)
+  in x ⊓ (s12 ∸ x) mod ic7
 
-orderedPitchClassInterval : PitchClassPair → OrderedIntervalClass
-orderedPitchClassInterval (pitchClass p , pitchClass q) =
- orderedIntervalClass ((((+ (toℕ q)) - (+ (toℕ p))) modℕ s12) mod s12)
+toPCI : PCPair → PCI
+toPCI (p , q) =
+ (((+ (toℕ q)) - (+ (toℕ p))) modℕ s12) mod s12
 
 -- Assumes p ≤ q
-pitchPairToPitchInterval : PitchPair → PitchInterval
-pitchPairToPitchInterval pq = proj₁ pq , absoluteInterval (pitchPairToSignedInterval pq)
+toPitchInterval : PitchPair → PitchInterval
+toPitchInterval pq = proj₁ pq , absoluteInterval (pitchPairToOpi pq)
 
 -- DEPRECATED? Note that the first and last pitches are compared in normal order, not circular order.
-◯pcIntervals : List PitchClass → List OrderedIntervalClass
-◯pcIntervals = map orderedPitchClassInterval ∘ ◯pairs
+◯pcIntervals : List PC → List PCI
+◯pcIntervals = map toPCI ∘ ◯pairs
 
 -- Note that the first and last pitches are compared in normal order, not circular order.
-pcIntervals : List PitchClass → List OrderedIntervalClass
-pcIntervals = map orderedPitchClassInterval ∘ reverse ∘ firstPairs
+pcIntervals : List PC → List PCI
+pcIntervals = map toPCI ∘ reverse ∘ firstPairs
 
 stepUp : Pitch → Pitch → Bool
-stepUp p q with pitchPairToSignedInterval (p , q)
-... | signedInterval (+_     n) = isStep (interval n)
-... | signedInterval (-[1+_] n) = false
+stepUp p q with pitchPairToOpi (p , q)
+... | +_     n = isStep n
+... | -[1+_] n = false
 
 stepDown : Pitch → Pitch → Bool
-stepDown p q with pitchPairToSignedInterval (p , q)
-... | signedInterval (+_     n) = false
-... | signedInterval (-[1+_] n) = isStep (interval n)
+stepDown p q with pitchPairToOpi (p , q)
+... | +_     n = false
+... | -[1+_] n = isStep n
 
 -- Check if q is a passing tone between p and r
 -- The interval between end points need to be a 3rd
 isPassingTone : Pitch → Pitch → Pitch → Bool
 isPassingTone p q r =
   (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r) ∨
-  (isThird (absoluteInterval (pitchPairToSignedInterval (p , r))))
+  (isThird (absoluteInterval (pitchPairToOpi (p , r))))
 
 moveUp : Pitch → Pitch → Bool
-moveUp p q with pitchPairToSignedInterval (p , q)
-... | signedInterval (+_     _) = true
-... | signedInterval (-[1+_] _) = false
+moveUp p q with pitchPairToOpi (p , q)
+... | +_     _ = true
+... | -[1+_] _ = false
 
 moveDown : Pitch → Pitch → Bool
 moveDown p q = not (moveUp p q)
@@ -206,27 +182,62 @@ moveDown p q = not (moveUp p q)
 isOppositeStep : Pitch → Pitch → Pitch → Bool
 isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)
 
-transposePitchInterval : SignedInterval → Pitch → Pitch
-transposePitchInterval (signedInterval z) p = transposePitch z p
+transposePitchInterval : Opi → Pitch → Pitch
+transposePitchInterval z p = transposePitch z p
+
+-- transpose pitch class by interval class
+Tic : PCI → PC → PC
+Tic n = Tp (toℕ n)
 
 ----------
 
 -- Interval Class Vector
-ICVector : Type
-ICVector = Vec ℕ ic7
+ICV : Type
+ICV = Vec ℕ ic7
 
-emptyICVector : ICVector
-emptyICVector = 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ []
+emptyICV : ICV
+emptyICV = 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ []
 
-icVector : List PitchClass → ICVector
+icVector : List PC → ICV
 icVector pcs =
   foldl
-    (λ icv pc → updateAt (unIntervalClass (unorderedPitchClassInterval pc)) suc icv)
-    emptyICVector
+    (λ icv pc → updateAt (toIC pc) suc icv)
+    (updateAt (# 0) (λ _ → length pcs) emptyICV)
     (allPairs pcs)
 
 ab = icVector (toList ryukyuScale)
 
 ----------
 
+--Construct matrix out of PC row
+matrix : List PC → List (List PC)
+matrix [] = []
+matrix pcs@(pc ∷ _) =
+  let r0 = map (Tic (toPCI (pc , # 0))) pcs -- start first row at 0
+  in map (λ p → map (Tic (Ip p)) r0) r0
 
+showMatrix : List (List PC) → String
+showMatrix m = intersperse "\n" (map showPCs m)
+
+rr : List PC
+rr = # 10 ∷ # 9 ∷ # 7 ∷ # 0 ∷ []
+rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
+
+bb = showPCs rp
+
+aa = showMatrix (matrix rp)
+
+{-
+0 b 9 2 4 3 1 6 8 7 5 a
+1 0 a 3 5 4 2 7 9 8 6 b
+3 2 0 5 7 6 4 9 b a 8 1
+a 9 7 0 2 1 b 4 6 5 3 8
+8 7 5 a 0 b 9 2 4 3 1 6
+9 8 6 b 1 0 a 3 5 4 2 7
+b a 8 1 3 2 0 5 7 6 4 9
+6 5 3 8 a 9 7 0 2 1 b 4
+4 3 1 6 8 7 5 a 0 b 9 2
+5 4 2 7 9 8 6 b 1 0 a 3
+7 6 4 9 b a 8 1 3 2 0 5
+2 1 b 4 6 5 3 8 a 9 7 0
+-}

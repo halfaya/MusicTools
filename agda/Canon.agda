@@ -20,7 +20,7 @@ open import MidiEvent
 open import Util            using (repeat; fins')
 open import Transformation
 
-makeImitations : {k : ℕ} → List Note → Vec SignedInterval k → Vec (List Note) k
+makeImitations : {k : ℕ} → List Note → Vec Opi k → Vec (List Note) k
 makeImitations subject []       = []
 makeImitations subject (i ∷ is) = map (transposeNoteInterval i) subject ∷ makeImitations subject is
 
@@ -30,10 +30,10 @@ addDelays (duration d) lines = ads 0 lines where
   ads n []              = []
   ads n (notes ∷ lines) = (rest (duration n) ∷ notes) ∷ ads (n + d) lines 
 
-makeCanon : {k : ℕ} → List Note → ℕ → Duration → Vec SignedInterval k → Vec (List Note) k
+makeCanon : {k : ℕ} → List Note → ℕ → Duration → Vec Opi k → Vec (List Note) k
 makeCanon subject reps d = addDelays d ∘ vmap (repeat reps) ∘ makeImitations subject
 
-makeCanon2 : {k : ℕ} → List Note → Duration → Vec SignedInterval k → Vec (List Note) k
+makeCanon2 : {k : ℕ} → List Note → Duration → Vec Opi k → Vec (List Note) k
 makeCanon2 subject d is =
   addDelays d (makeImitations (
     repeat 2 subject ++

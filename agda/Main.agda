@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical #-}
+{-# OPTIONS --erased-cubical #-}
 
 module Main where
 

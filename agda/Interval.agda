@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module Interval where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
 open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
-open import Cubical.Foundations.Function    using (_∘_)
+--open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
@@ -22,7 +22,7 @@ open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
 open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList; updateAt) renaming (map to vmap)
 
 open import Pitch
-open import Util using (allPairs; ◯pairs; firstPairs)
+open import Util using (allPairs; ◯pairs; firstPairs; _∘_)
 
 -- Maximum number of interval classes (0 to 6).
 ic7 : ℕ
@@ -185,9 +185,9 @@ isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepU
 transposePitchInterval : Opi → Pitch → Pitch
 transposePitchInterval z p = transposePitch z p
 
--- transpose pitch class by interval class
-Tic : PCI → PC → PC
-Tic n = Tp (toℕ n)
+-- transpose pitch class by pci
+Tpci : PCI → PC → PC
+Tpci n = Tp (toℕ n)
 
 ----------
 
@@ -213,8 +213,8 @@ ab = icVector (toList ryukyuScale)
 matrix : List PC → List (List PC)
 matrix [] = []
 matrix pcs@(pc ∷ _) =
-  let r0 = map (Tic (toPCI (pc , # 0))) pcs -- start first row at 0
-  in map (λ p → map (Tic (Ip p)) r0) r0
+  let r0 = map ((Tpci ∘ Ip) pc) pcs -- start first row at 0
+  in map (λ p → map ((Tpci ∘ Ip) p) r0) r0
 
 showMatrix : List (List PC) → String
 showMatrix m = intersperse "\n" (map showPCs m)
@@ -222,8 +222,6 @@ showMatrix m = intersperse "\n" (map showPCs m)
 rr : List PC
 rr = # 10 ∷ # 9 ∷ # 7 ∷ # 0 ∷ []
 rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
-
-bb = showPCs rp
 
 aa = showMatrix (matrix rp)
 

@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module Pitch where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
 open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp)
-open import Cubical.Foundations.Function    using (_∘_)
+--open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
@@ -23,7 +23,7 @@ open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; t
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert; empty; show)
-open import Util            using (n∸k<n; _+N_; opposite)
+open import Util            using (n∸k<n; _+N_; opposite; _∘_)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)

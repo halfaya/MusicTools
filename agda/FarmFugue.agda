@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module FarmFugue where
 
@@ -11,11 +11,11 @@ open import Data.Vec        using (Vec; _∷_; []; lookup; foldl₁) renaming (m
 open import Function        using (_∘_)
 
 open import Canon           using (makeCanon; makeTrackList)
-open import Interval
-open import Music
-open import Note
-open import Pitch
-open import MidiEvent
+open import Interval        --using (makeSigned; per1; per5; per8; Opi)
+open import Music           using (melody→notes; notes→melody; fixLength; dropPoints)
+open import Note            using (Note; tone; rest; 8th; qtr; dqtr; half; whole; transposeNoteInterval; _d+_; duration)
+open import Pitch           using (a; b; c; d; e; f; g)
+open import MidiEvent       using (MidiTrack)
 open import Util            using (repeat)
 open import Transformation
 

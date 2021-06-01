@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module Util where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
 open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
-open import Cubical.Foundations.Function    using (_∘_)
+--open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
@@ -23,6 +23,13 @@ open import Data.Vec             using (Vec; _∷_; []; zip; last) renaming (con
 open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Nullary.Decidable using (False)
 open import Relation.Unary       using (Pred; Decidable)
+
+infixr 9 _∘_
+
+_∘_ : {ℓ : Level}{A : Type ℓ}{B : A → Type ℓ}{C : (a : A) → B a → Type ℓ}
+  (g : {a : A} → (b : B a) → C a b) → (f : (a : A) → B a) → (a : A) → C a (f a)
+g ∘ f = λ x → g (f x)
+{-# INLINE _∘_ #-}
 
 repeat : {ℓ : Level} {A : Type ℓ} → (n : ℕ) → List A → List A
 repeat n = concat ∘ replicate n

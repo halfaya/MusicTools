@@ -1,0 +1,3 @@
+name: music-tools
+depend: standard-library cubical
+include: agda

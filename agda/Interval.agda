@@ -13,7 +13,7 @@ open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then
 open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
 open import Data.Integer.DivMod using (_modℕ_)
 open import Data.Fin        using (Fin; toℕ; #_)
-open import Data.List       using (List; []; _∷_; foldl; map; reverse; length; _++_)
+open import Data.List       using (List; []; _∷_; foldl; map; reverse; length; _++_; take; drop)
 open import Data.Nat        using (ℕ; zero; suc; _⊓_; _∸_) renaming (_≡ᵇ_ to _==_)
 open import Data.Nat.DivMod using (_mod_)
 open import Data.Sign       using (Sign)
@@ -223,6 +223,7 @@ rr : List PC
 rr = # 10 ∷ # 9 ∷ # 7 ∷ # 0 ∷ []
 rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
 
+-- Belle's matrix
 aa = showMatrix (matrix rp)
 
 {-
@@ -238,4 +239,28 @@ b a 8 1 3 2 0 5 7 6 4 9
 5 4 2 7 9 8 6 b 1 0 a 3
 7 6 4 9 b a 8 1 3 2 0 5
 2 1 b 4 6 5 3 8 a 9 7 0
+-}
+
+rd : List PC
+rd2 = reverse (map (Tp 4) rr)
+rd3' = reverse (map (Tp 8) rr)
+rd3 = reverse (take 2 rd3') ++ reverse (drop 2 rd3')
+rd = rr ++ rd2 ++ rd3
+
+-- Dan's matrix
+ad = showMatrix (matrix rd)
+
+{-
+0 b 9 2 6 1 3 4 5 a 8 7
+1 0 a 3 7 2 4 5 6 b 9 8
+3 2 0 5 9 4 6 7 8 1 b a
+a 9 7 0 4 b 1 2 3 8 6 5
+6 5 3 8 0 7 9 a b 4 2 1
+b a 8 1 5 0 2 3 4 9 7 6
+9 8 6 b 3 a 0 1 2 7 5 4
+8 7 5 a 2 9 b 0 1 6 4 3
+7 6 4 9 1 8 a b 0 5 3 2
+2 1 b 4 8 3 5 6 7 0 a 9
+4 3 1 6 a 5 7 8 9 2 0 b
+5 4 2 7 b 6 8 9 a 3 1 0
 -}

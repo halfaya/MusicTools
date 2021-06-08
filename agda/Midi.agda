@@ -7,6 +7,7 @@ open import Data.Fin using (toℕ)
 open import Data.Nat using (ℕ)
 open import Data.List using (List; []; _∷_; concatMap)
 open import Data.Product using (_,_)
+open import Data.Unit using (⊤)
 
 open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 
@@ -79,14 +80,9 @@ open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
     Nothing -> 0
 #-}
 
-data Unit : Set where
-  unit : Unit
-
-{-# COMPILE GHC Unit = data () (()) #-}
-
 postulate
   IO       : Set → Set
-  putStrLn : String -> IO Unit
+  putStrLn : String -> IO ⊤
   getArgs  : IO (List String)
   _>>=_    : {A B : Set} -> IO A -> (A -> IO B) -> IO B  
 
@@ -134,7 +130,7 @@ postulate
   exportTracks : FilePath        → -- path to the file to save the MIDI data to
                  ℕ               → -- number of ticks per beat (by default a beat is a quarter note)
                  List HMidiTrack → -- tracks, one per instrument
-                 IO Unit
+                 IO ⊤
 
 {-# COMPILE GHC exportTracks = exportTracks #-}
 

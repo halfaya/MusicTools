@@ -11,9 +11,11 @@ open import Data.Product using (_,_)
 open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 
 {-# FOREIGN GHC
+  import System.Environment (getArgs)
   import Codec.Midi
-  import Data.Text (Text, unpack)
-  import Data.List (sort)
+  import Data.Text (Text, unpack, pack)
+  import Data.List (sort, map)
+  import Text.Read (readMaybe)
 
   type HsTicksPerBeat = Integer
   type HsTicks        = Integer
@@ -69,6 +71,12 @@ open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
     --putStrLn $ "Writing file " ++ path
     putStrLn $ show $ toMidi ticksPerBeat tracks
     exportFile path (toMidi ticksPerBeat tracks)
+
+  -- Returns n+1 if s parses as natural number n, or 0 for any failure
+  readNat :: Text -> Integer
+  readNat s = case (readMaybe (unpack s) :: Maybe Integer) of
+    Just n  -> if n >= 0 then n+1 else 0
+    Nothing -> 0
 #-}
 
 data Unit : Set where
@@ -77,10 +85,17 @@ data Unit : Set where
 {-# COMPILE GHC Unit = data () (()) #-}
 
 postulate
-  IO : Set → Set
+  IO       : Set → Set
+  putStrLn : String -> IO Unit
+  getArgs  : IO (List String)
+  _>>=_    : {A B : Set} -> IO A -> (A -> IO B) -> IO B  
 
 {-# BUILTIN IO IO #-}
 {-# COMPILE GHC IO = type IO #-}
+
+{-# COMPILE GHC putStrLn = putStrLn . unpack #-}
+{-# COMPILE GHC getArgs = fmap (fmap pack) getArgs #-}
+{-# COMPILE GHC _>>=_ = \_ _ -> (>>=) :: IO a -> (a -> IO b) -> IO b #-}
 
 FilePath = String
 
@@ -122,3 +137,8 @@ postulate
                  IO Unit
 
 {-# COMPILE GHC exportTracks = exportTracks #-}
+
+postulate 
+  readNat : String → ℕ
+
+{-# COMPILE GHC readNat = readNat #-}

@@ -64,6 +64,9 @@ showPC (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs (fs fz))))))))))) = "b"
 showPCs : List PC → String
 showPCs pcs = intersperse " " (map showPC pcs)
 
+toPC : Pitch → PC
+toPC = _mod s12
+
 Scale : ℕ → Type
 Scale = Vec PC
 
@@ -78,7 +81,7 @@ relativeToAbsolute : PitchOctave → Pitch
 relativeToAbsolute (n , o) = (o * s12 + (toℕ n))
 
 absoluteToRelative : Pitch → PitchOctave
-absoluteToRelative n = (n mod s12 , n div s12)
+absoluteToRelative n = (toPC n , n div s12)
 
 pitchToClass : Pitch → PC
 pitchToClass = proj₁ ∘ absoluteToRelative

@@ -70,7 +70,7 @@ open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
   exportTracks filePath ticksPerBeat tracks = do
     let path = unpack filePath
     --putStrLn $ "Writing file " ++ path
-    putStrLn $ show $ toMidi ticksPerBeat tracks
+    --putStrLn $ show $ toMidi ticksPerBeat tracks
     exportFile path (toMidi ticksPerBeat tracks)
 
   -- Returns n+1 if s parses as natural number n, or 0 for any failure

@@ -11,7 +11,7 @@ open import Data.Vec     using (toList)
 open import Function     using (_∘_)
 
 open import Music        using (Melody; melody; Counterpoint; cp; Harmony; melody→notes; harmony→counterpoint)
-open import Note         using (Note; tone; rest; duration)
+open import Note         using (Note; tone; rest)
 open import Pitch        using (Pitch)
 
 -- General MIDI instrument numbers range from 1 to 128,
@@ -60,8 +60,8 @@ notes→events : Velocity → List Note → List MidiEvent
 notes→events v ns = me 0 ns where
   me : Tick → List Note → List MidiEvent
   me t [] = []
-  me t (tone (duration d) p ∷ ns) = midiEvent p t (t + d) v ∷ me (t + d) ns
-  me t (rest (duration d)   ∷ ns) = me (t + d) ns
+  me t (tone d p ∷ ns) = midiEvent p t (t + d) v ∷ me (t + d) ns
+  me t (rest d   ∷ ns) = me (t + d) ns
 
 melody→events : {n : ℕ} → Velocity → Melody n → List MidiEvent
 melody→events v = notes→events v ∘ melody→notes

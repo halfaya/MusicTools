@@ -3,31 +3,22 @@
 module Note where
 
 open import Data.Integer using (ℤ)
-open import Data.Nat     using (ℕ; _+_; _*_)
+open import Data.Nat     using (ℕ; _+_; _*_; ⌊_/2⌋)
 open import Function     using (_∘_)
 
 open import Pitch        using (Pitch; transposePitch)
 open import Interval     using (Upi; Opi; transposePitchInterval)
 
-data Duration : Set where
-  duration : ℕ → Duration
-
-unduration : Duration → ℕ
-unduration (duration d) = d
-
-infixl 6 _d+_
-_d+_ : Duration → Duration → Duration
-duration a d+ duration b = duration (a + b)
+Duration : Set
+Duration = ℕ
 
 data Note : Set where
   tone : Duration → Pitch → Note
   rest : Duration         → Note
 
--- Note: If we inline duration here Agda can't figure out
--- that noteDuration (tone d _) = unduration d
 noteDuration : Note → ℕ
-noteDuration (tone d _) = unduration d
-noteDuration (rest d)   = unduration d
+noteDuration (tone d _) = d
+noteDuration (rest d)   = d
 
 liftPitch : (Pitch → Pitch) → Note → Note
 liftPitch f (tone d p) = tone d (f p)
@@ -39,15 +30,24 @@ transposeNote = liftPitch ∘ transposePitch
 transposeNoteInterval : Opi → Note → Note
 transposeNoteInterval = liftPitch ∘ transposePitchInterval
 
+-- rounds down
+doubleSpeed : Note → Note
+doubleSpeed (tone d p) = tone (⌊_/2⌋ d) p
+doubleSpeed (rest d)   = rest (⌊_/2⌋ d)
+
+slowDown : ℕ → Note → Note
+slowDown k (tone d p) = tone (d * k) p
+slowDown k (rest d)   = rest (d * k)
+
 -- duration in 16th notes
 -- assume duration of a 16th note is 1
 16th 8th d8th qtr dqtr half whole : Duration
-16th   = duration 1
-8th    = duration 2
-d8th   = duration 3
-qtr    = duration 4
-dqtr   = duration 6
-half   = duration 8
-dhalf  = duration 12
-whole  = duration 16
-dwhole = duration 24
+16th   = 1
+8th    = 2
+d8th   = 3
+qtr    = 4
+dqtr   = 6
+half   = 8
+dhalf  = 12
+whole  = 16
+dwhole = 24

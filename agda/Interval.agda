@@ -205,8 +205,6 @@ icVector pcs =
     (updateAt (# 0) (λ _ → length pcs) emptyICV)
     (allPairs pcs)
 
-ab = icVector (toList ryukyuScale)
-
 ----------
 
 --Construct matrix out of PC row
@@ -219,6 +217,7 @@ matrix pcs@(pc ∷ _) =
 showMatrix : List (List PC) → String
 showMatrix m = intersperse "\n" (map showPCs m)
 
+{-
 rr : List PC
 rr = # 10 ∷ # 9 ∷ # 7 ∷ # 0 ∷ []
 rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
@@ -226,7 +225,7 @@ rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
 -- Belle's matrix
 aa = showMatrix (matrix rp)
 
-{-
+
 0 b 9 2 4 3 1 6 8 7 5 a
 1 0 a 3 5 4 2 7 9 8 6 b
 3 2 0 5 7 6 4 9 b a 8 1
@@ -239,7 +238,7 @@ b a 8 1 3 2 0 5 7 6 4 9
 5 4 2 7 9 8 6 b 1 0 a 3
 7 6 4 9 b a 8 1 3 2 0 5
 2 1 b 4 6 5 3 8 a 9 7 0
--}
+
 
 rd : List PC
 rd2 = reverse (map (Tp 4) rr)
@@ -250,7 +249,7 @@ rd = rr ++ rd2 ++ rd3
 -- Dan's matrix
 ad = showMatrix (matrix rd)
 
-{-
+
 0 b 9 2 6 1 3 4 5 a 8 7
 1 0 a 3 7 2 4 5 6 b 9 8
 3 2 0 5 9 4 6 7 8 1 b a

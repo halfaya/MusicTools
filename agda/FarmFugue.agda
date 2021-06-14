@@ -5,7 +5,7 @@ module FarmFugue where
 open import Data.Bool       using (Bool; true; false; if_then_else_)
 open import Data.Fin        using (#_)
 open import Data.List       using (List; _∷_; []; map; _++_)
-open import Data.Nat        using (ℕ; _*_)
+open import Data.Nat        using (ℕ; _*_; _+_)
 open import Data.Sign       using () renaming (+ to s+ ; - to s-)
 open import Data.Vec        using (Vec; _∷_; []; lookup; foldl₁) renaming (map to vmap)
 open import Function        using (_∘_)
@@ -13,7 +13,7 @@ open import Function        using (_∘_)
 open import Canon           using (makeCanon; makeTrackList)
 open import Interval        --using (makeSigned; per1; per5; per8; Opi)
 open import Music           using (melody→notes; notes→melody; fixLength; dropPoints)
-open import Note            using (Note; tone; rest; 8th; qtr; dqtr; half; whole; transposeNoteInterval; _d+_; duration)
+open import Note            using (Note; tone; rest; 8th; qtr; dqtr; half; whole; transposeNoteInterval)
 open import Pitch           using (a; b; c; d; e; f; g)
 open import MidiEvent       using (MidiTrack)
 open import Util            using (repeat)
@@ -149,7 +149,7 @@ transpositions = vmap (makeSigned s-) (per1 ∷ per5 ∷ per8 ∷ [])
 
 -- Exposition is a truncated canon
 expo exposition : Vec (List Note) 3
-expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
+expo = makeCanon base 2 (whole + whole + whole + whole) transpositions
 -- Truncate to first 20 bars (16 16th notes per bar in 4/4 time)
 exposition = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo
 
@@ -158,19 +158,19 @@ exposition = vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) ex
 doubleLastDuration : List Note → List Note
 doubleLastDuration []                         = []
 doubleLastDuration (m ∷ n ∷ ns)               = m ∷ doubleLastDuration (n ∷ ns)
-doubleLastDuration (tone (duration d) p ∷ []) = tone (duration (2 * d)) p ∷ []
-doubleLastDuration (rest (duration d)   ∷ []) = rest (duration (2 * d)) ∷ []
+doubleLastDuration (tone d p ∷ []) = tone (2 * d) p ∷ []
+doubleLastDuration (rest d   ∷ []) = rest (2 * d) ∷ []
 
 makeVariation : List Note → List Note → List Note → Vec (List Note) 3
 makeVariation s c e =
   let base = s ++ c ++ e
-      expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
+      expo = makeCanon base 2 (whole + whole + whole + whole) transpositions
   in vmap (melody→notes ∘ fixLength (20 * 16) ∘ notes→melody) expo
 
 makeVariation' : List Note → List Note → List Note → Vec (List Note) 3
 makeVariation' s c e =
   let base = s ++ c ++ e
-      expo = makeCanon base 2 (whole d+ whole d+ whole d+ whole) transpositions
+      expo = makeCanon base 2 (whole + whole + whole + whole) transpositions
   in vmap (melody→notes ∘ dropPoints (2 * 16) ∘ fixLength (16 * 16) ∘ notes→melody) expo
 
 v1 v2 v3 variations : Vec (List Note) 3

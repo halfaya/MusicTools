@@ -38,15 +38,15 @@ _m++_ : {m n : ℕ} → Melody m → Melody n → Melody (m + n)
 melody a m++ melody b = melody (a ++ b)
 
 note→melody : (n : Note) → Melody (noteDuration n)
-note→melody (tone (duration zero)    p) = melody []
-note→melody (tone (duration (suc d)) p) = melody (tone p ∷ replicate (hold p))
-note→melody (rest _)                    = melody (replicate rest)
+note→melody (tone zero    p) = melody []
+note→melody (tone (suc d) p) = melody (tone p ∷ replicate (hold p))
+note→melody (rest _)         = melody (replicate rest)
 
 notes→melody : (ns : List Note) → Melody (sum (map noteDuration ns))
 notes→melody []       = melody []
 notes→melody (n ∷ ns) = note→melody n m++ notes→melody ns
 
-pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * unduration d)
+pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * d)
 pitches→melody d ps = melody (concat (vmap (unmelody ∘ note→melody ∘ tone d) ps))
 
 -- Assumes melody is well-formed in that a held note has the
@@ -56,9 +56,9 @@ melody→notes : {n : ℕ} → Melody n → List Note
 melody→notes (melody m) = (reverse ∘ mn 0 ∘ reverse ∘ toList) m
   where mn : ℕ → List Point → List Note -- c is the number of held points
         mn c []            = []
-        mn c (tone p ∷ ps) = tone (duration (suc c)) p ∷ mn 0 ps
+        mn c (tone p ∷ ps) = tone (suc c) p ∷ mn 0 ps
         mn c (hold _ ∷ ps) = mn (suc c) ps
-        mn c (rest ∷ ps)   = rest (duration 1) ∷ mn 0 ps
+        mn c (rest ∷ ps)   = rest 1 ∷ mn 0 ps
 
 transposePoint : ℤ → Point → Point
 transposePoint k (tone p) = tone (transposePitch k p)
@@ -89,14 +89,14 @@ data Harmony (v : ℕ) (d : ℕ): Set where
 unharmony : {v d : ℕ} → Harmony v d → Vec (Chord v) d
 unharmony (harmony h) = h
 
-pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n (unduration d)
-pitches→harmony (duration zero)    ps = harmony []
-pitches→harmony (duration (suc d)) ps = harmony (chord (vmap tone ps) ∷ replicate (chord (vmap hold ps)))
+pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n d
+pitches→harmony zero    ps = harmony []
+pitches→harmony (suc d) ps = harmony (chord (vmap tone ps) ∷ replicate (chord (vmap hold ps)))
 
-pitchPair→Harmony : (d : Duration) → PitchPair → Harmony 2 (unduration d)
+pitchPair→Harmony : (d : Duration) → PitchPair → Harmony 2 d
 pitchPair→Harmony d (p , q) = pitches→harmony d (p ∷ q ∷ [])
 
-pitchInterval→Harmony : (d : Duration) → PitchInterval → Harmony 2 (unduration d)
+pitchInterval→Harmony : (d : Duration) → PitchInterval → Harmony 2 d
 pitchInterval→Harmony d = pitchPair→Harmony d ∘ pitchIntervalToPitchPair
 
 {-
@@ -111,7 +111,7 @@ infixl 5 _+H+_
 _+H+_ : {v d d' : ℕ} → Harmony v d → Harmony v d' → Harmony v (d + d')
 h +H+ h' = harmony (unharmony h ++ unharmony h')
 
-foldIntoHarmony : {k n : ℕ} (ds : Vec Duration (suc k)) → (pss : Vec (Vec Pitch n) (suc k)) → Harmony n (foldr₁ _+_ (vmap unduration ds))
+foldIntoHarmony : {k n : ℕ} (ds : Vec Duration (suc k)) → (pss : Vec (Vec Pitch n) (suc k)) → Harmony n (foldr₁ _+_ ds)
 foldIntoHarmony (d ∷ [])      (ps ∷ [])        = pitches→harmony d ps
 foldIntoHarmony (d ∷ d' ∷ ds) (ps ∷ ps' ∷ pss) = (pitches→harmony d ps) +H+ (foldIntoHarmony (d' ∷ ds) (ps' ∷ pss))
 

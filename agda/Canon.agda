@@ -25,10 +25,10 @@ makeImitations subject []       = []
 makeImitations subject (i ∷ is) = map (transposeNoteInterval i) subject ∷ makeImitations subject is
 
 addDelays : {k : ℕ} → Duration → Vec (List Note) k → Vec (List Note) k
-addDelays (duration d) lines = ads 0 lines where
+addDelays d lines = ads 0 lines where
   ads : {k : ℕ} → ℕ → Vec (List Note) k → Vec (List Note) k
   ads n []              = []
-  ads n (notes ∷ lines) = (rest (duration n) ∷ notes) ∷ ads (n + d) lines 
+  ads n (notes ∷ lines) = (rest n ∷ notes) ∷ ads (n + d) lines 
 
 makeCanon : {k : ℕ} → List Note → ℕ → Duration → Vec Opi k → Vec (List Note) k
 makeCanon subject reps d = addDelays d ∘ vmap (repeat reps) ∘ makeImitations subject

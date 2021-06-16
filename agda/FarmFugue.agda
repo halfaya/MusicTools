@@ -10,8 +10,9 @@ open import Data.Sign       using () renaming (+ to s+ ; - to s-)
 open import Data.Vec        using (Vec; _∷_; []; lookup; foldl₁) renaming (map to vmap)
 open import Function        using (_∘_)
 
-open import Canon           using (makeCanon; makeTrackList)
+open import Canon           using (makeCanon)
 open import Interval        --using (makeSigned; per1; per5; per8; Opi)
+open import MakeTracks      using (instruments ; makeTrackList)
 open import Music           using (melody→notes; notes→melody; fixLength; dropPoints)
 open import Note            using (Note; tone; rest; 8th; qtr; dqtr; half; whole; transposeNoteInterval)
 open import Pitch           using (a; b; c; d; e; f; g)
@@ -246,5 +247,6 @@ fugue = line1 ∷ line2 ∷ line3 ∷ []
 tempo : ℕ
 tempo = 160
 
+-- note that this was originally all piano
 fugueTracks : List MidiTrack
-fugueTracks = makeTrackList tempo fugue
+fugueTracks = makeTrackList instruments tempo fugue

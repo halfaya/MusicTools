@@ -17,7 +17,7 @@ open import Interval
 open import Note
 open import Pitch
 open import MidiEvent
-open import Util            using (repeat; fins')
+open import Util            using (repeat)
 open import Transformation
 
 makeImitations : {k : ℕ} → List Note → Vec Opi k → Vec (List Note) k
@@ -42,20 +42,3 @@ makeCanon2 subject d is =
     (retrograde ∘ inversion) subject)
     is)
 
---------------
-
-piano : InstrumentNumber-1
-piano   = # 0
-
-velocity : Velocity
-velocity = # 60
-
-makeTrack : ℕ → Channel-1 → List Note → MidiTrack
-makeTrack tempo n notes = track (show (suc (toℕ n))) piano n tempo (notes→events velocity notes)
-
--- Note that channel 10 (9 as Channel-1) is percussion, so best to stay under 10 channels.
-makeTracks : {k : Fin maxChannels} → ℕ → Vec (List Note) (toℕ k) → Vec MidiTrack (toℕ k)
-makeTracks {k} tempo lines = vmap (uncurry (makeTrack tempo)) (vzip (fins' maxChannels k) lines)
-
-makeTrackList : {k : Fin maxChannels} → ℕ → Vec (List Note) (toℕ k) → List MidiTrack
-makeTrackList tempo lines = toList (makeTracks tempo lines)

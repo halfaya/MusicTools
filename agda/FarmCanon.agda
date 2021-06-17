@@ -8,8 +8,9 @@ open import Data.Sign       renaming (+ to s+ ; - to s-)
 open import Data.Vec        using (Vec; _∷_; []; map)
 
 open import Canon           using (makeCanon2)
+open import Instruments     using (pianos)
 open import Interval
-open import MakeTracks      using (instruments ; makeTrackList)
+open import MakeTracks      using (makeTrackList)
 open import MidiEvent
 open import Note
 open import Pitch
@@ -41,6 +42,5 @@ canon = makeCanon2 subject delay transpositions
 tempo : ℕ
 tempo = 120
 
--- note that this was originally all piano
 canonTracks : List MidiTrack
-canonTracks = makeTrackList instruments tempo canon
+canonTracks = makeTrackList pianos tempo canon

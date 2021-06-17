@@ -9,41 +9,13 @@ open import Data.Nat.Show   using (show)
 open import Data.Product    using (_,_; uncurry)
 open import Data.Vec        using (fromList; toList; Vec; _∷_; []; lookup) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
 
+open import Instruments
 open import Interval
 open import Note
 open import Pitch
 open import MidiEvent
 open import Util            using (fins')
 open import Transformation
-
-piano celesta vibraphone organ : InstrumentNumber-1
-piano      = # 0
-celesta    = # 8
-vibraphone = # 11
-organ      = # 17
-drums      = # 0
-
--- sample assignment of instruments to tracks
--- Note that channel 10 (9 as Channel-1) is percussion
-instruments : Vec InstrumentNumber-1 maxChannels
-instruments =
-  piano ∷ -- 1
-  celesta ∷ -- 2
-  vibraphone ∷ -- 3
-  organ ∷ -- 4
-  piano ∷ -- 5
-  piano ∷ -- 6
-  piano ∷ -- 7
-  piano ∷ -- 8
-  piano ∷ -- 9
-  drums ∷ -- 10 (percussion)
-  piano ∷ -- 11
-  piano ∷ -- 12
-  piano ∷ -- 13
-  piano ∷ -- 14
-  piano ∷ -- 15
-  piano ∷ -- 16
-  []
 
 velocity : Velocity
 velocity = # 60

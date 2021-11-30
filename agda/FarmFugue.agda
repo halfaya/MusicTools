@@ -249,4 +249,4 @@ tempo : ℕ
 tempo = 160
 
 fugueTracks : List MidiTrack
-fugueTracks = makeTrackList pianos tempo fugue
+fugueTracks = makeTrackList {# 3} pianos tempo fugue

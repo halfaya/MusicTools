@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
 
 module Util where
 
@@ -99,7 +99,7 @@ fins zero    = []
 fins (suc k) = fz ∷ vmap fsuc (fins k)
 
 fins' : (n : ℕ) → (k : Fin n) → Vec (Fin n) (toℕ k)
-fins' n k = vmap inject (fins (toℕ k))
+fins' n k = vmap (inject {n} {k}) (fins (toℕ k))
 
 finSuc : {n : ℕ} → Fin (suc n) → Fin (suc n)
 finSuc {n} m with suc (toℕ m) <? suc n

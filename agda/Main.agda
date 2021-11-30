@@ -9,6 +9,8 @@ open import Midi      using (IO; _>>=_; getArgs; putStrLn; exportTracks; track�
 
 open import FarmCanon using (canonTracks)
 open import FarmFugue using (fugueTracks)
+open import Frog      using (cfcpTracks1; cfcpTracks2)
+open import Yamanote  using (ycpTracks)
 
 -- TODO: Remove
 open import Data.List using (List; []; _∷_)
@@ -23,14 +25,14 @@ process (x ∷ xs) with readNat x
 ... | zero  = ""
 ... | suc n = (showPC ∘ toPC) n
 
-main : IO ⊤
-main = do
+main' : IO ⊤
+main' = do
   args ← getArgs
   (putStrLn ∘ process) args
 
-main' : IO ⊤
-main' =
+main : IO ⊤
+main =
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
-      song         = fugueTracks
+      song         = ycpTracks
   in exportTracks file ticksPerBeat (map track→htrack song)

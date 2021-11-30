@@ -18,7 +18,7 @@ open import Music
 open import MidiEvent
 open import Pitch
 open import Interval
-open import Util
+open import Util hiding (_∘_)
 
 -- First species counterpoint (musical content)
 first : PitchInterval
@@ -69,14 +69,14 @@ cf =
   
 cp1 =
   tone whole ((proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.firstBar fs)) ∷
-  map (tone whole ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) ++
+  map (λ x → tone whole (secondPitch x)) (FirstSpecies.middleBars fs) ++
   tone whole ((proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.lastBar fs)) ∷
   []
 
 cp2 =
   rest half ∷
   (tone half ((proj₂ ∘ pitchIntervalToPitchPair) (SecondSpecies.firstBar ss))) ∷
-  map (tone half ∘ proj₂ ∘ pitchIntervalToPitchPair) (expandPitchIntervals2 (SecondSpecies.middleBars ss)) ++
+  map (λ x → tone half (secondPitch x)) (expandPitchIntervals2 (SecondSpecies.middleBars ss)) ++
   tone whole ((proj₂ ∘ pitchIntervalToPitchPair) (SecondSpecies.lastBar ss)) ∷
   []
 

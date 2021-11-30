@@ -29,4 +29,4 @@ makeTracks {k} insts tempo lines =
        (vzip (fins' maxChannels k) lines)
 
 makeTrackList : {k : Fin maxChannels} → Vec InstrumentNumber-1 maxChannels → ℕ → Vec (List Note) (toℕ k) → List MidiTrack
-makeTrackList insts tempo lines = toList (makeTracks insts tempo lines)
+makeTrackList {k} insts tempo lines = toList (makeTracks {k} insts tempo lines)

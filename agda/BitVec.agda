@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
 
 module BitVec where
 

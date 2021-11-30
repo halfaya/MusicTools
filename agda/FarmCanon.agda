@@ -3,6 +3,7 @@
 module FarmCanon where
 
 open import Data.List       using (List; _∷_; [])
+open import Data.Fin        using (#_)
 open import Data.Nat        using (ℕ)
 open import Data.Sign       renaming (+ to s+ ; - to s-)
 open import Data.Vec        using (Vec; _∷_; []; map)
@@ -43,4 +44,4 @@ tempo : ℕ
 tempo = 120
 
 canonTracks : List MidiTrack
-canonTracks = makeTrackList pianos tempo canon
+canonTracks = makeTrackList {# 4} pianos tempo canon

@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
 
 open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _≤_ ; _>_; _<_; _≥_; z≤n; s≤s)
 open import Data.Sum        using (_⊎_; inj₁; inj₂)

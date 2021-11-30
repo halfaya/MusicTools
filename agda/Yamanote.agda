@@ -1,4 +1,4 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module Yamanote where
 
@@ -19,7 +19,7 @@ open import MidiEvent
 open import Pitch
 open import Interval
 -- open import ScaleDegree
-open import Util
+open import Util hiding (_∘_)
 
 -- Yamanoto melody transposed down an octave and with an additional d6 at the end.
 cantusFirmus : Vec Pitch 40
@@ -66,7 +66,7 @@ yamanote =
   
 counterp =
   tone 8th (g 6) L∷
-  map (tone 8th ∘ proj₂ ∘ pitchIntervalToPitchPair) (FirstSpecies.middleBars fs) L++
+  map (λ x → tone 8th (secondPitch x)) (FirstSpecies.middleBars fs) L++
   tone 8th (c 7) L∷
   L[]
 

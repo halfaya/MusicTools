@@ -1,11 +1,11 @@
-{-# OPTIONS --cubical --safe #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module NormalForm where
 
 open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
 
 open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; i0; i1)
-open import Cubical.Foundations.Function    using (_∘_)
+--open import Cubical.Foundations.Function    using (_∘_)
 open import Cubical.Foundations.Univalence  using (ua)
 open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
 
@@ -26,6 +26,8 @@ open import Util
 open import Pitch
 open import Interval
 
+-- True iff each element in the first list
+-- is ≤ the correspondng element of the second list.
 _≤[]_ : List ℕ → List ℕ → Bool
 []       ≤[] ys = true
 (x ∷ xs) ≤[] [] = false
@@ -34,12 +36,17 @@ _≤[]_ : List ℕ → List ℕ → Bool
   then xs ≤[] ys
   else (if x <ᵇ y then true else false)
 
-_≤[opci]_ : List PitchClass → List PitchClass → Bool
+-- True iff each opci between pcs in the first list
+-- is ≤ the correspondng opci between pcs in the second list.
+_≤[opci]_ : List PC → List PC → Bool
 _≤[opci]_ xs ys =
-  (map (toℕ ∘ unOrderedIntervalClass) (pcIntervals xs)) ≤[]
-  (map (toℕ ∘ unOrderedIntervalClass) (pcIntervals ys))
+  (map toℕ (pcIntervals xs)) ≤[]
+  (map toℕ (pcIntervals ys))
 
-bestPitchClassList : List PitchClass → List (List PitchClass) → List PitchClass
+-- Given a list of pc lists, return the pc list that
+-- is is smallest under ≤[opci] ordering. The first argument
+-- is the current smallest list, normally passed in as [].
+bestPitchClassList : List PC → List (List PC) → List PC
 bestPitchClassList xs         []         = xs
 bestPitchClassList []         (ys ∷ yss) = bestPitchClassList ys yss
 bestPitchClassList xs@(_ ∷ _) (ys ∷ yss) =
@@ -47,34 +54,41 @@ bestPitchClassList xs@(_ ∷ _) (ys ∷ yss) =
   then bestPitchClassList xs yss
   else bestPitchClassList ys yss
 
-normalForm : PitchClassSet → List PitchClass
+-- Find the normal form of a pc set.
+normalForm : PCSet → List PC
 normalForm pcs =
-  let xs  = fromPitchClassSet pcs
+  let xs  = fromPCSet pcs
   in bestPitchClassList [] (iter rotateLeft (pred (length xs)) xs)
 
-bestNormalForm : PitchClassSet → List PitchClass
+-- Find the best normal form of a pc set.
+-- The best normal form is the smaller of the normal form of the original set
+-- and the inverted set under ≤[opci] ordering.
+bestNormalForm : PCSet → List PC
 bestNormalForm pcs =
   let xs = normalForm pcs
       ys = normalForm (I pcs)
   in if xs ≤[opci] ys then xs else ys
 
-primeForm : PitchClassSet → List PitchClass
+-- Find the prime form of a pc set.
+-- The prime form is the best normal form, normalized so that the first pc is 0.
+primeForm : PCSet → List PC
 primeForm pcs with bestNormalForm pcs
 ... | []                    = []
-... | xs@(pitchClass p ∷ _) = map (Tp (toℕ (opposite p))) xs
+... | xs@(p ∷ _) = map (Tp (toℕ (opposite p))) xs
 
 -- Test
 
---ss = vmap pitchClass (# 4 ∷ # 7 ∷ # 9 ∷ [])
-ss = vmap pitchClass (# 2 ∷ # 0 ∷ # 5 ∷ # 6 ∷ [])
---ss = vmap pitchClass (# 8 ∷ # 9 ∷ # 11 ∷ # 0 ∷ # 4 ∷ [])
---ss = vmap pitchClass (# 8 ∷ # 7 ∷ # 4 ∷ # 3 ∷ # 11 ∷ # 0 ∷ [])
+ss : Vec PC 4
+ss = # 2 ∷ # 0 ∷ # 5 ∷ # 6 ∷ []
+--ss = # 4 ∷ # 7 ∷ # 9 ∷ []
+--ss = # 8 ∷ # 9 ∷ # 11 ∷ # 0 ∷ # 4 ∷ []
+--ss = # 8 ∷ # 7 ∷ # 4 ∷ # 3 ∷ # 11 ∷ # 0 ∷ []
 
-aa = show (toPitchClassSet (toList ss))
-bb = fromPitchClassSet (toPitchClassSet (toList ss))
-cc = map (toℕ ∘ unPitchClass) (normalForm (toPitchClassSet (toList ss)))
-dd = map (toℕ ∘ unPitchClass) (bestNormalForm (toPitchClassSet (toList ss)))
-ee = map (toℕ ∘ unPitchClass) (primeForm (toPitchClassSet (toList ss)))
-ff = icVector (primeForm (toPitchClassSet (toList ss)))
-gg = map (toℕ ∘ unPitchClass) (fromPitchClassSet (T 8 (toPitchClassSet (toList ss))))
+aa = show (toPCSet (toList ss))
+bb = map toℕ (fromPCSet (toPCSet (toList ss)))
+cc = map toℕ (normalForm (toPCSet (toList ss)))
+dd = map toℕ (bestNormalForm (toPCSet (toList ss)))
+ee = map toℕ (primeForm (toPCSet (toList ss)))
+ff = icVector (primeForm (toPCSet (toList ss)))
+gg = map toℕ (fromPCSet (T 8 (toPCSet (toList ss))))
 

@@ -6,6 +6,7 @@ open import Data.List using (map)
 open import Data.Unit using (⊤)
 
 open import Midi      using (IO; _>>=_; getArgs; putStrLn; exportTracks; track→htrack)
+open import Smt       using (solveConstraints; Maybe; just; nothing)
 
 open import FarmCanon using (canonTracks)
 open import FarmFugue using (fugueTracks)
@@ -14,6 +15,8 @@ open import Yamanote  using (ycpTracks)
 
 -- TODO: Remove
 open import Data.List using (List; []; _∷_)
+open import Data.Nat using (ℕ)
+open import Agda.Builtin.String using (primShowNat)
 open import Data.String using (String)
 open import Function using (_∘_)
 open import Midi using (readNat)
@@ -25,13 +28,18 @@ process (x ∷ xs) with readNat x
 ... | zero  = ""
 ... | suc n = (showPC ∘ toPC) n
 
-main' : IO ⊤
-main' = do
-  args ← getArgs
-  (putStrLn ∘ process) args
+process2 : List (Maybe ℕ) → String
+process2 []       = ""
+process2 (just x ∷ xs) = primShowNat x
+process2 (nothing ∷ xs) = "nothing"
 
 main : IO ⊤
-main =
+main = do
+  args ← getArgs
+  (putStrLn ∘ process2 ∘ solveConstraints) args
+
+main' : IO ⊤
+main' =
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
       song         = ycpTracks

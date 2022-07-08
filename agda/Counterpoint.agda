@@ -3,6 +3,8 @@
 -- First and second species counterpoint
 module Counterpoint where
 
+open import Cubical.Core.Everything using (Type)
+
 open import Data.Bool using (Bool; true; false; if_then_else_; _∨_; _∧_; not)
 open import Data.Fin using (Fin; #_)
 open import Data.Integer using (+_)
@@ -16,11 +18,21 @@ open import Function using (_∘_)
 
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
+open import Constraint
+open import Interval
 open import Music
 open import Note
 open import Pitch
 open import Interval
 open import Util using (pairs)
+
+------------------------------------------------
+
+-- NEW
+
+firstSpeciesIntervals : List Upi
+firstSpeciesIntervals = min3 ∷ maj3 ∷ per5 ∷ min6 ∷ maj6 ∷ per8 ∷ []
+
 
 ------------------------------------------------
 

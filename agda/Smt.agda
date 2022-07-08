@@ -11,34 +11,50 @@ open import Data.Nat using (ℕ)
 data Maybe (A : Type) : Type where
   nothing : Maybe A
   just    : A → Maybe A
-  
-{-# COMPILE GHC Maybe = data Maybe (Nothing | Just) #-}
+
+data IExpr : Type where
+  const : ℕ → IExpr
+  var   : String → IExpr
+
+data BExpr : Type where
+  eq : IExpr → IExpr → BExpr
 
 {-# FOREIGN GHC
   import Data.SBV
   import Data.Text (Text, unpack)
   import System.IO.Unsafe (unsafePerformIO)
 
-  getPitches' :: [String] -> SatResult -> [Maybe Integer]
-  getPitches' xs res = map (\x -> getModelValue x res) xs
+  data IExpr = Const Integer | Var Text
+  data BExpr = Eq IExpr IExpr
 
-  getPitches :: [String] -> IO SatResult -> [Maybe Integer]
-  getPitches xs res = unsafePerformIO (fmap (getPitches' xs) res)
+  compileIExpr :: IExpr -> Symbolic SInt8
+  compileIExpr (Const n) = return $ literal (fromInteger n)
+  compileIExpr (Var   s) = free (unpack s)
 
-  runSat :: IO SatResult
-  runSat= sat $ do
-    x <- free "var1" :: Symbolic SInt8
-    let b = x .== 13 :: SBool
-    solve [b]
+  compileBExpr :: BExpr -> Symbolic SBool
+  compileBExpr (Eq a b) = do
+    c <- compileIExpr a
+    d <- compileIExpr b
+    return $ c .== d
 
-  solveConstraintsT :: [Text] -> [Maybe Integer]
-  solveConstraintsT = solveConstraints . (map unpack)
+  getPitches :: [Text] -> SatResult -> [Maybe Integer]
+  getPitches xs res = map (flip getModelValue res . unpack) xs
 
-  solveConstraints :: [String] -> [Maybe Integer]
-  solveConstraints xs = getPitches xs runSat
+  runSat :: [BExpr] -> IO SatResult
+  runSat xs = sat $ do
+    bs <- sequence $ map compileBExpr xs
+    solve bs
+
+  solveConstraints :: [Text] -> [BExpr] -> [Maybe Integer]
+  solveConstraints xs bs =
+    getPitches xs (unsafePerformIO (runSat bs))
 #-}
 
 postulate
-  solveConstraints : List String → List (Maybe ℕ)
+  solveConstraints : List String → List BExpr → List (Maybe ℕ)
 
-{-# COMPILE GHC solveConstraints = solveConstraintsT #-}
+{-# COMPILE GHC Maybe = data Maybe (Nothing | Just) #-}
+{-# COMPILE GHC IExpr = data IExpr (Const | Var) #-}
+{-# COMPILE GHC BExpr = data BExpr (Eq) #-}
+
+{-# COMPILE GHC solveConstraints = solveConstraints #-}

@@ -6,7 +6,7 @@ open import Data.List using (map)
 open import Data.Unit using (⊤)
 
 open import Midi      using (IO; _>>=_; getArgs; putStrLn; exportTracks; track→htrack)
-open import Smt       using (solveConstraints; Maybe; just; nothing)
+open import Smt       using (solveConstraints; Maybe; just; nothing; eq; var; const)
 
 open import FarmCanon using (canonTracks)
 open import FarmFugue using (fugueTracks)
@@ -36,7 +36,7 @@ process2 (nothing ∷ xs) = "nothing"
 main : IO ⊤
 main = do
   args ← getArgs
-  (putStrLn ∘ process2 ∘ solveConstraints) args
+  (putStrLn ∘ process2 ∘ (λ x → solveConstraints x ((eq (var "var2") (const 14)) ∷ []))) args
 
 main' : IO ⊤
 main' =

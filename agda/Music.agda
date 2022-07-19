@@ -2,23 +2,16 @@
 
 module Music where
 
-open import Data.Nat     using (ℕ; zero; suc; _+_; _*_; _≤_; _≤?_)
-open import Data.Integer using (ℤ; +_)
-open import Data.List    using (List; foldr; []; _∷_; reverse; sum; map)
-open import Data.Product using (_×_; _,_)
-open import Data.Sum     using (_⊎_; inj₁; inj₂)
-open import Data.Vec     using (Vec; []; _∷_; replicate; concat; zipWith; toList; _++_; foldr₁; take; drop) renaming (map to vmap)
-open import Function     using (_∘_)
-
-open import Data.Nat.Properties using (<⇒≤)
-open import Relation.Nullary    using (yes; no)
+open import Prelude hiding (sym; subst)
 
 open import Relation.Binary.PropositionalEquality using (sym; subst)
+open import Data.Nat.Properties using (<⇒≤)
 
 open import Nat
 open import Note
 open import Pitch
 open import Interval
+open import Util using (_∘_)
 
 -- A point in the music grid, which can either be a tone,
 -- a continuation of a previous tone, or a rest.
@@ -35,19 +28,19 @@ unmelody (melody ps) = ps
 
 infixr 5 _m++_
 _m++_ : {m n : ℕ} → Melody m → Melody n → Melody (m + n)
-melody a m++ melody b = melody (a ++ b)
+melody a m++ melody b = melody (a ++v b)
 
 note→melody : (n : Note) → Melody (noteDuration n)
 note→melody (tone zero    p) = melody []
-note→melody (tone (suc d) p) = melody (tone p ∷ replicate (hold p))
-note→melody (rest _)         = melody (replicate rest)
+note→melody (tone (suc d) p) = melody (tone p ∷ rep (hold p))
+note→melody (rest _)         = melody (rep rest)
 
 notes→melody : (ns : List Note) → Melody (sum (map noteDuration ns))
 notes→melody []       = melody []
 notes→melody (n ∷ ns) = note→melody n m++ notes→melody ns
 
 pitches→melody : {n : ℕ} → (d : Duration) → (ps : Vec Pitch n) → Melody (n * d)
-pitches→melody d ps = melody (concat (vmap (unmelody ∘ note→melody ∘ tone d) ps))
+pitches→melody d ps = melody (cat (vmap (unmelody ∘ note→melody ∘ tone d) ps))
 
 -- Assumes melody is well-formed in that a held note has the
 -- same pitch as the note before it.
@@ -91,7 +84,7 @@ unharmony (harmony h) = h
 
 pitches→harmony : {n : ℕ} (d : Duration) → (ps : Vec Pitch n) → Harmony n d
 pitches→harmony zero    ps = harmony []
-pitches→harmony (suc d) ps = harmony (chord (vmap tone ps) ∷ replicate (chord (vmap hold ps)))
+pitches→harmony (suc d) ps = harmony (chord (vmap tone ps) ∷ rep (chord (vmap hold ps)))
 
 pitchPair→Harmony : (d : Duration) → PitchPair → Harmony 2 d
 pitchPair→Harmony d (p , q) = pitches→harmony d (p ∷ q ∷ [])
@@ -109,7 +102,7 @@ addEmptyVoice (harmony h) = harmony (vmap (chord ∘ (rest ∷_) ∘ unchord) h)
 
 infixl 5 _+H+_
 _+H+_ : {v d d' : ℕ} → Harmony v d → Harmony v d' → Harmony v (d + d')
-h +H+ h' = harmony (unharmony h ++ unharmony h')
+h +H+ h' = harmony (unharmony h ++v unharmony h')
 
 foldIntoHarmony : {k n : ℕ} (ds : Vec Duration (suc k)) → (pss : Vec (Vec Pitch n) (suc k)) → Harmony n (foldr₁ _+_ ds)
 foldIntoHarmony (d ∷ [])      (ps ∷ [])        = pitches→harmony d ps
@@ -117,7 +110,7 @@ foldIntoHarmony (d ∷ d' ∷ ds) (ps ∷ ps' ∷ pss) = (pitches→harmony d ps
 
 -- matrix transposition
 mtranspose : {A : Set}{m n : ℕ} → Vec (Vec A n) m → Vec (Vec A m) n
-mtranspose []         = replicate []
+mtranspose []         = rep []
 mtranspose (xs ∷ xss) = zipWith _∷_ xs (mtranspose xss)
 
 counterpoint→harmony : {v d : ℕ} → Counterpoint v d → Harmony v d
@@ -129,8 +122,8 @@ harmony→counterpoint = cp ∘ vmap melody ∘ mtranspose ∘ vmap unchord ∘ 
 -- Fix length of a melody, either truncating or padding with rests
 fixLength : {m : ℕ} → (n : ℕ) → Melody m → Melody n
 fixLength {m} n (melody ns) with <-∨-≥ n m
-... | inj₁ n<m = melody (take n (subst (Vec Point) (sym (m+n-m=n n m {<⇒≤ n<m})) ns))
-... | inj₂ m≤n = melody (subst (Vec Point) (m+n-m=n m n) (ns ++ replicate {n = n - m ⟨ m≤n ⟩} rest))
+... | inj₁ n<m = melody (vtake n (subst (Vec Point) (sym (m+n-m=n n m {<⇒≤ n<m})) ns))
+... | inj₂ m≤n = melody (subst (Vec Point) (m+n-m=n m n) (ns ++v rep {n = n - m ⟨ m≤n ⟩} rest))
 
 holdToTone : Point → Point
 holdToTone (tone p) = tone p
@@ -143,4 +136,4 @@ firstHoldToTone (melody (x ∷ xs)) = melody (holdToTone x ∷ xs)
 
 -- Drop points, but convert any held tones to tones.
 dropPoints : {n : ℕ} → (m : ℕ) → Melody (m + n) → Melody n
-dropPoints m = firstHoldToTone ∘ melody ∘ drop m ∘ unmelody
+dropPoints m = firstHoldToTone ∘ melody ∘ vdrop m ∘ unmelody

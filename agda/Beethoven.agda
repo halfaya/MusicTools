@@ -2,20 +2,12 @@
 
 module Beethoven where
 
-import Data.List 
+open import Prelude
 
-open import Cubical.Core.Everything using (Type)
-
-open import Data.List    using (List; []; _∷_)
-open import Data.Maybe   using (Maybe; just; nothing)
-open import Data.Product using (_×_; _,_; Σ; proj₁; proj₂)
-
+open import Counterpoint
 open import Pitch
 open import Interval
 open import Music
-
-FirstSpecies2 : Type → Type
-FirstSpecies2 A = List (A × A)
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
 beethoven146 : FirstSpecies2 Pitch

@@ -2,26 +2,11 @@
 
 module Util where
 
-open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
+open import Prelude
 
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
---open import Cubical.Foundations.Function    using (_∘_)
-open import Cubical.Foundations.Univalence  using (ua)
-open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
-
-open import Agda.Primitive       using (Level)
-open import Data.Fin             using (Fin; #_; toℕ; inject; fromℕ; fromℕ<; inject₁) renaming (zero to fz; suc to fsuc)
-open import Data.Bool            using (Bool; true; false; if_then_else_)
-open import Data.Integer         using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
-open import Data.List            using (List; concat; replicate; []; _∷_; _∷ʳ_; map; _++_; reverse)
-open import Data.Maybe           using (Maybe; just; nothing)
-open import Data.Nat             using (ℕ; zero; suc; _+_; _*_; _<ᵇ_; _≤ᵇ_; _≡ᵇ_; _<?_; _≟_; _∸_; _<_; s≤s; z≤n; _⊓_)
-open import Data.Nat.DivMod      using (_mod_)
 open import Data.Nat.Properties  using (≤-step; ≤-trans; ≤-refl)
-open import Data.Product         using (_×_; _,_)
-open import Data.Vec             using (Vec; _∷_; []; zip; last) renaming (concat to cat; replicate to rep; map to vmap; _∷ʳ_ to _v∷ʳ_)
-open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Nullary.Decidable using (False)
+open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Unary       using (Pred; Decidable)
 
 infixr 9 _∘_
@@ -42,7 +27,7 @@ findIndex : {a ℓ : Level} {A : Type a} {n : ℕ} {P : Pred A ℓ} → Decidabl
 findIndex _ (x ∷ [])     = # 0
 findIndex P (x ∷ y ∷ ys) with P x
 ... | yes _ = # 0
-... | no  _ = fsuc (findIndex P (y ∷ ys))
+... | no  _ = fs (findIndex P (y ∷ ys))
 
 
 -- Returns a list of all adjacent pairs in the original list.
@@ -73,7 +58,7 @@ firstPairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
 firstPairs []       = []
 firstPairs (x ∷ xs) = map (x ,_) xs
 
--- Basic Boolean Filter and Elem
+-- Basic boolean Filter and Elem
 filter : {ℓ : Level} {A : Type ℓ} → (A → Bool) → List A → List A
 filter f []       = []
 filter f (x ∷ xs) = if f x then x ∷ filter f xs else filter f xs
@@ -96,7 +81,7 @@ listMin f (x ∷ xs) with listMin f xs
 
 fins : (k : ℕ) → Vec (Fin k) k
 fins zero    = []
-fins (suc k) = fz ∷ vmap fsuc (fins k)
+fins (suc k) = fz ∷ vmap fs (fins k)
 
 fins' : (n : ℕ) → (k : Fin n) → Vec (Fin n) (toℕ k)
 fins' n k = vmap (inject {n} {k}) (fins (toℕ k))
@@ -126,20 +111,20 @@ n∸k<n (suc n) (suc k) = ≤-trans (n∸k<n n k) (≤-step ≤-refl)
 
 opposite' : ∀ {n} → Fin n → Fin n
 opposite' {suc n} fz       = fz
-opposite' {suc n} (fsuc k) = fromℕ< (n∸k<n n (toℕ k))
+opposite' {suc n} (fs k) = fromℕ< (n∸k<n n (toℕ k))
 
 -- opposite "i" = "n - i" (i.e. the additive inverse).
 opposite : ∀ {n} → Fin n → Fin n
-opposite {suc n} fz              = fz
-opposite {suc n} (fsuc fz)       = fromℕ n
-opposite {suc n} (fsuc (fsuc i)) = inject₁ (opposite (fsuc i))
+opposite {suc n} fz          = fz
+opposite {suc n} (fs fz)     = fromℕ n
+opposite {suc n} (fs (fs i)) = inject₁ (opposite (fs i))
 
-_modℕ_ : (dividend : ℤ) (divisor : ℕ) {≢0 : False (divisor ≟ 0)} → Fin divisor
-((+ n)    modℕ d) {d≠0} = (n mod d) {d≠0}
-(-[1+ n ] modℕ d) {d≠0} = opposite ((suc n mod d) {d≠0})
+_modℕ'_ : (dividend : ℤ) (divisor : ℕ) {≢0 : False (divisor ≟ 0)} → Fin divisor
+((+ n)    modℕ' d) {d≠0} = (n mod d) {d≠0}
+(-[1+ n ] modℕ' d) {d≠0} = opposite ((suc n mod d) {d≠0})
 
 zipWithIndex : {ℓ : Level} {A : Type ℓ} {k : ℕ} → Vec A k → Vec (Fin k × A) k
-zipWithIndex {k = k} = zip (fins k)
+zipWithIndex {k = k} = vzip (fins k)
 
 iter : {ℓ : Level} {A : Type ℓ} → (A → A) → ℕ → A → List A
 iter f zero    x = x ∷ []

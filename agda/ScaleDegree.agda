@@ -2,11 +2,7 @@
 
 module ScaleDegree where
 
-open import Data.Fin        using (Fin; toℕ; #_)
-open import Data.Nat        using (ℕ; suc; _+_)
-open import Data.Nat.DivMod using (_mod_; _div_)
-open import Data.Product    using (_×_; _,_)
-open import Data.Vec        using (lookup)
+open import Prelude
 
 open import Pitch
 

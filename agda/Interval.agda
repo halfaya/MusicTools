@@ -2,24 +2,7 @@
 
 module Interval where
 
-open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
-
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp; I; i0; i1)
---open import Cubical.Foundations.Function    using (_∘_)
-open import Cubical.Foundations.Univalence  using (ua)
-open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
-
-open import Data.Bool       using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
-open import Data.Integer    using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_)
-open import Data.Integer.DivMod using (_modℕ_)
-open import Data.Fin        using (Fin; toℕ; #_)
-open import Data.List       using (List; []; _∷_; foldl; map; reverse; length; _++_; take; drop)
-open import Data.Nat        using (ℕ; zero; suc; _⊓_; _∸_) renaming (_≡ᵇ_ to _==_)
-open import Data.Nat.DivMod using (_mod_)
-open import Data.Sign       using (Sign)
-open import Data.String     using (String; intersperse) renaming (_++_ to _++s_)
-open import Data.Product    using (_×_; _,_; Σ; proj₁; proj₂)
-open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList; updateAt) renaming (map to vmap)
+open import Prelude
 
 open import Pitch
 open import Util using (allPairs; ◯pairs; firstPairs; _∘_)

@@ -2,9 +2,7 @@
 
 module Transformation where
 
-open import Data.Integer using (ℤ; +_; _-_; -_)
-open import Data.List    using (List; _∷_; []; map; reverse)
-open import Data.Product using (_,_)
+open import Prelude
 
 open import Note         using (Note; tone; rest)
 open import Pitch        using (Pitch; transposePitch)

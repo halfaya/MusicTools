@@ -2,12 +2,11 @@
 
 module Note where
 
-open import Data.Integer using (ℤ)
-open import Data.Nat     using (ℕ; _+_; _*_; ⌊_/2⌋)
-open import Function     using (_∘_)
+open import Prelude
 
 open import Pitch        using (Pitch; transposePitch)
 open import Interval     using (Upi; Opi; transposePitchInterval)
+open import Util         using (_∘_)
 
 Duration : Set
 Duration = ℕ

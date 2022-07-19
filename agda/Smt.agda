@@ -6,14 +6,14 @@ open import Cubical.Core.Everything using (Type)
 
 open import Agda.Builtin.String using (String)
 open import Data.List using (List)
-open import Data.Nat using (ℕ)
+open import Data.Integer using (ℤ)
 
-data Maybe (A : Type) : Type where
-  nothing : Maybe A
-  just    : A → Maybe A
+data HMaybe (A : Type) : Type where
+  nothing : HMaybe A
+  just    : A → HMaybe A
 
 data IExpr : Type where
-  const : ℕ → IExpr
+  const : ℤ → IExpr
   var   : String → IExpr
 
 data BExpr : Type where
@@ -51,9 +51,9 @@ data BExpr : Type where
 #-}
 
 postulate
-  solveConstraints : List String → List BExpr → List (Maybe ℕ)
+  solveConstraints : List String → List BExpr → List (HMaybe ℤ)
 
-{-# COMPILE GHC Maybe = data Maybe (Nothing | Just) #-}
+{-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}
 {-# COMPILE GHC IExpr = data IExpr (Const | Var) #-}
 {-# COMPILE GHC BExpr = data BExpr (Eq) #-}
 

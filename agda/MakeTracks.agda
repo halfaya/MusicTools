@@ -2,12 +2,9 @@
 
 module MakeTracks where
 
-open import Data.Fin        using (Fin; #_; toℕ)
-open import Data.List       using (List; _∷_; []; map; concat; _++_; replicate; zip; length; take; drop)
-open import Data.Nat        using (_*_; ℕ; suc; _+_)
+open import Prelude
+
 open import Data.Nat.Show   using (show)
-open import Data.Product    using (_,_; uncurry)
-open import Data.Vec        using (fromList; toList; Vec; _∷_; []; lookup) renaming (replicate to rep; zip to vzip; map to vmap; concat to vconcat; _++_ to _+v_)
 
 open import Instruments
 open import Interval

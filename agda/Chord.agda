@@ -2,20 +2,12 @@
 
 module Chord where
 
-open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
-
-open import Data.Fin        using (Fin; toℕ) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; map; []; _∷_; _++_; zip)
-open import Data.Nat        using (ℕ)
-open import Data.Product    using (_×_)
-open import Data.String     using (String) renaming (_++_ to _++s_)
-
-open import Function        using (_∘_)
+open import Prelude
 
 open import AssocList
 open import BitVec
 open import Pitch
-open import Util            using (_+N_)
+open import Util            using (_+N_; _∘_)
 
 data Root : Type where
   root : Fin s12 → Root

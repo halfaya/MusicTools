@@ -2,20 +2,12 @@
 
 module Diatonic where
 
-open import Data.Bool           using (Bool; false; true; if_then_else_; _∧_)
-open import Data.Empty          using (⊥)
-open import Data.Fin            using (Fin; toℕ; #_; _≟_) renaming (zero to fz; suc to fs)
-open import Data.Integer        using (ℤ; +_; -[1+_]; _+_)
-open import Data.Integer.DivMod using (_modℕ_)
-open import Data.Nat            using (ℕ; zero; suc; _∸_) renaming (_+_ to _+ℕ_; _≡ᵇ_ to _==_)
-open import Data.Nat.DivMod     using (_mod_)
-open import Data.Unit           using (⊤)
-open import Data.Vec            using (Vec; []; _∷_; head; foldl; take; reverse; lookup; updateAt)
-
-open import Function            using (_∘_)
+open import Prelude renaming (_+_ to _+ℕ_)
+open import Data.Integer using (_+_)
 
 open import Interval            using (Upi; maj3; min3)
 open import Pitch               using (Pitch; s7; PC; pitchToClass)
+open import Util                using (_∘_)
 
 data Mode : Set where
   major : Mode
@@ -203,7 +195,7 @@ scaleNotes : Key → Vec PCL s7
 scaleNotes (key pc m) =
   let f : {n : ℕ} → Vec PCL (suc n) → Step → Vec PCL (suc (suc n))
       f pcs step = stepUp step (head pcs) ∷ pcs
-  in reverse (foldl (Vec PCL ∘ suc) f (pc ∷ []) (take 6 (scaleSteps m)))
+  in vreverse (foldl (Vec PCL ∘ suc) f (pc ∷ []) (take 6 (scaleSteps m)))
 
 data Root : Set where
   I   : Root

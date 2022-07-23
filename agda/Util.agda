@@ -4,6 +4,8 @@ module Util where
 
 open import Prelude
 
+open import Data.Integer public  using () renaming (_≤ᵇ_ to _≤ℤ_)
+open import Data.Nat             using (_<_; _<ᵇ_)
 open import Data.Nat.Properties  using (≤-step; ≤-trans; ≤-refl)
 open import Relation.Nullary.Decidable using (False)
 open import Relation.Nullary     using (yes; no; ¬_)
@@ -144,3 +146,19 @@ vrotateLeft {k = suc k} (x ∷ xs) = xs v∷ʳ x
 vrotateRight : {ℓ : Level} {A : Type ℓ} {k : ℕ} → Vec A k → Vec A k
 vrotateRight {k = zero}  []          = []
 vrotateRight {k = suc k} xs@(_ ∷ ys) = last xs ∷ ys
+
+-- Integer boolean equality
+
+infix  4 _==ℤ_ _<ℤ_
+
+_==ℤ_ : ℤ → ℤ → Bool
++_     a ==ℤ +_     b = a == b
++_     a ==ℤ -[1+_] b = false
+-[1+_] a ==ℤ +_     b = false
+-[1+_] a ==ℤ -[1+_] b = a == b
+
+_<ℤ_ : ℤ → ℤ → Bool
++_     a <ℤ +_     b = a <ᵇ b
++_     a <ℤ -[1+_] b = false
+-[1+_] a <ℤ +_     b = true
+-[1+_] a <ℤ -[1+_] b = b <ᵇ a

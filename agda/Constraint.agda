@@ -2,19 +2,17 @@
 
 module Constraint where
 
-open import Prelude
+open import Prelude hiding (_∨_; _==_; #_)
 
-open import Util using (_∈_via_)
+open import Expr
 
-data SetConstraint (A : Type) :  Type where
-  inSet : (List A) → SetConstraint A
+data SetConstraint : Type where
+  inSet : List ℕ → ℕ → SetConstraint
 
-checkSetConstraint : {A : Type} → (A → A → Bool) → SetConstraint A → A → Bool
-checkSetConstraint f (inSet xs) x = x ∈ xs via f
+compileSetConstraint : SetConstraint → BExpr
+compileSetConstraint (inSet ns n) = foldr (λ m x → (# (+ m) == # (+ n)) ∨ x) false ns
 
-data IExpr : Type where
-  const : ℤ → IExpr
-  var   : String → IExpr
+-- Given input (a,b),(c,d), assumes a ≤ c and b ≤ d
+data MotionConstraint : Type where
+  similarIntoPerfect : (ℕ × ℕ) × (ℕ × ℕ) → MotionConstraint
 
-data BExpr : Type where
-  eq : IExpr → IExpr → BExpr

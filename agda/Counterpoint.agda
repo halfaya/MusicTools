@@ -31,9 +31,7 @@ unMaybe ((nothing , just _)  ∷ _ ) = []
 unMaybe ((just _  , nothing) ∷ _ ) = []
 unMaybe ((nothing , nothing) ∷ _ ) = []
 
-checkFirstSpecies : FirstSpecies2 Pitch → List (SetConstraint Upi × Upi)
-checkFirstSpecies xs =
-  filter
-    (not ∘ uncurry (checkSetConstraint (_==_)))
-    (map (λ x → inSet firstSpeciesIntervals , (absoluteInterval ∘ pitchPairToOpi) x) xs)
+firstSpeciesConstraints : FirstSpecies2 Pitch → List (SetConstraint)
+firstSpeciesConstraints =
+  map (inSet firstSpeciesIntervals ∘ absoluteInterval ∘ pitchPairToOpi)
 

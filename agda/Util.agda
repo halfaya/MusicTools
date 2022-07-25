@@ -149,13 +149,25 @@ vrotateRight {k = suc k} xs@(_ ∷ ys) = last xs ∷ ys
 
 -- Integer boolean equality
 
-infix  4 _==ℤ_ _<ℤ_
+infix  4 _≠ℕ_ _==ℤ_ _≠ℤ_ _<ℤ_
+
+_≠ℕ_ : ℕ → ℕ → Bool
+zero  ≠ℕ zero  = false
+zero  ≠ℕ suc b = true
+suc a ≠ℕ zero  = true
+suc a ≠ℕ suc b = a ≠ℕ b
 
 _==ℤ_ : ℤ → ℤ → Bool
 +_     a ==ℤ +_     b = a == b
 +_     a ==ℤ -[1+_] b = false
 -[1+_] a ==ℤ +_     b = false
 -[1+_] a ==ℤ -[1+_] b = a == b
+
+_≠ℤ_ : ℤ → ℤ → Bool
++_     a ≠ℤ +_     b = a ≠ℕ b
++_     a ≠ℤ -[1+_] b = true
+-[1+_] a ≠ℤ +_     b = true
+-[1+_] a ≠ℤ -[1+_] b = a ≠ℕ b
 
 _<ℤ_ : ℤ → ℤ → Bool
 +_     a <ℤ +_     b = a <ᵇ b

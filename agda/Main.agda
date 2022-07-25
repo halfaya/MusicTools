@@ -6,7 +6,7 @@ open import Data.List using (map)
 open import Data.Unit using (⊤)
 
 open import Midi      using (IO; _>>=_; getArgs; putStrLn; exportTracks; track→htrack)
-open import Smt       using (solveConstraints; HMaybe; just; nothing; eq; var; const)
+open import Smt       using (solveConstraints; HMaybe; just; nothing; _==_; var; #_)
 
 -- TODO: Remove
 open import Data.List using (List; []; _∷_)
@@ -33,7 +33,7 @@ process2 (nothing ∷ xs) = "nothing"
 main : IO ⊤
 main = do
   args ← getArgs
-  (putStrLn ∘ process2 ∘ (λ x → solveConstraints x ((eq (var "var2") (const (+ 14))) ∷ []))) args
+  (putStrLn ∘ process2 ∘ (λ x → solveConstraints x ((var "var2" == # (+ 14)) ∷ []))) args
 
 {-
 main' : IO ⊤

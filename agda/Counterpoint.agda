@@ -3,9 +3,10 @@
 -- First and second species counterpoint
 module Counterpoint where
 
-open import Prelude
+open import Prelude hiding (#_)
 
 open import Constraint
+open import Expr
 open import Interval
 open import Music
 open import Note
@@ -18,8 +19,14 @@ open import Util using (pairs; filter; _∘_)
 FirstSpecies2 : Type → Type
 FirstSpecies2 A = List (A × A)
 
-firstSpeciesIntervals : List Upi
-firstSpeciesIntervals = min3 ∷ maj3 ∷ per5 ∷ min6 ∷ maj6 ∷ per8 ∷ []
+pairPairs : FirstSpecies2 Pitch → List PP
+pairPairs [] = []
+pairPairs (x ∷ []) = []
+pairPairs ((a , b) ∷ (c , d) ∷ ps) =
+  ((# (+ a), # (+ b)), (# (+ c), # (+ d))) ∷ pairPairs ((c , d) ∷ ps)
+
+firstSpeciesIntervals : List Opi
+firstSpeciesIntervals = map +_ (min3 ∷ maj3 ∷ per5 ∷ min6 ∷ maj6 ∷ per8 ∷ [])
 
 unMaybe : {A : Type} → List (Maybe A × Maybe A) → List (A × A)
 unMaybe [] = []
@@ -31,7 +38,8 @@ unMaybe ((nothing , just _)  ∷ _ ) = []
 unMaybe ((just _  , nothing) ∷ _ ) = []
 unMaybe ((nothing , nothing) ∷ _ ) = []
 
-firstSpeciesConstraints : FirstSpecies2 Pitch → List (SetConstraint)
-firstSpeciesConstraints =
-  map (inSet firstSpeciesIntervals ∘ absoluteInterval ∘ pitchPairToOpi)
+firstSpeciesConstraints : FirstSpecies2 Pitch → List Constraint
+firstSpeciesConstraints ps =
+  map (setConstraint ∘ inSet firstSpeciesIntervals ∘ #_ ∘ pitchPairToOpi) ps ++
+  map (motionConstraint ∘ notSimilarIntoPerfect) (pairPairs ps)
 

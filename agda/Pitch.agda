@@ -2,23 +2,7 @@
 
 module Pitch where
 
-open import Cubical.Core.Everything using (_≡_; Level; Type; Σ; _,_; fst; snd; _≃_; ~_)
-
-open import Cubical.Foundations.Prelude     using (refl; sym; _∙_; cong; transport; subst; funExt; transp)
---open import Cubical.Foundations.Function    using (_∘_)
-open import Cubical.Foundations.Univalence  using (ua)
-open import Cubical.Foundations.Isomorphism using (iso; Iso; isoToPath; section; retract; isoToEquiv)
-
-open import Data.Bool       using (Bool; false; true)
-open import Data.Integer    using (ℤ; +_; -[1+_])
-open import Data.Fin        using (Fin; toℕ; #_; _≟_; fromℕ<) renaming (zero to fz; suc to fs)
-open import Data.List       using (List; []; _∷_; foldr; map)
-open import Data.Maybe      using (Maybe; just; nothing) renaming (map to mmap)
-open import Data.Nat        using (ℕ; zero; suc; _+_; _*_; _∸_; _≡ᵇ_; _>_)
-open import Data.Nat.DivMod using (_mod_; _div_)
-open import Data.Product    using (_×_; _,_; proj₁)
-open import Data.String     using (String; intersperse) renaming (_++_ to _++s_)
-open import Data.Vec        using (Vec; []; _∷_; lookup; replicate; _[_]%=_; toList) renaming (map to vmap)
+open import Prelude
 
 open import Relation.Nullary using (yes; no)
 
@@ -106,7 +90,7 @@ ryukyuScale          = # 0 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 11 ∷ []
 
 indexInScale : {n : ℕ} → Vec PC n → Fin s12 → Maybe (Fin n)
 indexInScale []         p = nothing
-indexInScale (pc ∷ pcs) p with pc ≟ p
+indexInScale (pc ∷ pcs) p with pc ≟Fin p
 ... | yes _ = just fz
 ... | no  _ = mmap fs (indexInScale pcs p)
 

@@ -11,12 +11,14 @@ open import Relation.Nullary.Decidable using (False)
 open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Unary       using (Pred; Decidable)
 
+{-
 infixr 9 _∘_
 
 _∘_ : {ℓ : Level}{A : Type ℓ}{B : A → Type ℓ}{C : (a : A) → B a → Type ℓ}
   (g : {a : A} → (b : B a) → C a b) → (f : (a : A) → B a) → (a : A) → C a (f a)
 g ∘ f = λ x → g (f x)
 {-# INLINE _∘_ #-}
+-}
 
 repeat : {ℓ : Level} {A : Type ℓ} → (n : ℕ) → List A → List A
 repeat n = concat ∘ replicate n
@@ -127,6 +129,12 @@ _modℕ'_ : (dividend : ℤ) (divisor : ℕ) {≢0 : False (divisor ≟ 0)} → 
 
 zipWithIndex : {ℓ : Level} {A : Type ℓ} {k : ℕ} → Vec A k → Vec (Fin k × A) k
 zipWithIndex {k = k} = vzip (fins k)
+
+listZipWithIndex : {ℓ : Level} {A : Type ℓ} → List A → List (ℕ × A)
+listZipWithIndex xs = f 0 xs where
+  f : {ℓ : Level} {A : Type ℓ} → ℕ → List A → List (ℕ × A)
+  f _ []       = []
+  f n (x ∷ xs) = (n , x) ∷ f (suc n) xs
 
 iter : {ℓ : Level} {A : Type ℓ} → (A → A) → ℕ → A → List A
 iter f zero    x = x ∷ []

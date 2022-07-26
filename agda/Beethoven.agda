@@ -2,12 +2,20 @@
 
 module Beethoven where
 
-open import Prelude
+open import Prelude hiding (#_)
 
+open import Constraint using (P)
 open import Counterpoint
+open import Expr
 open import Pitch
 open import Interval
 open import Music
+
+FirstSpecies2 : (A : Type) → Type
+FirstSpecies2 A = List (A × A)
+
+n : Pitch → IExpr
+n = #_ ∘ +_
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
 beethoven146 : FirstSpecies2 Pitch
@@ -25,20 +33,20 @@ beethoven146 =
    (g 5 , d 6) ∷
    (g 5 , c 6) ∷ []
 
-beethoven146a : FirstSpecies2 (Maybe Pitch)
+beethoven146a : List P
 beethoven146a =
-  (just (g 5) , just (c 6)) ∷
-  (just (c 6) , just (e 6)) ∷
-  (just (b 5) , just (g 6)) ∷
-  (just (a 5) , just (f 6)) ∷
-  (just (g 5) , just (e 6)) ∷
-  (just (f 5) , just (c 6)) ∷
-  (just (a 5) , just (a 6)) ∷
-  (just (c 6) , just (f 6)) ∷
-  (just (b 5) , just (g 6)) ∷
-  (just (g 5) , just (e 6)) ∷
-  (just (g 5) , just (d 6)) ∷
-  (just (g 5) , just (c 6)) ∷ []
+  (n (g 5) , n (c 6)) ∷
+  (n (c 6) , n (e 6)) ∷
+  (n (b 5) , n (g 6)) ∷
+  (n (a 5) , n (f 6)) ∷
+  (n (g 5) , n (e 6)) ∷
+  (n (f 5) , n (c 6)) ∷
+  (n (a 5) , n (a 6)) ∷
+  (n (c 6) , n (f 6)) ∷
+  (n (b 5) , n (g 6)) ∷
+  (n (g 5) , n (e 6)) ∷
+  (n (g 5) , n (d 6)) ∷
+  (n (g 5) , n (c 6)) ∷ []
 
 {-
 beethoven146a2 : FirstSpecies2 (Maybe PSym)
@@ -74,20 +82,26 @@ beethoven146h =
   (just (g 5) , just (c 6)) ∷ []
 
 -- Eliminating one note at mistake
-beethoven146-1 : FirstSpecies2 (Maybe Pitch)
+beethoven146-1 : List P
 beethoven146-1 =
-  (just (g 5) , just (c 6)) ∷
-  (just (c 6) , just (e 6)) ∷
-  (just (b 5) , just (g 6)) ∷
-  (just (a 5) , just (f 6)) ∷
-  (just (g 5) , just (e 6)) ∷
-  (nothing    , just (c 6)) ∷
-  (just (a 5) , just (a 6)) ∷
-  (just (c 6) , just (f 6)) ∷
-  (just (b 5) , just (g 6)) ∷
-  (just (g 5) , just (e 6)) ∷
-  (just (g 5) , just (d 6)) ∷
-  (just (g 5) , just (c 6)) ∷ []
+  (n (g 5) , n (c 6)) ∷
+  (n (c 6) , n (e 6)) ∷
+  (n (b 5) , n (g 6)) ∷
+  (n (a 5) , n (f 6)) ∷
+  (n (g 5) , n (e 6)) ∷
+  (var "?" , n (c 6)) ∷
+  (n (a 5) , n (a 6)) ∷
+  (n (c 6) , n (f 6)) ∷
+  (n (b 5) , n (g 6)) ∷
+  (n (g 5) , n (e 6)) ∷
+  (n (g 5) , n (d 6)) ∷
+  (n (g 5) , n (c 6)) ∷ []
+
+-- REMOVE
+remove : List P
+remove =
+  (var "?" , n (c 6)) ∷
+  (n (a 5) , n (a 6)) ∷ []
 
 -- Eliminating three notes at mistake
 beethoven146-3 : FirstSpecies2 (Maybe Pitch)

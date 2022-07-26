@@ -6,7 +6,6 @@ open import Prelude
 
 open import Pitch        using (Pitch; transposePitch)
 open import Interval     using (Upi; Opi; transposePitchInterval)
-open import Util         using (_∘_)
 
 Duration : Set
 Duration = ℕ

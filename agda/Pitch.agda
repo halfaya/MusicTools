@@ -7,7 +7,7 @@ open import Prelude
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert; empty; show)
-open import Util            using (n∸k<n; _+N_; opposite; _∘_)
+open import Util            using (n∸k<n; _+N_; opposite)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)

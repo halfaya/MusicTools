@@ -6,8 +6,6 @@ open import Prelude hiding (_==_)
 
 open import Data.String     using (fromList)
 
-open import Util            using (_∘_)
-
 -- Bit vector representation of finite sets
 
 BitVec : ℕ → Type

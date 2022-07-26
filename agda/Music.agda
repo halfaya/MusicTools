@@ -11,7 +11,6 @@ open import Nat
 open import Note
 open import Pitch
 open import Interval
-open import Util using (_∘_)
 
 -- A point in the music grid, which can either be a tone,
 -- a continuation of a previous tone, or a rest.

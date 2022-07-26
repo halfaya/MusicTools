@@ -5,7 +5,7 @@ module Interval where
 open import Prelude
 
 open import Pitch
-open import Util using (allPairs; ◯pairs; firstPairs; _∘_)
+open import Util using (allPairs; ◯pairs; firstPairs)
 
 -- Maximum number of interval classes (0 to 6).
 ic7 : ℕ

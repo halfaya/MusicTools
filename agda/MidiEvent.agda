@@ -35,6 +35,13 @@ maxChannels = 16
 Channel-1 : Set
 Channel-1 = Fin maxChannels
 
+-- a few pre-defined channels
+channel1 channel2 channel3 channel4 : Channel-1
+channel1 = # 0
+channel2 = # 1
+channel3 = # 2
+channel4 = # 3
+
 -- in bpm
 Tempo : Set
 Tempo = ℕ

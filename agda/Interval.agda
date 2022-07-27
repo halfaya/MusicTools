@@ -110,7 +110,7 @@ pitchIntervalToPitchPair : PitchInterval → PitchPair
 pitchIntervalToPitchPair (p , n) = (p , transposePitch (+ n)  p)
 
 secondPitch : PitchInterval → Pitch
-secondPitch = proj₂ ∘ pitchIntervalToPitchPair
+secondPitch = snd ∘ pitchIntervalToPitchPair
 
 pitchPairToOpi : PitchPair → Opi
 pitchPairToOpi (p , q) = (+ q) - (+ p)
@@ -126,7 +126,7 @@ toPCI (p , q) =
 
 -- Assumes p ≤ q
 toPitchInterval : PitchPair → PitchInterval
-toPitchInterval pq = proj₁ pq , absoluteInterval (pitchPairToOpi pq)
+toPitchInterval pq = fst pq , absoluteInterval (pitchPairToOpi pq)
 
 -- DEPRECATED? Note that the first and last pitches are compared in normal order, not circular order.
 ◯pcIntervals : List PC → List PCI

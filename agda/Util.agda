@@ -12,6 +12,8 @@ open import Relation.Nullary     using (yes; no; ¬_)
 open import Relation.Unary       using (Pred; Decidable)
 
 {-
+-- There was some reason (due to Cubical Agda I think) that I needed to define this here,
+-- but I forget why so I'm commenting it out until I remember.
 infixr 9 _∘_
 
 _∘_ : {ℓ : Level}{A : Type ℓ}{B : A → Type ℓ}{C : (a : A) → B a → Type ℓ}

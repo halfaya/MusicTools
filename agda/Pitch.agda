@@ -68,7 +68,7 @@ absoluteToRelative : Pitch → PitchOctave
 absoluteToRelative n = (toPC n , n div s12)
 
 pitchToClass : Pitch → PC
-pitchToClass = proj₁ ∘ absoluteToRelative
+pitchToClass = fst ∘ absoluteToRelative
 
 majorScale harmonicMinorScale : Scale s7
 majorScale         = # 0 ∷ # 2 ∷ # 4 ∷ # 5 ∷ # 7 ∷ # 9 ∷ # 11 ∷ []

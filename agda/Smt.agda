@@ -27,7 +27,6 @@ data HMaybe (A : Type) : Type where
   nothing : HMaybe A
   just    : A → HMaybe A
 
-
 data HBExpr : Type
 B→HBExpr : BExpr → HBExpr
 
@@ -139,6 +138,12 @@ compileConstraints = map (B→HBExpr ∘ compileConstraint)
 #-}
 
 postulate
+  -- Given a list of variable names and a list of boolean expressions that contain
+  -- variables with these names, find values for those variables that
+  -- satisfy all expressions. The result for the variable is nothing if no
+  -- value could be found.
+  -- The output list is the same length as the input list of variable names,
+  -- and the correspondence is 1-1.
   solveConstraints : List String → List HBExpr → List (HMaybe ℤ)
 
 {-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}

@@ -11,6 +11,7 @@ open import Smt       using (solveConstraints; compileConstraints; HMaybe; just;
 open import Beethoven using (beethoven146-1)
 open import Constraint
 open import Counterpoint
+open import SmtResult using (firstSpecies→Midi)
 
 -- TODO: Remove
 open import Data.Integer using (ℤ)
@@ -23,10 +24,10 @@ process (nothing ∷ xs) = "nothing"
 
 main : IO ⊤
 main =
-  let x = firstSpeciesConstraints beethoven146-1
-      y = compileConstraints x
-      z = solveConstraints ("?" ∷ []) y
-  in putStrLn (process z)
+  let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
+      file         = "/Users/leo/Music/MusicTools/test.mid"
+      song         = firstSpecies→Midi beethoven146-1
+  in exportTracks file ticksPerBeat (map track→htrack song)
 
 {-
 main : IO ⊤

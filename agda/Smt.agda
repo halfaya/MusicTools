@@ -111,7 +111,7 @@ compileConstraints = map (B→HBExpr ∘ compileConstraint)
   compileIExpr vt (Const n)   = literal (fromInteger n)
   compileIExpr vt (Var   s)   = lookupVar s vt
   compileIExpr vt (Plus a b)  = compileIExpr vt a + compileIExpr vt b
-  compileIExpr vt (Minus a b) = compileIExpr vt a + compileIExpr vt b
+  compileIExpr vt (Minus a b) = compileIExpr vt a - compileIExpr vt b
   compileIExpr vt (Ite b a c) = ite (compileBExpr vt b) (compileIExpr vt a) (compileIExpr vt c)
 
   compileBExpr :: VarTable -> BExpr -> SBool
@@ -129,7 +129,7 @@ compileConstraints = map (B→HBExpr ∘ compileConstraint)
   getResults xs res = map (flip getModelValue res . unpack) xs
 
   runSat :: [Text] -> [BExpr] -> IO SatResult
-  runSat ts xs = satWith z3 {verbose=True} $ do
+  runSat ts xs = satWith z3 {verbose=False} $ do -- change verbose=True to debug
     vt <- makeVarTable ts
     let bs = map (compileBExpr vt) xs
     solve bs

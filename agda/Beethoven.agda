@@ -97,12 +97,6 @@ beethoven146-1 =
   (n (g 5) , n (d 6)) ∷
   (n (g 5) , n (c 6)) ∷ []
 
--- REMOVE
-remove : List P
-remove =
-  (var "?" , n (c 6)) ∷
-  (n (a 5) , n (a 6)) ∷ []
-
 -- Eliminating three notes at mistake
 beethoven146-3 : FirstSpecies2 (Maybe Pitch)
 beethoven146-3 =

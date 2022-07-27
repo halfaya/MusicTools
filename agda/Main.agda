@@ -8,7 +8,7 @@ open import Data.Unit using (⊤)
 open import Midi      using (IO; _>>=_; getArgs; putStrLn; exportTracks; track→htrack)
 open import Smt       using (solveConstraints; compileConstraints; HMaybe; just; nothing; _==_; var; #_; B→HBExpr)
 
-open import Beethoven using (beethoven146-1; remove)
+open import Beethoven using (beethoven146-1)
 open import Constraint
 open import Counterpoint
 
@@ -23,7 +23,7 @@ process (nothing ∷ xs) = "nothing"
 
 main : IO ⊤
 main =
-  let x = firstSpeciesConstraints remove --beethoven146-1
+  let x = firstSpeciesConstraints beethoven146-1
       y = compileConstraints x
       z = solveConstraints ("?" ∷ []) y
   in putStrLn (process z)

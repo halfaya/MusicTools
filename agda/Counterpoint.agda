@@ -33,8 +33,8 @@ toOpi (a , b) = b - a
 
 firstSpeciesConstraints : List P → List Constraint
 firstSpeciesConstraints ps =
-  map (setConstraint ∘ inSet firstSpeciesIntervals4 ∘ toOpi) ps --++
---  map (motionConstraint ∘ notSimilarIntoPerfect) (pairPairs ps)
+  map (setConstraint ∘ inSet firstSpeciesIntervals4 ∘ toOpi) ps ++
+  map (motionConstraint ∘ notSimilarIntoPerfect) (pairPairs ps)
 
 {-
 unMaybe : {A : Type} → List (Maybe A × Maybe A) → List (A × A)

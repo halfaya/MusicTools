@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --erased-cubical #-}
 
 module Test where
 
@@ -10,14 +10,18 @@ open import Counterpoint
 open import Expr
 open import Pitch
 open import Interval
+open import Smt
 
 open import Util using (filter)
 
 test : List Constraint
-test = firstSpeciesConstraints remove --beethoven146-1
+test = firstSpeciesConstraints beethoven146-1
 
 test2 : List BExpr
 test2 = map compileConstraint test
 
-test3 : List Constraint
-test3 = filter (not ∘ evalB ∘ compileConstraint) test
+test3 : List HBExpr
+test3 = compileConstraints test
+
+test4 : List Constraint
+test4 = filter (not ∘ evalB ∘ compileConstraint) test

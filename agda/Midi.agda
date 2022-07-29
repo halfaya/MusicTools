@@ -69,7 +69,7 @@ open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
   exportTracks :: Text -> HsTicksPerBeat -> [HsMidiTrack] -> IO ()
   exportTracks filePath ticksPerBeat tracks = do
     let path = unpack filePath
-    --putStrLn $ "Writing file " ++ path
+    putStrLn $ "Writing file " ++ path
     --putStrLn $ show $ toMidi ticksPerBeat tracks
     exportFile path (toMidi ticksPerBeat tracks)
 

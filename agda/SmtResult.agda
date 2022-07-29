@@ -4,14 +4,17 @@ module SmtResult where
 
 open import Prelude hiding (lookup; #_; _+_; _-_)
 
+open import Constraint using (Constraint; compileConstraint)
 open import Counterpoint using (firstSpeciesConstraints)
 open import Expr renaming (if_then_else_ to i_t_e_)
 open import Instruments using (piano)
 open import MidiEvent
 open import Note
 open import Pitch
-open import Smt using (HMaybe; just; nothing; solveConstraints; compileConstraints)
+open import Smt using (HMaybe; just; nothing; HBExpr; B→HBExpr; solveConstraints)
 
+compileConstraints : List Constraint → List HBExpr
+compileConstraints = map (B→HBExpr ∘ compileConstraint)
 
 -- Any result which is nonexistant or negative is converted to 0.
 HMaybeℤ→Pitch : HMaybe ℤ → ℕ
@@ -41,6 +44,7 @@ iExpr→Pitch d (# -[1+_] n)  = 0
 iExpr→Pitch d (var s)       = lookup d s
 iExpr→Pitch d (_ + _)       = 0
 iExpr→Pitch d (_ - _)       = 0
+iExpr→Pitch d (_ % _)       = 0
 iExpr→Pitch d (i _ t _ e _) = 0
 
 firstSpecies→Pitches : List (IExpr × IExpr) → List (Pitch × Pitch)

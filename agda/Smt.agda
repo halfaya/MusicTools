@@ -10,10 +10,10 @@ open import Data.Integer        using (ℤ)
 open import Function            using (_∘_)
 
 open import Expr
-open import Constraint using (Constraint; compileConstraint)
 
 infix 10 #_
 infixr 9 ¬_
+infixl 9 _%_
 infixl 8 _+_ _-_
 infix  7 _==_ _≠_ _<_ _≤_
 infixr 6 _∧_
@@ -35,6 +35,7 @@ data HIExpr : Type where
   var           : String → HIExpr
   _+_           : HIExpr → HIExpr → HIExpr
   _-_           : HIExpr → HIExpr → HIExpr
+  _%_           : HIExpr → HIExpr → HIExpr
   if_then_else_ : HBExpr → HIExpr → HIExpr → HIExpr
 
 data HBExpr where
@@ -53,6 +54,7 @@ I→HIExpr (# x)                = # x
 I→HIExpr (var x)              = var x
 I→HIExpr (x + y)              = I→HIExpr x + I→HIExpr y
 I→HIExpr (x - y)              = I→HIExpr x - I→HIExpr y
+I→HIExpr (x % y)              = I→HIExpr x % I→HIExpr y
 I→HIExpr (if b then a else c) = if (B→HBExpr b) then (I→HIExpr a) else (I→HIExpr c) 
 
 --B→HBExpr : BExpr → HBExpr
@@ -66,10 +68,6 @@ B→HBExpr (x ∧ y)  = B→HBExpr x ∧ B→HBExpr y
 B→HBExpr (x ∨ y)  = B→HBExpr x ∨ B→HBExpr y
 B→HBExpr (¬ x)    = ¬ B→HBExpr x
 
-compileConstraints : List Constraint → List HBExpr
-compileConstraints = map (B→HBExpr ∘ compileConstraint)
-
-
 {-# FOREIGN GHC
   import Data.SBV
   import Data.Text (Text, unpack, pack)
@@ -80,6 +78,7 @@ compileConstraints = map (B→HBExpr ∘ compileConstraint)
     Var Text          |
     Plus IExpr IExpr  |
     Minus IExpr IExpr |
+    Mod IExpr IExpr   |
     Ite BExpr IExpr IExpr
     deriving Show
 
@@ -111,6 +110,7 @@ compileConstraints = map (B→HBExpr ∘ compileConstraint)
   compileIExpr vt (Var   s)   = lookupVar s vt
   compileIExpr vt (Plus a b)  = compileIExpr vt a + compileIExpr vt b
   compileIExpr vt (Minus a b) = compileIExpr vt a - compileIExpr vt b
+  compileIExpr vt (Mod a b)   = compileIExpr vt a `sMod` compileIExpr vt b
   compileIExpr vt (Ite b a c) = ite (compileBExpr vt b) (compileIExpr vt a) (compileIExpr vt c)
 
   compileBExpr :: VarTable -> BExpr -> SBool
@@ -147,7 +147,7 @@ postulate
   solveConstraints : List String → List HBExpr → List (HMaybe ℤ)
 
 {-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}
-{-# COMPILE GHC HIExpr = data IExpr (Const | Var | Plus | Minus | Ite) #-}
+{-# COMPILE GHC HIExpr = data IExpr (Const | Var | Plus | Minus | Mod | Ite) #-}
 {-# COMPILE GHC HBExpr = data BExpr (BFalse | BTrue | BEq | BNeq | BLt | BLe | BAnd | BOr | BNot) #-}
 
 {-# COMPILE GHC solveConstraints = solveConstraints #-}

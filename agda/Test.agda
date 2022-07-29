@@ -11,6 +11,7 @@ open import Expr
 open import Pitch
 open import Interval
 open import Smt
+open import SmtResult
 
 open import Util using (filter)
 

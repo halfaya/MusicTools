@@ -184,3 +184,14 @@ _<ℤ_ : ℤ → ℤ → Bool
 +_     a <ℤ -[1+_] b = false
 -[1+_] a <ℤ +_     b = true
 -[1+_] a <ℤ -[1+_] b = b <ᵇ a
+
+--
+
+infixl 7 _modℤ_
+
+-- Integer modulus. If trying to compute n mod 0 just return 0.
+-- Always returns a non-negative value.
+_modℤ_ : ℤ → ℤ → ℤ
+n modℤ +_     zero    = + 0
+n modℤ +_     (suc d) = + (n modℕ (suc d))
+n modℤ -[1+_] d       = + (n modℕ (suc d))

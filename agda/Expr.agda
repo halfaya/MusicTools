@@ -80,5 +80,12 @@ varNamesB (¬ x)     = varNamesB x
 
 -- Utility functions
 
+N : ℕ → IExpr
+N = #_ ∘ +_
+
 _mod_ : IExpr → ℕ → IExpr
-e mod n = e % (# (+ n))
+e mod n = e % N n
+
+-- indicator function
+χ : BExpr → IExpr
+χ b = if b then N 1 else N 0

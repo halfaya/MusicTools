@@ -36,8 +36,10 @@ firstSpeciesConstraints : List P → List Constraint
 firstSpeciesConstraints ps =
   let v1 = map snd ps
       v2 = map fst ps
-  in map (inScaleConstraint majorScale ) (v1 ++ v2) ++ -- for now assumes key is C
+  in map (inScaleConstraint majorScale) (v1 ++ v2) ++ -- for now assumes key is C
      map (setConstraint ∘ inSet firstSpeciesIntervals4 ∘ toOpi) ps ++
      map (motionConstraint ∘ notSimilarIntoPerfect) (pairPairs ps)
 
-
+-- Contraints to make the music more interesting
+interestingConstraints : List P → List Constraint
+interestingConstraints ps = (numericConstraint ∘ numContrary≥ (+ 6) ∘ pairPairs) ps ∷ []

@@ -8,6 +8,7 @@ open import Data.Nat using (ℕ)
 open import Data.List using (List; []; _∷_; concatMap)
 open import Data.Product using (_,_)
 open import Data.Unit using (⊤)
+open import IO.Primitive
 
 open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 
@@ -81,17 +82,11 @@ open import MidiEvent using (Tick; MidiEvent; midiEvent; MidiTrack; track)
 #-}
 
 postulate
-  IO       : Set → Set
   putStrLn : String -> IO ⊤
   getArgs  : IO (List String)
-  _>>=_    : {A B : Set} -> IO A -> (A -> IO B) -> IO B  
-
-{-# BUILTIN IO IO #-}
-{-# COMPILE GHC IO = type IO #-}
 
 {-# COMPILE GHC putStrLn = putStrLn . unpack #-}
 {-# COMPILE GHC getArgs = fmap (fmap pack) getArgs #-}
-{-# COMPILE GHC _>>=_ = \_ _ -> (>>=) :: IO a -> (a -> IO b) -> IO b #-}
 
 FilePath = String
 

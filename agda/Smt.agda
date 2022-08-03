@@ -8,6 +8,7 @@ open import Agda.Builtin.String using (String)
 open import Data.List           using (List; map)
 open import Data.Integer        using (ℤ)
 open import Function            using (_∘_)
+open import IO.Primitive
 
 open import Expr
 
@@ -124,8 +125,10 @@ B→HBExpr (¬ x)    = ¬ B→HBExpr x
   compileBExpr vt (BOr a b)  = compileBExpr vt a .|| compileBExpr vt b
   compileBExpr vt (BNot a)   = sNot (compileBExpr vt a)
 
-  getResults :: [Text] -> SatResult -> [Maybe Integer]
-  getResults xs res = map (flip getModelValue res . unpack) xs
+  getResults :: [Text] -> IO SatResult -> IO [Maybe Integer]
+  getResults xs res = do
+    r <- res
+    return $ map (flip getModelValue r . unpack) xs
 
   runSat :: [Text] -> [BExpr] -> IO SatResult
   runSat ts xs = satWith z3 {verbose=False} $ do -- change verbose=True to debug
@@ -133,8 +136,8 @@ B→HBExpr (¬ x)    = ¬ B→HBExpr x
     let bs = map (compileBExpr vt) xs
     solve bs
 
-  solveConstraints :: [Text] -> [BExpr] -> [Maybe Integer]
-  solveConstraints ts bs = getResults ts (unsafePerformIO (runSat ts bs))
+  solveConstraints :: [Text] -> [BExpr] -> IO [Maybe Integer]
+  solveConstraints ts bs = getResults ts (runSat ts bs)
 #-}
 
 postulate
@@ -144,7 +147,7 @@ postulate
   -- value could be found.
   -- The output list is the same length as the input list of variable names,
   -- and the correspondence is 1-1.
-  solveConstraints : List String → List HBExpr → List (HMaybe ℤ)
+  solveConstraints : List String → List HBExpr → IO (List (HMaybe ℤ))
 
 {-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}
 {-# COMPILE GHC HIExpr = data IExpr (Const | Var | Plus | Minus | Mod | Ite) #-}

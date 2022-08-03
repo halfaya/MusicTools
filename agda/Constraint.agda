@@ -2,7 +2,7 @@
 
 module Constraint where
 
-open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_)
+open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_)
 
 open import Expr
 open import Interval
@@ -53,13 +53,22 @@ compileMotionConstraint (notSimilarIntoPerfect ((a , b) , c , d)) =
   ¬ (perfectInterval4 c d ∧ compileMotionConstraint (similarOrParallel ((a , b) , c , d)))
   -- note that we currently handle 4ths
 
+data NumericConstraint : Type where
+  numContrary≥ : ℤ → List PP → NumericConstraint
+
+compileNumericConstraint : NumericConstraint → BExpr
+compileNumericConstraint (numContrary≥ n xs) =
+  (# n) ≤ foldr (λ pp x → χ (compileMotionConstraint (contrary pp)) + x) (N 0) xs
+
 data Constraint : Type where
-  setConstraint    : SetConstraint → Constraint
-  motionConstraint : MotionConstraint → Constraint
+  setConstraint     : SetConstraint → Constraint
+  motionConstraint  : MotionConstraint → Constraint
+  numericConstraint : NumericConstraint → Constraint
 
 compileConstraint : Constraint → BExpr
-compileConstraint (setConstraint x)    = compileSetConstraint x
-compileConstraint (motionConstraint x) = compileMotionConstraint x
+compileConstraint (setConstraint x)     = compileSetConstraint x
+compileConstraint (motionConstraint x)  = compileMotionConstraint x
+compileConstraint (numericConstraint x) = compileNumericConstraint x
 
 inScaleConstraint : {n : ℕ} → Scale n → IExpr → Constraint
 inScaleConstraint scale pitch =

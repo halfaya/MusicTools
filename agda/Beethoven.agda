@@ -11,9 +11,6 @@ open import Pitch
 open import Interval
 open import Music
 
-n : Pitch → IExpr
-n = #_ ∘ +_
-
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
 beethoven146 : List (Pitch × Pitch)
 beethoven146 =
@@ -32,18 +29,18 @@ beethoven146 =
 
 beethoven146a : List P
 beethoven146a =
-  (n (g 5) , n (c 6)) ∷
-  (n (c 6) , n (e 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (a 5) , n (f 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (n (f 5) , n (c 6)) ∷
-  (n (a 5) , n (a 6)) ∷
-  (n (c 6) , n (f 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (n (g 5) , n (d 6)) ∷
-  (n (g 5) , n (c 6)) ∷ []
+  (N (g 5) , N (c 6)) ∷
+  (N (c 6) , N (e 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (a 5) , N (f 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (N (f 5) , N (c 6)) ∷
+  (N (a 5) , N (a 6)) ∷
+  (N (c 6) , N (f 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (N (g 5) , N (d 6)) ∷
+  (N (g 5) , N (c 6)) ∷ []
 
 {-
 beethoven146a2 : FirstSpecies2 (Maybe PSym)
@@ -65,63 +62,63 @@ beethoven146a2 = FirstSpecies2
 -- Haydn's correction
 beethoven146h : List P
 beethoven146h =
-  (n (g 5) , n (c 6)) ∷
-  (n (c 6) , n (e 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (a 5) , n (f 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (n (a 5) , n (c 6)) ∷ -- f5 -> a5
-  (n (a 5) , n (a 6)) ∷
-  (n (c 6) , n (f 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (n (g 5) , n (d 6)) ∷
-  (n (g 5) , n (c 6)) ∷ []
+  (N (g 5) , N (c 6)) ∷
+  (N (c 6) , N (e 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (a 5) , N (f 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (N (a 5) , N (c 6)) ∷ -- f5 -> a5
+  (N (a 5) , N (a 6)) ∷
+  (N (c 6) , N (f 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (N (g 5) , N (d 6)) ∷
+  (N (g 5) , N (c 6)) ∷ []
 
 -- Eliminating one note at mistake
 beethoven146-1 : List P
 beethoven146-1 =
-  (n (g 5) , n (c 6)) ∷
-  (n (c 6) , n (e 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (a 5) , n (f 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (var "?" , n (c 6)) ∷
-  (n (a 5) , n (a 6)) ∷
-  (n (c 6) , n (f 6)) ∷
-  (n (b 5) , n (g 6)) ∷
-  (n (g 5) , n (e 6)) ∷
-  (n (g 5) , n (d 6)) ∷
-  (n (g 5) , n (c 6)) ∷ []
+  (N (g 5) , N (c 6)) ∷
+  (N (c 6) , N (e 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (a 5) , N (f 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (var "?" , N (c 6)) ∷
+  (N (a 5) , N (a 6)) ∷
+  (N (c 6) , N (f 6)) ∷
+  (N (b 5) , N (g 6)) ∷
+  (N (g 5) , N (e 6)) ∷
+  (N (g 5) , N (d 6)) ∷
+  (N (g 5) , N (c 6)) ∷ []
 
 -- Eliminating three notes at mistake
 beethoven146-3 : List P
 beethoven146-3 =
-  (n (g 5)  , n (c 6)) ∷
-  (n (c 6)  , n (e 6)) ∷
-  (n (b 5)  , n (g 6)) ∷
-  (n (a 5)  , n (f 6)) ∷
-  (var "?1" , n (e 6)) ∷
-  (var "?2" , n (c 6)) ∷
-  (var "?3" , n (a 6)) ∷
-  (n (c 6)  , n (f 6)) ∷
-  (n (b 5)  , n (g 6)) ∷
-  (n (g 5)  , n (e 6)) ∷
-  (n (g 5)  , n (d 6)) ∷
-  (n (g 5)  , n (c 6)) ∷ []
+  (N (g 5)  , N (c 6)) ∷
+  (N (c 6)  , N (e 6)) ∷
+  (N (b 5)  , N (g 6)) ∷
+  (N (a 5)  , N (f 6)) ∷
+  (var "?1" , N (e 6)) ∷
+  (var "?2" , N (c 6)) ∷
+  (var "?3" , N (a 6)) ∷
+  (N (c 6)  , N (f 6)) ∷
+  (N (b 5)  , N (g 6)) ∷
+  (N (g 5)  , N (e 6)) ∷
+  (N (g 5)  , N (d 6)) ∷
+  (N (g 5)  , N (c 6)) ∷ []
 
 -- Cantus firmus only, plus start and end of counterpoint
 beethoven146cf : List P
 beethoven146cf =
-  (n (g 5)   , n (c 6)) ∷
-  (var "?1"  , n (e 6)) ∷
-  (var "?2"  , n (g 6)) ∷
-  (var "?3"  , n (f 6)) ∷
-  (var "?4"  , n (e 6)) ∷
-  (var "?5"  , n (c 6)) ∷
-  (var "?6"  , n (a 6)) ∷
-  (var "?7"  , n (f 6)) ∷
-  (var "?8"  , n (g 6)) ∷
-  (var "?9"  , n (e 6)) ∷
-  (var "?10" , n (d 6)) ∷
-  (n (g 5)   , n (c 6)) ∷ []
+  (N (g 5)   , N (c 6)) ∷
+  (var "?1"  , N (e 6)) ∷
+  (var "?2"  , N (g 6)) ∷
+  (var "?3"  , N (f 6)) ∷
+  (var "?4"  , N (e 6)) ∷
+  (var "?5"  , N (c 6)) ∷
+  (var "?6"  , N (a 6)) ∷
+  (var "?7"  , N (f 6)) ∷
+  (var "?8"  , N (g 6)) ∷
+  (var "?9"  , N (e 6)) ∷
+  (var "?10" , N (d 6)) ∷
+  (N (g 5)   , N (c 6)) ∷ []

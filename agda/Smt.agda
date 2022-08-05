@@ -16,7 +16,7 @@ infix 10 #_
 infixr 9 ¬_
 infixl 9 _%_
 infixl 8 _+_ _-_
-infix  7 _==_ _≠_ _<_ _≤_
+infix  7 _==_ _≠_ _<_ _≤_ _>_ _≥_
 infixr 6 _∧_
 infixr 5 _∨_
 
@@ -46,6 +46,8 @@ data HBExpr where
   _≠_   : HIExpr → HIExpr → HBExpr
   _<_   : HIExpr → HIExpr → HBExpr
   _≤_   : HIExpr → HIExpr → HBExpr
+  _>_   : HIExpr → HIExpr → HBExpr
+  _≥_   : HIExpr → HIExpr → HBExpr
   _∧_   : HBExpr → HBExpr → HBExpr
   _∨_   : HBExpr → HBExpr → HBExpr
   ¬_    : HBExpr → HBExpr
@@ -65,6 +67,8 @@ B→HBExpr (x == y) = I→HIExpr x == I→HIExpr y
 B→HBExpr (x ≠ y)  = I→HIExpr x ≠ I→HIExpr y
 B→HBExpr (x < y)  = I→HIExpr x < I→HIExpr y
 B→HBExpr (x ≤ y)  = I→HIExpr x ≤ I→HIExpr y
+B→HBExpr (x > y)  = I→HIExpr x > I→HIExpr y
+B→HBExpr (x ≥ y)  = I→HIExpr x ≥ I→HIExpr y
 B→HBExpr (x ∧ y)  = B→HBExpr x ∧ B→HBExpr y
 B→HBExpr (x ∨ y)  = B→HBExpr x ∨ B→HBExpr y
 B→HBExpr (¬ x)    = ¬ B→HBExpr x
@@ -90,6 +94,8 @@ B→HBExpr (¬ x)    = ¬ B→HBExpr x
     BNeq IExpr IExpr  |
     BLt IExpr IExpr   |
     BLe IExpr IExpr   |
+    BGt IExpr IExpr   |
+    BGe IExpr IExpr   |
     BAnd BExpr BExpr  |
     BOr BExpr BExpr   |
     BNot BExpr
@@ -121,6 +127,8 @@ B→HBExpr (¬ x)    = ¬ B→HBExpr x
   compileBExpr vt (BNeq a b) = compileIExpr vt a ./= compileIExpr vt b
   compileBExpr vt (BLt a b)  = compileIExpr vt a .< compileIExpr vt b
   compileBExpr vt (BLe a b)  = compileIExpr vt a .<= compileIExpr vt b
+  compileBExpr vt (BGt a b)  = compileIExpr vt a .> compileIExpr vt b
+  compileBExpr vt (BGe a b)  = compileIExpr vt a .>= compileIExpr vt b
   compileBExpr vt (BAnd a b) = compileBExpr vt a .&& compileBExpr vt b
   compileBExpr vt (BOr a b)  = compileBExpr vt a .|| compileBExpr vt b
   compileBExpr vt (BNot a)   = sNot (compileBExpr vt a)
@@ -151,6 +159,6 @@ postulate
 
 {-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}
 {-# COMPILE GHC HIExpr = data IExpr (Const | Var | Plus | Minus | Mod | Ite) #-}
-{-# COMPILE GHC HBExpr = data BExpr (BFalse | BTrue | BEq | BNeq | BLt | BLe | BAnd | BOr | BNot) #-}
+{-# COMPILE GHC HBExpr = data BExpr (BFalse | BTrue | BEq | BNeq | BLt | BLe | BGt | BGe | BAnd | BOr | BNot) #-}
 
 {-# COMPILE GHC solveConstraints = solveConstraints #-}

@@ -2,16 +2,25 @@
 
 module Constraint where
 
-open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_)
+open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_; ∣_∣)
 
 open import Expr
 open import Interval
 open import Pitch
+open import Util using (pairs)
 
 -- Pairs and pairs of pairs of IExpr
 P PP : Type
 P  = IExpr × IExpr
 PP = P × P
+
+-- Convert a pair of pitches to an Opi
+toOpi : P → IExpr
+toOpi (p , q) = q - p
+
+-- Convert a pair of pitches to a Upi
+toUpi : P → IExpr
+toUpi pq = ∣ toOpi pq ∣
 
 data SetConstraint : Type where
   inSet : List ℤ → IExpr → SetConstraint
@@ -54,11 +63,15 @@ compileMotionConstraint (notSimilarIntoPerfect ((a , b) , c , d)) =
   -- note that we currently handle 4ths
 
 data NumericConstraint : Type where
-  numContrary≥ : ℤ → List PP → NumericConstraint
+  numContrary≥ :     ℤ → List PP     → NumericConstraint
+  numLeaps≤    : ℤ → ℤ → List IExpr  → NumericConstraint -- first argument is max size of non-leap in semitones
 
 compileNumericConstraint : NumericConstraint → BExpr
 compileNumericConstraint (numContrary≥ n xs) =
-  (# n) ≤ foldr (λ pp x → χ (compileMotionConstraint (contrary pp)) + x) (N 0) xs
+  foldr (λ pp x → χ (compileMotionConstraint (contrary pp)) + x) (N 0) xs ≥ (# n)
+compileNumericConstraint (numLeaps≤ max n ps) =
+  let is = map toUpi (pairs ps)
+  in foldr (λ upi x → χ (upi > # max) + x) (N 0) is ≤ (# n)
 
 data Constraint : Type where
   setConstraint     : SetConstraint → Constraint

@@ -19,7 +19,7 @@ compileConstraints : List Constraint → List HBExpr
 compileConstraints = map (B→HBExpr ∘ compileConstraint)
 
 -- Any result which is nonexistant or negative is converted to 0.
-HMaybeℤ→Pitch : HMaybe ℤ → ℕ
+HMaybeℤ→Pitch : HMaybe ℤ → Pitch
 HMaybeℤ→Pitch nothing           = 0
 HMaybeℤ→Pitch (just (+_     n)) = n
 HMaybeℤ→Pitch (just (-[1+_] _)) = 0
@@ -61,7 +61,7 @@ firstSpecies→Pitches xs = do
 firstSpecies→Midi : List (IExpr × IExpr) → IO (List MidiTrack)
 firstSpecies→Midi xs = do
   ps      ← firstSpecies→Pitches xs
-      -- note that higher voice is at top, but the input has lower voice first
+      -- note that higher MIDI voice is at top, but the input has lower voice first
   let ps1 = map (tone half ∘ snd) ps
       ps2 = map (tone half ∘ fst) ps
       tempo = 240

@@ -2,7 +2,7 @@
 
 module Expr where
 
-open import Prelude hiding (#_; _==_; _+_; _mod_)
+open import Prelude hiding (#_; _==_; _+_; _mod_; ∣_∣)
                     renaming ( _∨_ to _∨b_; _∧_ to _∧b_; _-_ to _-ℤ_; if_then_else_ to i_t_e_)
 
 open import Util using (_==ℤ_; _≠ℤ_; _<ℤ_; _≤ℤ_; _>ℤ_; _≥ℤ_; _modℤ_)
@@ -91,6 +91,9 @@ N = #_ ∘ +_
 
 _mod_ : IExpr → ℕ → IExpr
 e mod n = e % N n
+
+∣_∣ : IExpr → IExpr
+∣ n ∣ = if n ≥ N 0 then n else (N 0 - n)
 
 -- indicator function
 χ : BExpr → IExpr

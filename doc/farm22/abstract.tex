@@ -7,7 +7,7 @@
 \acmYear{}
 \copyrightyear{}
 \acmISBN{}
-\acmConference[FARM '22]{}
+\acmConference[FARM '22]{Proceedings of the 10th ACM SIGPLAN International Workshop on Functional Art, Music, Modeling, and Design}{September 15, 2022}{Ljubljana, Slovenia}
 \acmBooktitle{}
 
 %% Bibliography style
@@ -47,13 +47,13 @@
 %% Note: \begin{abstract}...\end{abstract} environment must come
 %% before \maketitle command
 \begin{abstract}
-We present a Haskell library to help analyze
+We present an Agda library to help analyze
 and synthesize musical counterpoint. The tool allows expression of
 generic constraints in a higher-level musical language which are
 translated to a lower level for use both to find rule violations in
 existing music and to generate (using an SMT solver) new
 music satisfying the constraints. The tool is intended for use by
-musicians who need only have a basic knowledge of Haskell.
+musicians who need only have a basic knowledge of Agda.
 \end{abstract}
 
 
@@ -80,7 +80,7 @@ musicians who need only have a basic knowledge of Haskell.
 
 %% Keywords
 %% comma separated list
-\keywords{Counterpoint, Haskell, SMT}  %% \keywords are mandatory in final camera-ready submission
+\keywords{Counterpoint, Agda, SMT}  %% \keywords are mandatory in final camera-ready submission
 
 
 %% \maketitle
@@ -128,26 +128,18 @@ expressed (at a low level) in the quantifier-free logic of linear
 arithmetic and uninterpreted functions (QF-UFLIA \cite{Barrett2010}),
 which allows one to not only analyze existing counterpoint, but also
 synthesize counterpoint satisfying the constraints using an SMT
-solver.
+(Satisfiablity Modulo Theories) solver.
 
-This tool, still a work in progress, has been implemented in Haskell
-and is available at \cite{HaskellCounterpoint}. Haskell was chosen as
-a high-quality and feature-rich SMT library called SBV \citep{SBV} is
-available. The tool makes heavy use of functional programming, but
-dependent types are sometimes wished for and the goal is to eventually
-port the work to the Agda Music Tools \cite{MusicTools} library.
+The initial prototype \citep{HaskellCounterpoint} of this tool was
+written in Haskell, chosen due to the availability of the
+high-quality and feature-rich SMT library SBV \citep{SBV}. It was then
+ported to the Agda Music Tools library \cite{MusicTools}, using Agda's
+Haskell foreign function interface (FFI) to call SBV. There is also an
+Agda interface \citep{Schmitty} to SMT and we might convert to using
+that at some point in the future.
 
 The following sections give an overview of current
-functionality. Future plans include integration with Liquid Haskell
-\citep{LiquidHaskell} (for analysis) and Synquid \citep{Synquid} (for
-synthesis). In addition to handling higher species we would like to
-also incorporate the rules and conventions of galant schemata
-\citep{Gjerdingen2007}, which informed much of the music composed in
-the era of Haydn and Mozart. Ideally one could use the tool to compose
-convincing music in the galant style.
-
-Concurrently Cong \citep{Cong2022a} is exploring another approach
-using a different representation of constraints within a type system.
+functionality. 
 
 \section{An Example}
 
@@ -183,7 +175,7 @@ to ensure independence of voices. In particular parallel and similar
 octaves is prohibited. Here we can see that Beethoven has in fact made
 two errors in the top two voices: similar motion into a fifth in bar 3
 and then into an octave between bars 3 and 4. Haydn fixes both errors
-by changing the F in the second voice to an A.
+by changing the F in the second voice (marked with the red X) to an A.
 
 For simplicity we now focus only on the top two voices. Feeding
 Beethoven's notes into the tool as two part first species
@@ -243,7 +235,7 @@ dependent types would be useful to ensure for example that every voice
 has the same number of bars, but a run-time check can also be used to
 enforce this. Each of these elements is parameterized, allowing a
 number of pitch-like elements to be used to construct music. These
-could be algebraic data types representing name (like C\#) and
+could be algebraic data types representing name (like G\#) and
 octave, or a numeric representation of pitch. Either datum can then be
 embedded into a wrapper, such as \texttt{MPitch} which can either be a
 fixed pitch or a named hole to be solved for.
@@ -271,6 +263,21 @@ using the constraints and the SMT solver. MIDI is also generated,
 which can then be opened and viewed with notation software such as
 MuseScore.
 
+\section{Future Plans}
+
+Future plans include possible integration with Liquid Haskell
+\citep{LiquidHaskell} (for analysis) and Synquid \citep{Synquid} (for
+synthesis). In addition to handling higher species we would like to
+also incorporate the rules and conventions of galant schemata
+\citep{Gjerdingen2007}, which informed much of the music composed in
+the era of Haydn and Mozart. Ideally one could use the tool to compose
+convincing music in the galant style.
+
+Concurrently Cong \citep{Cong2022a,Cong2022c} is exploring another approach
+using a different representation of constraints within a type system.
+Recent work by Tanaka \citep{Tanaka2022} uses integer programming to
+express constraints, and we plan to compare our method with this.
+
 \section*{Acknowledgements}
 
 Thanks to Youyou Cong for many enlightening discussions about type
@@ -280,6 +287,8 @@ Emina Torlak and Stephen Rumph for their generosity in allowing me to
 audit their classes at the University of Washington. CSE 507 was
 invaluable for learning the fundamentals of SMT 
 solvers, and MUHST 211 and 430 introduced me to galant schemata.
+Finally, thanks the anonymous referees for many helpful comments and
+suggestions.
 
 %% Bibliography
 \bibliography{abstract.bib}

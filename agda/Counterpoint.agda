@@ -12,7 +12,7 @@ open import Music
 open import Note
 open import Pitch
 open import Interval
-open import Util using (pairs; filter)
+open import Util using (pairs; filter; middle)
 
 ------------------------------------------------
 
@@ -37,4 +37,4 @@ interestingConstraints : List P → List Constraint
 interestingConstraints ps =
   (numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps ∷
   (numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps ∷
-  []
+  map (setConstraint ∘ inSet firstSpeciesIntervals ∘ toOpi) (middle ps)

@@ -14,5 +14,5 @@ main : IO ⊤
 main = do
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
-  song             ← firstSpecies→Midi beethoven146-3
+  song             ← firstSpecies→Midi beethoven146cf
   exportTracks file ticksPerBeat (map track→htrack song)

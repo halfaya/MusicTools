@@ -47,6 +47,18 @@ allPairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
 allPairs [] = []
 allPairs (x ∷ xs) = map (x ,_) xs ++ allPairs xs
 
+-- Drops the last element of a list
+dropLast : {ℓ : Level} {A : Type ℓ} → List A → List A
+dropLast []           = []
+dropLast (x ∷ [])     = []
+dropLast (x ∷ y ∷ xs) = x ∷ dropLast (y ∷ xs)
+
+-- Returns the middle of the list, with the first and last elements dropped.
+middle : {ℓ : Level} {A : Type ℓ} → List A → List A
+middle xs with dropLast xs
+... | []     = []
+... | _ ∷ ys = ys
+
 -- Returns a singleton list of the pair of the first and last element if the list has at least 2 elements,
 -- or the empty list otherwise.
 firstLast : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)

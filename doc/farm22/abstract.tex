@@ -188,21 +188,19 @@ with a hole, and run the tool in synthesis mode using the same
 rules. It makes the same fix Haydn did. Perhaps we gave it too much
 guidance, so instead we can create three holes in a row near the
 error, which generates the solution shown in
-Figure~\ref{fig:b146fix3}, with the three generated notes inside the
-blue box. Although there are several possible solutions, the SMT
-solver has chosen to retain the third A while changing the first two
-notes to A as well; the only difference with Haydn's correction is
+Figure~\ref{fig:b146fix3}, with the three synthesized notes inside the
+blue box. The only difference with Haydn's correction is
 that the first note was changed from G to A as well. Although this
 creates a satisfying oblique motion into a perfect fifth between bars
 2 and 3, this same motion occurs between bars 5 and 6; furthermore we
 now have four A notes in a row in addition to the three G notes at the
 end of the second voice. For a middle voice this is not too bad, but
-viewed as just two voices it is a big dull.
+viewed as just two voices it is a bit dull.
 
 \begin{figure}
   \includegraphics[width=8cm]{figures/b146fix3.png}
-  \caption{Three Notes Changed}
-  \Description{Three Notes Changed}
+  \caption{Three Notes Synthesized}
+  \Description{Three Notes Synthesized}
   \label{fig:b146fix3}
 \end{figure}
 
@@ -212,14 +210,16 @@ following Haydn's cantus firmus, fixing only the first and last of
 Beethoven's notes. To help create better quality counterpoint we add
 constraints to limit the number of leaps (horizontal intervals of more
 than a major third) to at most one and require at least six instances
-of contrary motion, which turns out to be maximal. Note that it would
+of contrary motion, which turns out to be maximal. We also disallow
+perfect fourths except at the boundary. Note that it would
 be extremely difficult for a human being with no computer assistance
 to generate counterpoint following such restrictions, but the SMT
 solver instantly returns the solution shown in
-Figure~\ref{fig:b146gen3}.
+Figure~\ref{fig:b146gen3}. Contrary motion is shown by pairs of blue
+arrows and the single leap by a red line.
 
 \begin{figure}
-  \includegraphics[width=8cm]{figures/b146gen3.png}
+  \includegraphics[width=8cm]{figures/b146gen.png}
   \caption{Generated Counterpoint}
   \Description{Generated Counterpoint}
   \label{fig:b146gen3}

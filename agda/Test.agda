@@ -16,7 +16,7 @@ open import SmtInterface
 open import Util using (filter)
 
 test : List Constraint
-test = {-firstSpeciesConstraints beethoven146-1 ++ -} interestingConstraints beethoven146-1
+test = {-firstSpeciesConstraints beethoven146-1 ++ -} interestingConstraints beethoven146-3
 
 test2 : List BExpr
 test2 = map compileConstraint test

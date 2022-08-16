@@ -42,15 +42,15 @@ data HIExpr : Type where
 data HBExpr where
   false : HBExpr
   true  : HBExpr
+  _∧_   : HBExpr → HBExpr → HBExpr
+  _∨_   : HBExpr → HBExpr → HBExpr
+  ¬_    : HBExpr → HBExpr
   _==_  : HIExpr → HIExpr → HBExpr
   _≠_   : HIExpr → HIExpr → HBExpr
   _<_   : HIExpr → HIExpr → HBExpr
   _≤_   : HIExpr → HIExpr → HBExpr
   _>_   : HIExpr → HIExpr → HBExpr
   _≥_   : HIExpr → HIExpr → HBExpr
-  _∧_   : HBExpr → HBExpr → HBExpr
-  _∨_   : HBExpr → HBExpr → HBExpr
-  ¬_    : HBExpr → HBExpr
 
 I→HIExpr : IExpr → HIExpr
 I→HIExpr (# x)                = # x
@@ -63,15 +63,15 @@ I→HIExpr (if b then a else c) = if (B→HBExpr b) then (I→HIExpr a) else (I�
 --B→HBExpr : BExpr → HBExpr
 B→HBExpr false    = false
 B→HBExpr true     = true
+B→HBExpr (x ∧ y)  = B→HBExpr x ∧ B→HBExpr y
+B→HBExpr (x ∨ y)  = B→HBExpr x ∨ B→HBExpr y
+B→HBExpr (¬ x)    = ¬ B→HBExpr x
 B→HBExpr (x == y) = I→HIExpr x == I→HIExpr y
 B→HBExpr (x ≠ y)  = I→HIExpr x ≠ I→HIExpr y
 B→HBExpr (x < y)  = I→HIExpr x < I→HIExpr y
 B→HBExpr (x ≤ y)  = I→HIExpr x ≤ I→HIExpr y
 B→HBExpr (x > y)  = I→HIExpr x > I→HIExpr y
 B→HBExpr (x ≥ y)  = I→HIExpr x ≥ I→HIExpr y
-B→HBExpr (x ∧ y)  = B→HBExpr x ∧ B→HBExpr y
-B→HBExpr (x ∨ y)  = B→HBExpr x ∨ B→HBExpr y
-B→HBExpr (¬ x)    = ¬ B→HBExpr x
 
 {-# FOREIGN GHC
   import Data.SBV
@@ -90,15 +90,15 @@ B→HBExpr (¬ x)    = ¬ B→HBExpr x
   data BExpr =
     BFalse            |
     BTrue             |
+    BAnd BExpr BExpr  |
+    BOr BExpr BExpr   |
+    BNot BExpr        |
     BEq IExpr IExpr   |
     BNeq IExpr IExpr  |
     BLt IExpr IExpr   |
     BLe IExpr IExpr   |
     BGt IExpr IExpr   |
-    BGe IExpr IExpr   |
-    BAnd BExpr BExpr  |
-    BOr BExpr BExpr   |
-    BNot BExpr
+    BGe IExpr IExpr
     deriving Show
 
   type VarTable = [(Text, SInt8)]
@@ -159,6 +159,6 @@ postulate
 
 {-# COMPILE GHC HMaybe = data Maybe (Nothing | Just) #-}
 {-# COMPILE GHC HIExpr = data IExpr (Const | Var | Plus | Minus | Mod | Ite) #-}
-{-# COMPILE GHC HBExpr = data BExpr (BFalse | BTrue | BEq | BNeq | BLt | BLe | BGt | BGe | BAnd | BOr | BNot) #-}
+{-# COMPILE GHC HBExpr = data BExpr (BFalse | BTrue | BAnd | BOr | BNot | BEq | BNeq | BLt | BLe | BGt | BGe) #-}
 
 {-# COMPILE GHC solveConstraints = solveConstraints #-}

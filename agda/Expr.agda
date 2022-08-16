@@ -29,15 +29,15 @@ data IExpr : Type where
 data BExpr where
   false : BExpr
   true  : BExpr
+  _∧_   : BExpr → BExpr → BExpr
+  _∨_   : BExpr → BExpr → BExpr
+  ¬_    : BExpr → BExpr
   _==_  : IExpr → IExpr → BExpr
   _≠_   : IExpr → IExpr → BExpr
   _<_   : IExpr → IExpr → BExpr
   _≤_   : IExpr → IExpr → BExpr
   _>_   : IExpr → IExpr → BExpr
   _≥_   : IExpr → IExpr → BExpr
-  _∧_   : BExpr → BExpr → BExpr
-  _∨_   : BExpr → BExpr → BExpr
-  ¬_    : BExpr → BExpr
 
 -- For now variables are evaluated to -9999
 evalI : IExpr → ℤ
@@ -51,15 +51,15 @@ evalI (if b then a else c) = i (evalB b) t (evalI a) e (evalI c)
 --evalB : BExpr → Bool
 evalB false    = false
 evalB true     = true
+evalB (x ∧ y)  = evalB x ∧b evalB y
+evalB (x ∨ y)  = evalB x ∨b evalB y
+evalB (¬ x)    = not (evalB x)
 evalB (x == y) = evalI x ==ℤ evalI y
 evalB (x ≠ y)  = evalI x ≠ℤ evalI y
 evalB (x < y)  = evalI x <ℤ evalI y
 evalB (x ≤ y)  = evalI x ≤ℤ evalI y
 evalB (x > y)  = evalI x >ℤ evalI y
 evalB (x ≥ y)  = evalI x ≥ℤ evalI y
-evalB (x ∧ y)  = evalB x ∧b evalB y
-evalB (x ∨ y)  = evalB x ∨b evalB y
-evalB (¬ x)    = not (evalB x)
 
 varNamesB : BExpr → List String
 
@@ -74,15 +74,15 @@ varNamesI (if b then x else y) = varNamesB b ++ varNamesI x ++ varNamesI y
 --varNamesB : BExpr → List String
 varNamesB false     = []
 varNamesB true      = []
+varNamesB (x ∧ y)   = varNamesB x ++ varNamesB y
+varNamesB (x ∨ y)   = varNamesB x ++ varNamesB y
+varNamesB (¬ x)     = varNamesB x
 varNamesB (x == y)  = varNamesI x ++ varNamesI y
 varNamesB (x ≠ y)   = varNamesI x ++ varNamesI y
 varNamesB (x < y)   = varNamesI x ++ varNamesI y
 varNamesB (x ≤ y)   = varNamesI x ++ varNamesI y
 varNamesB (x > y)   = varNamesI x ++ varNamesI y
 varNamesB (x ≥ y)   = varNamesI x ++ varNamesI y
-varNamesB (x ∧ y)   = varNamesB x ++ varNamesB y
-varNamesB (x ∨ y)   = varNamesB x ++ varNamesB y
-varNamesB (¬ x)     = varNamesB x
 
 -- Utility functions
 

@@ -135,7 +135,7 @@ written in Haskell, chosen due to the availability of the
 high-quality and feature-rich SMT library SBV \citep{SBV}. It was then
 ported to the Agda Music Tools library \cite{MusicTools}, using Agda's
 Haskell foreign function interface (FFI) to call SBV. There is also an
-Agda interface \citep{Schmitty} to SMT and we might convert to using
+Agda interface \citep{Schmitty} to SMT; we might convert to using
 that at some point in the future.
 
 The following sections give an overview of current
@@ -164,7 +164,7 @@ triads, all of them complete save the last and all in root position
 save the second triad in bar 4. Since the notes form triads they
 automatically satisfy consonance rules (only perfect intervals, thirds
 or sixths between any pair of notes vertically); note that a perfect
-fourth is prohibited in two part strict counterpoint but allowed with
+fourth is prohibited in strict two part counterpoint but allowed with
 more voices. Perfect fourths can be found between the top two voices
 in the first, fourth and last bars.
 
@@ -188,13 +188,16 @@ with a hole, and run the tool in synthesis mode using the same
 rules. It makes the same fix Haydn did. Perhaps we gave it too much
 guidance, so instead we can create three holes in a row near the
 error, which generates the solution shown in
-Figure~\ref{fig:b146fix3}. Note that this introduces a series of five
-parallel 6ths, and there is a ``soft'' rule that one should not have
-long sequences of 3rds or 6ths as that also diminishes independence
-of voices. However we can easily add a constraint limiting parallel
-intervals to at most two in a row; the solution returned changes the G
-in bar three to an A, breaking the chain with a fifth, a small
-improvement but one might hope for more.
+Figure~\ref{fig:b146fix3}, with the three generated notes inside the
+blue box. Although there are several possible solutions, the SMT
+solver has chosen to retain the third A while changing the first two
+notes to A as well; the only difference with Haydn's correction is
+that the first note was changed from G to A as well. Although this
+creates a satisfying oblique motion into a perfect fifth between bars
+2 and 3, this same motion occurs between bars 5 and 6; furthermore we
+now have four A notes in a row in addition to the three G notes at the
+end of the second voice. For a middle voice this is not too bad, but
+viewed as just two voices it is a big dull.
 
 \begin{figure}
   \includegraphics[width=8cm]{figures/b146fix3.png}
@@ -203,17 +206,17 @@ improvement but one might hope for more.
   \label{fig:b146fix3}
 \end{figure}
 
-This can be done by adding a constraint to increase contrary motion
-(in which both voices move in opposite directions), and in fact we can
-try generating our own two part counterpoint following Haydn's cantus
-firmus, fixing only the first and last of Beethoven's notes. To help
-create better quality counterpoint we add constraints to limit the
-number of leaps (horizontal intervals of more than a major third) to
-at most one and require at least six instances of contrary motion,
-which turns out to be maximal. Note that it would be extremely
-difficult for a human being with no computer assistance to generate
-counterpoint following such restrictions, but the SMT solver instantly
-returns the solution shown in Figure~\ref{fig:b146gen3}.
+This can be fixed by adding a constraint to limit the number of repeated
+notes, but we can also try generating our own two part counterpoint
+following Haydn's cantus firmus, fixing only the first and last of
+Beethoven's notes. To help create better quality counterpoint we add
+constraints to limit the number of leaps (horizontal intervals of more
+than a major third) to at most one and require at least six instances
+of contrary motion, which turns out to be maximal. Note that it would
+be extremely difficult for a human being with no computer assistance
+to generate counterpoint following such restrictions, but the SMT
+solver instantly returns the solution shown in
+Figure~\ref{fig:b146gen3}.
 
 \begin{figure}
   \includegraphics[width=8cm]{figures/b146gen3.png}

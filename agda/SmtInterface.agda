@@ -52,7 +52,7 @@ iExpr→Pitch d (i _ t _ e _) = 0
 firstSpecies→Pitches : List (IExpr × IExpr) → IO (List (Pitch × Pitch))
 firstSpecies→Pitches xs = do
   let vnames = varNames xs
-      fsc    = firstSpeciesConstraints xs ++ interestingConstraints xs
+      fsc    = firstSpeciesConstraints xs --++ interestingConstraints xs
       cs     = compileConstraints fsc
   res        ← solveConstraints vnames cs
   let f      = iExpr→Pitch (varDictionary vnames res)

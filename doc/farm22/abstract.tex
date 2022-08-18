@@ -229,42 +229,38 @@ arrows and the single leap by a red line.
 \section{Selected Features}
 
 We describe at a high level some of the key features of the
-library. Details can be found in the code repository
-\citep{HaskellCounterpoint}.
+library; it is under development so details may change. The
+latest code is available at \citep{MusicTools}.
 
-At a high level music is represented as a list of voices, which in
-turn are a list of bars, which are in turn a list of beats. Here
-dependent types would be useful to ensure for example that every voice
-has the same number of bars, but a run-time check can also be used to
-enforce this. Each of these elements is parameterized, allowing a
-number of pitch-like elements to be used to construct music. These
-could be algebraic data types representing name (like G\#) and
-octave, or a numeric representation of pitch. Either datum can then be
-embedded into a wrapper, such as \texttt{MPitch} which can either be a
-fixed pitch or a named hole to be solved for.
+The core component is a simple constraint language (\texttt{Expr}) of
+booleans and integers. All constraints must be expressed at a low level
+in this language. Integers represent absolute pitches and there are
+named variables for synthesized pitches. Integer functions include
+addition, subtraction and modulo. Equalities and inequalities convert
+from integers to booleans; a monomorphic \texttt{if\_then\_else\_} allows
+the reverse.
 
-The above representation of music allows natural handling of first,
-second and third species counterpoint (one to four notes per cantus
-firmus note) as well as multi-part counterpoint. At a lower level the
-music is translated into a simpler form---for example first-species
-two part counterpoint is most simply represented as a list of pairs.
+At a higher level, constraints (\texttt{Constraint}) are represented as
+simple algebraic data types. For example \texttt{contrary}
+denotes the \texttt{MotionConstraint} that two pairs of pitches
+(each representing an vertical interval) represent contrary
+motion. Constraints are compiled into boolean expressions, and only the
+constraint author needs to understand these details; the user can
+employ the high-level constraints directly.
 
-We plan to try to implement a constraint language as an embedded
-DSL. However for now Haskell typeclasses are used, which have the
-advantage that constraints can be written in natural Haskell; the only
-drawback is that type signatures are somewhat abstract. The main
-challenge is that we want to write constraints only once and use them
-for both analysis and synthesis. The former expects low-level integers
-and booleans while the latter their symbolic counterparts. This is
-handled by using typeclasses which can be instantiated with either.
+At a higher level still, counterpoint rules (\texttt{Counterpoint})
+take music as input and generate a list of constraints. For analysis of
+music (no unknown pitches), constraints can be compiled and evaluated;
+those which evaluate to false fail to hold. This can be done
+interactively within emacs, for example.
 
-Analysis and synthesis then both take the same music and list of
-constraints. The former checks the constraints returning error
-messages in the higher-level language used to express the music. The
-latter generates (if possible) music by filling in the given holes
-using the constraints and the SMT solver. MIDI is also generated,
-which can then be opened and viewed with notation software such as
-MuseScore.
+For synthesis, the code must currently be compiled and run. The Agda
+constraint language is converted to Haskell and compiled into symbolic
+integers and booleans using SBV (\texttt{Smt}). An SMT solver
+(currently only Z3 is supported) is called to solve for the variable
+pitches, if possible. The result is then output as MIDI
+(\texttt{SmtInterface}) which can then be opened and viewed with
+notation software such as MuseScore.
 
 \section{Future Plans}
 

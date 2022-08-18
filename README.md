@@ -6,6 +6,8 @@ Also you will need to `cabal install --lib` the following libraries:
 * `HCodecs`
 * `sbv`
 
+To use synthesis features, [Z3](https://github.com/Z3Prover/z3) must also be installed and in the path.
+
 I am using the latest development versions of Agda/Agda-Stdlib/Cubical and GHC 9.2.2 but it may work with other versions as well.
 No support is provided if it doesn't work.
 * `agda -c Main.agda`

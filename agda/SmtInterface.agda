@@ -32,7 +32,7 @@ varDictionary xs ys = zip xs (map HMaybeℤ→Pitch ys)
 
 -- Returns 0 if not found.
 lookup : Dict → String → Pitch
-lookup [] s = 0
+lookup []             s = 0
 lookup ((x , n) ∷ xs) s = if x ==s s then n else lookup xs s
 
 -- Assumes each var name appears only once.

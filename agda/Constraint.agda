@@ -86,3 +86,4 @@ compileConstraint (numericConstraint x) = compileNumericConstraint x
 inScaleConstraint : {n : ℕ} → Scale n → IExpr → Constraint
 inScaleConstraint scale pitch =
   setConstraint (inSet (map (+_ ∘ toℕ) (toList scale)) (pitch mod 12))
+

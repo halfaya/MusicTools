@@ -7,6 +7,7 @@ open import Prelude
 open import Pitch
 open import Util using (allPairs; ◯pairs; firstPairs)
 
+
 -- Maximum number of interval classes (0 to 6).
 ic7 : ℕ
 ic7 = 7
@@ -42,6 +43,12 @@ intervalWithinOctave i = toℕ (i mod s12)
 absoluteInterval : Opi → Upi
 absoluteInterval i = ∣ i ∣
 
+opi : Pitch → Pitch → Opi
+opi p q = (+ q) - (+ p)
+
+upi : Pitch → Pitch → Upi
+upi p q = absoluteInterval (opi p q)
+
 makeSigned : Sign → Upi → Opi
 makeSigned Sign.- zero    = + 0
 makeSigned Sign.- (suc i) = -[1+ i ]
@@ -68,6 +75,29 @@ maj10 = 16
 per11 = 17
 aug11 = 18
 per12 = 19
+
+showInterval : Upi → String
+showInterval zero = "per1"
+showInterval (suc zero) = "min2"
+showInterval (suc (suc zero)) = "maj2"
+showInterval (suc (suc (suc zero))) = "min3"
+showInterval (suc (suc (suc (suc zero)))) = "maj3"
+showInterval (suc (suc (suc (suc (suc zero))))) = "per4"
+showInterval (suc (suc (suc (suc (suc (suc zero)))))) = "aug4"
+showInterval (suc (suc (suc (suc (suc (suc (suc zero))))))) = "per5"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) = "min6"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) = "maj6"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))) = "min7"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))) = "maj7"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))) = "per8"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))) = "min9"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = "min10"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = "maj10"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = "per11"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = "aug11"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = "per12"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))) =
+  "interval " ++s primShowNat (20 + n)
 
 isConsonant : Upi → Bool
 isConsonant iv =

@@ -7,7 +7,7 @@ open import Prelude hiding (lookup; #_; _+_; _-_)
 open import IO.Primitive
 
 open import Constraint using (Constraint; compileConstraint)
-open import Counterpoint using (firstSpeciesConstraints; interestingConstraints)
+open import Counterpoint using (firstSpeciesConstraints)
 open import Expr renaming (if_then_else_ to i_t_e_)
 open import Instruments using (piano)
 open import MidiEvent
@@ -49,6 +49,7 @@ iExpr→Pitch d (_ - _)       = 0
 iExpr→Pitch d (_ % _)       = 0
 iExpr→Pitch d (i _ t _ e _) = 0
 
+{-
 firstSpecies→Pitches : List (IExpr × IExpr) → IO (List (Pitch × Pitch))
 firstSpecies→Pitches xs = do
   let vnames = varNames xs
@@ -68,3 +69,4 @@ firstSpecies→Midi xs = do
       tr1 = track "Voice 1" piano channel1 tempo (notes→events defaultVelocity ps1)
       tr2 = track "Voice 2" piano channel2 tempo (notes→events defaultVelocity ps2)
   return (tr1 ∷ tr2 ∷ [])
+-}

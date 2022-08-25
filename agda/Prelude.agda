@@ -5,6 +5,7 @@ module Prelude where
 open import Cubical.Core.Everything     public using (_≡_; Level; Type; _≃_; ~_)
 open import Cubical.Foundations.Prelude public using (refl; sym; _∙_; cong; transport; subst; funExt; transp)
 
+open import Agda.Builtin.String public using (primShowNat)
 open import Data.Bool           public using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
 open import Data.Integer        public using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_) renaming (_+_ to _+ℤ_)
 open import Data.Integer.DivMod public using (_modℕ_)

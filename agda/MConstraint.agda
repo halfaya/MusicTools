@@ -45,10 +45,10 @@ mmc→mc (similarOrParallel     x) = similarOrParallel     (npnp→pp x)
 mmc→mc (notSimilarIntoPerfect x) = notSimilarIntoPerfect (npnp→pp x)
 
 data MIntervalConstraint : Type where
-  inSet : List NInt → NInt → MIntervalConstraint
+  inSet : List NInt → NP → MIntervalConstraint
 
 ic→sc : MIntervalConstraint → SetConstraint
-ic→sc (inSet xs x) = inSet (map (+_ ∘ name→upi) xs) (N (name→upi x))
+ic→sc (inSet xs x) = inSet (map (+_ ∘ name→upi) xs) (toUpi (np→p x))
 
 data MScaleConstraint : Type where
   inScale : Key → NPitch → MScaleConstraint

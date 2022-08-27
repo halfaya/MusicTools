@@ -19,7 +19,7 @@ open import Symbolic
 open import Util using (filter)
 
 test : List MConstraint
-test = firstSpeciesConstraints (key C major) beethoven146h
+test = firstSpeciesConstraints (key C major) beethoven146cf
 
 test1 : List String
 test1 = map ppMConstraint test

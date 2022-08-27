@@ -25,8 +25,8 @@ firstSpeciesConstraints : Key → List NP → List MConstraint
 firstSpeciesConstraints k ns =
   let v1 = map snd ns
       v2 = map fst ns
-  in map (scaleConstraint ∘ inScale k ) (v1 ++ v1) ++
-     map (intervalConstraint ∘ inSet firstSpeciesIntervals4 ∘ toNInt) ns ++
+  in map (scaleConstraint ∘ inScale k ) (v1 ++ v2) ++
+     map (intervalConstraint ∘ inSet firstSpeciesIntervals4) ns ++
      map (motionConstraint ∘ notSimilarIntoPerfect) (pairs ns)
 
 -- Constraints to make the music more interesting
@@ -35,7 +35,7 @@ interestingConstraints ns =
   let ps = map np→p ns
   in constraint ((numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps) ∷
      constraint ((numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps) ∷
-     map (intervalConstraint ∘ inSet firstSpeciesIntervals ∘ toNInt) (middle ns)
+     map (intervalConstraint ∘ inSet firstSpeciesIntervals) (middle ns)
 
 defaultConstraints : List NP → List MConstraint
 defaultConstraints ns = firstSpeciesConstraints (key C major) ns ++ interestingConstraints ns

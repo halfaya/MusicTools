@@ -55,7 +55,8 @@ ppMMotionConstraint (similarOrParallel x)     = "SimilarOrParallel "            
 ppMMotionConstraint (notSimilarIntoPerfect x) = "NotParallelOrSimilarIntoPerfect " ++s ppNPNP x
 
 ppMIntervalConstraint : MIntervalConstraint → String
-ppMIntervalConstraint (inSet xs x) = "InIntervals " ++s ppList showNInt xs ++s " " ++s showNInt x
+ppMIntervalConstraint (inSet xs x) =
+  "InIntervals " ++s ppList showNInt xs ++s " " ++s ppNInt x
 
 ppMScaleConstraint : MScaleConstraint → String
 ppMScaleConstraint (inScale k x) = "InScaleOfKey " ++s showKey k ++s " " ++s showNPitch x

@@ -7,12 +7,13 @@ open import Data.Unit using (⊤)
 open import IO.Primitive
 
 open import Beethoven
+open import Counterpoint using (defaultConstraints)
 open import Midi         using (exportTracks; track→htrack)
-open import SmtInterface using (firstSpecies→Midi)
+open import SmtInterface using (solveToMidi)
 
 main : IO ⊤
 main = do
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
-  song             ← firstSpecies→Midi beethoven146cf
+  song             ← solveToMidi defaultConstraints beethoven146cf
   exportTracks file ticksPerBeat (map track→htrack song)

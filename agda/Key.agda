@@ -6,12 +6,6 @@ open import Prelude
 
 open import Pitch
 
--- Keys (just a few for now)
-data Key : Type where
-  C : Key
-  F : Key
-  G : Key
-
 -- Accidentals
 data Acc : Type where
   ♭ : Acc

@@ -4,11 +4,70 @@ module Symbolic where
 
 open import Prelude
 
-open import Expr hiding (_+_)
+open import Expr hiding (_+_; #_)
 open import Pitch
 open import Interval
 
 -- Named Pitch
+data NoteName : Type where
+  C  : NoteName
+  C♯ : NoteName
+  D♭ : NoteName
+  D  : NoteName
+  D♯ : NoteName
+  E♭ : NoteName
+  E  : NoteName
+  F  : NoteName
+  F♯ : NoteName
+  G♭ : NoteName
+  G  : NoteName
+  G♯ : NoteName
+  A♭ : NoteName
+  A  : NoteName
+  A♯ : NoteName
+  B♭ : NoteName
+  B  : NoteName
+
+showNoteName : NoteName → String
+showNoteName C  = "C"
+showNoteName C♯ = "C♯"
+showNoteName D♭ = "D♭"
+showNoteName D  = "D"
+showNoteName D♯ = "D♯"
+showNoteName E♭ = "E♭"
+showNoteName E  = "E"
+showNoteName F  = "F"
+showNoteName F♯ = "F♯"
+showNoteName G♭ = "G♭"
+showNoteName G  = "G"
+showNoteName G♯ = "G♯"
+showNoteName A♭ = "A♭"
+showNoteName A  = "A"
+showNoteName A♯ = "A♯"
+showNoteName B♭ = "B♭"
+showNoteName B  = "B"
+
+noteName→PC : NoteName → PC
+noteName→PC C  = # 0
+noteName→PC C♯ = # 1
+noteName→PC D♭ = # 1
+noteName→PC D  = # 2
+noteName→PC D♯ = # 3
+noteName→PC E♭ = # 3
+noteName→PC E  = # 4
+noteName→PC F  = # 5
+noteName→PC F♯ = # 6
+noteName→PC G♭ = # 6
+noteName→PC G  = # 7
+noteName→PC G♯ = # 8
+noteName→PC A♭ = # 8
+noteName→PC A  = # 9
+noteName→PC A♯ = # 10
+noteName→PC B♭ = # 10
+noteName→PC B  = # 11
+
+-- Named Pitch
+-- We don't use a product type here since it would be more verbose.
 data NPitch : Type where
   C  : Octave → NPitch
   C♯ : Octave → NPitch
@@ -48,6 +107,45 @@ showNPitch (A♯ o) = "A♯" ++s primShowNat o
 showNPitch (B♭ o) = "B♭" ++s primShowNat o
 showNPitch (B  o) = "B"  ++s primShowNat o
 showNPitch (?? s) = "?"  ++s s
+
+noteName→npitch : NoteName → Octave → NPitch
+noteName→npitch C  o = C  o
+noteName→npitch C♯ o = C♯ o
+noteName→npitch D♭ o = D♭ o
+noteName→npitch D  o = D  o
+noteName→npitch D♯ o = D♯ o
+noteName→npitch E♭ o = E♭ o
+noteName→npitch E  o = E  o
+noteName→npitch F  o = F  o
+noteName→npitch F♯ o = F♯ o
+noteName→npitch G♭ o = G♭ o
+noteName→npitch G  o = G  o
+noteName→npitch G♯ o = G♯ o
+noteName→npitch A♭ o = A♭ o
+noteName→npitch A  o = A  o
+noteName→npitch A♯ o = A♯ o
+noteName→npitch B♭ o = B♭ o
+noteName→npitch B  o = B  o
+
+npitch→noteName : NPitch → NoteName
+npitch→noteName (C  o) = C
+npitch→noteName (C♯ o) = C♯
+npitch→noteName (D♭ o) = D♭
+npitch→noteName (D  o) = D
+npitch→noteName (D♯ o) = D♯
+npitch→noteName (E♭ o) = E♭
+npitch→noteName (E  o) = E
+npitch→noteName (F  o) = F
+npitch→noteName (F♯ o) = F♯
+npitch→noteName (G♭ o) = G♭
+npitch→noteName (G  o) = G
+npitch→noteName (G♯ o) = G♯
+npitch→noteName (A♭ o) = A♭
+npitch→noteName (A  o) = A
+npitch→noteName (A♯ o) = A♯
+npitch→noteName (B♭ o) = B♭
+npitch→noteName (B  o) = B
+npitch→noteName (?? s) = C -- make this C for now; should fix this somewhow
 
 name→pitch : NPitch → IExpr
 name→pitch (C  o) = N (o * s12 + 0)
@@ -173,3 +271,46 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 
 nint : NPitch → NPitch → NInt
 nint a b = upi→name (upi (name→p a) (name→p b))
+
+-- Keys (just a few for now)
+data KeyRoot : Type where
+  C : KeyRoot
+  F : KeyRoot
+  G : KeyRoot
+
+showKeyRoot : KeyRoot → String
+showKeyRoot C = "C"
+showKeyRoot F = "F"
+showKeyRoot G = "G"
+
+data KeyQuality : Type where
+  major         : KeyQuality
+--  naturalMinor  : KeyQuality
+--  harmonicMinor : KeyQuality
+--  melodicMinor  : KeyQuality
+
+showKeyQuality : KeyQuality → String
+showKeyQuality major = "maj"
+
+-- For now these are 7 note scales
+data Key : Type where
+  key : KeyRoot → KeyQuality → Key
+
+showKey : Key → String
+showKey (key k q) = showKeyRoot k ++s showKeyQuality q
+
+scale : Key → Vec NoteName s7
+scale (key C major) = C ∷ D ∷ E ∷ F ∷ G ∷ A ∷ B ∷ []
+scale (key F major) = F ∷ G ∷ A ∷ B♭ ∷ C ∷ D ∷ E ∷ []
+scale (key G major) = G ∷ A ∷ B ∷ C ∷ D ∷ E ∷ F♯ ∷ []
+
+chromaticScale : Vec NoteName s12
+chromaticScale = C ∷ C♯ ∷ D ∷ E♭ ∷ E ∷ F ∷ F♯ ∷ G ∷ A♭ ∷ A ∷ B♭ ∷ B ∷ []
+
+toScale : {n : ℕ} → Vec NoteName n → Scale n
+toScale = vmap noteName→PC
+
+pitch→npitch : Pitch → NPitch
+pitch→npitch n =
+  let (p , o) = absoluteToRelative n
+  in noteName→npitch (lookup chromaticScale p) o

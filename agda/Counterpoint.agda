@@ -5,7 +5,9 @@ module Counterpoint where
 
 open import Prelude
 
-open import HConstraint
+open import Interval
+open import Constraint hiding (motionConstraint; notSimilarIntoPerfect)
+open import MConstraint
 open import Symbolic
 open import Util using (pairs; filter; middle)
 
@@ -19,22 +21,21 @@ firstSpeciesIntervals = Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ Per8 ∷ []
 firstSpeciesIntervals4 : List NInt
 firstSpeciesIntervals4 = Per4 ∷ firstSpeciesIntervals
 
-firstSpeciesConstraints : List NP → List HConstraint
-firstSpeciesConstraints ps = map (motionConstraint ∘ notSimilarIntoPerfect) (pairs ps)
+firstSpeciesConstraints : Key → List NP → List MConstraint
+firstSpeciesConstraints k ns =
+  let v1 = map snd ns
+      v2 = map fst ns
+  in map (scaleConstraint ∘ inScale k ) (v1 ++ v1) ++
+     map (intervalConstraint ∘ inSet firstSpeciesIntervals4 ∘ toNInt) ns ++
+     map (motionConstraint ∘ notSimilarIntoPerfect) (pairs ns)
 
-{-
-firstSpeciesConstraints : List P → List Constraint
-firstSpeciesConstraints ps =
-  let v1 = map snd ps
-      v2 = map fst ps
-  in map (inScaleConstraint majorScale) (v1 ++ v2) ++ -- for now assumes key is C
-     map (setConstraint ∘ inSet firstSpeciesIntervals4 ∘ toOpi) ps ++
-     map (motionConstraint ∘ notSimilarIntoPerfect) (pairs ps)
+-- Constraints to make the music more interesting
+interestingConstraints : List NP → List MConstraint
+interestingConstraints ns =
+  let ps = map np→p ns
+  in constraint ((numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps) ∷
+     constraint ((numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps) ∷
+     map (intervalConstraint ∘ inSet firstSpeciesIntervals ∘ toNInt) (middle ns)
 
--- Contraints to make the music more interesting
-interestingConstraints : List P → List Constraint
-interestingConstraints ps =
-  (numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps ∷
-  (numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps ∷
-  map (setConstraint ∘ inSet firstSpeciesIntervals ∘ toOpi) (middle ps)
--}
+defaultConstraints : List NP → List MConstraint
+defaultConstraints ns = firstSpeciesConstraints (key C major) ns ++ interestingConstraints ns

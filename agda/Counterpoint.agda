@@ -7,6 +7,7 @@ open import Prelude
 
 open import Interval
 open import Constraint hiding (motionConstraint; notSimilarIntoPerfect)
+open import Location
 open import MConstraint
 open import Symbolic
 open import Util using (pairs; filter; middle)
@@ -21,21 +22,25 @@ firstSpeciesIntervals = Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ Per8 ∷ []
 firstSpeciesIntervals4 : List NInt
 firstSpeciesIntervals4 = Per4 ∷ firstSpeciesIntervals
 
-firstSpeciesConstraints : Key → List NP → List MConstraint
+firstSpeciesConstraints : Key → List NP → List (Ranged MConstraint)
 firstSpeciesConstraints k ns =
-  let v1 = map snd ns
-      v2 = map fst ns
-  in map (scaleConstraint ∘ inScale k ) (v1 ++ v2) ++
-     map (intervalConstraint ∘ inSet firstSpeciesIntervals4) ns ++
-     map (motionConstraint ∘ notSimilarIntoPerfect) (pairs ns)
+  let lp = index2VoiceBeat ns
+      v1 = map snd lp
+      v2 = map fst lp
+  in map (mapRanged scaleConstraint ∘ locScaleConstraint k) (v1 ++ v2) ++
+     map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals4) lp ++
+     map (mapRanged motionConstraint ∘ locMotionConstraint notSimilarIntoPerfect) (pairs lp)
 
 -- Constraints to make the music more interesting
-interestingConstraints : List NP → List MConstraint
+interestingConstraints : List NP → List (Ranged MConstraint)
 interestingConstraints ns =
   let ps = map np→p ns
-  in constraint ((numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps) ∷
-     constraint ((numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps) ∷
-     map (intervalConstraint ∘ inSet firstSpeciesIntervals) (middle ns)
+      lp = index2VoiceBeat ns
+      r  = fullRange2 ns
+  in ranged r (constraint ((numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps)) ∷
+     ranged r (constraint ((numericConstraint ∘ numLeaps≤ (+ maj3) (+ 1) ∘ map fst) ps)) ∷
+     map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) (middle lp)
 
+-- For synthesis, so don't need range
 defaultConstraints : List NP → List MConstraint
-defaultConstraints ns = firstSpeciesConstraints (key C major) ns ++ interestingConstraints ns
+defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) ns ++ interestingConstraints ns)

@@ -5,6 +5,7 @@ module Util where
 open import Prelude
 
 open import Data.Integer public  using () renaming (_≤ᵇ_ to _≤ℤ_)
+open import Data.Integer.DivMod  using () renaming (_modℕ_ to _modN_)
 open import Data.Nat             using (_<_; _<ᵇ_)
 open import Data.Nat.Properties  using (≤-step; ≤-trans; ≤-refl)
 open import Relation.Nullary.Decidable using (False)
@@ -205,11 +206,21 @@ a ≥ℤ b = not (a <ℤ b)
 
 --
 
-infixl 7 _modℤ_
+infixl 7 _divℕ_ _modℕ_ _modℤ_
+
+-- If trying to compute n div 0 just return 0.
+_divℕ_ : ℕ → ℕ → ℕ
+n divℕ zero  = 0
+n divℕ suc d = n div (suc d)
+
+-- If trying to compute n mod 0 just return 0.
+_modℕ_ : ℕ → ℕ → ℕ
+n modℕ zero  = 0
+n modℕ suc d = toℕ (n mod (suc d))
 
 -- Integer modulus. If trying to compute n mod 0 just return 0.
 -- Always returns a non-negative value.
 _modℤ_ : ℤ → ℤ → ℤ
 n modℤ +_     zero    = + 0
-n modℤ +_     (suc d) = + (n modℕ (suc d))
-n modℤ -[1+_] d       = + (n modℕ (suc d))
+n modℤ +_     (suc d) = + (n modN (suc d))
+n modℤ -[1+_] d       = + (n modN (suc d))

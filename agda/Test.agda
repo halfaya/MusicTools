@@ -1,37 +1,31 @@
-{-# OPTIONS --erased-cubical #-}
+{-# OPTIONS --erased-cubical --safe #-}
 
 module Test where
 
-open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_)
+open import Prelude
 
 open import Beethoven
 open import Constraint
 open import MConstraint
 open import Counterpoint
 open import Expr
-open import Pitch
+open import Location
 open import PrettyPrint
-open import Interval
-open import Smt
-open import SmtInterface
 open import Symbolic
 
 open import Util using (filter)
 
-test : List MConstraint
-test = firstSpeciesConstraints (key C major) beethoven146cf
+test : List (Ranged MConstraint)
+test = firstSpeciesConstraints (key C major) beethoven146
 
 test1 : List String
-test1 = map ppMConstraint test
+test1 = map (showRanged ppMConstraint) test
 
 test2 : List BExpr
-test2 = map (compileConstraint ∘ mc→c) test
+test2 = map (compileConstraint ∘ mc→c ∘ unrange) test
 
---test3 : List HBExpr
---test3 = compileConstraints test
+test3 : List (Ranged MConstraint)
+test3 = filter (not ∘ evalB ∘ compileConstraint ∘ mc→c ∘ unrange) test
 
-test4 : List MConstraint
-test4 = filter (not ∘ evalB ∘ compileConstraint ∘ mc→c) test
-
-test5 : List String
-test5 = map ppMConstraint test4
+test4 : List String
+test4 = map (showRanged ppMConstraint) test3

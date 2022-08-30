@@ -8,7 +8,6 @@ open import Cubical.Foundations.Prelude public using (refl; sym; _∙_; cong; tr
 open import Agda.Builtin.String public using (primShowNat)
 open import Data.Bool           public using (Bool; true; false; _∨_; _∧_; not; if_then_else_)
 open import Data.Integer        public using (ℤ; +_; -[1+_]; _-_; ∣_∣; -_) renaming (_+_ to _+ℤ_)
-open import Data.Integer.DivMod public using (_modℕ_)
 open import Data.Fin            public using (Fin; #_; toℕ; inject; fromℕ; fromℕ<; inject₁) renaming (zero to fz; suc to fs) renaming (_≟_ to _≟Fin_)
 open import Data.List           public using (List; []; _∷_; _∷ʳ_; foldl; foldr; map; reverse; length; _++_; take; drop; concat; zip; replicate; sum)
 open import Data.Maybe          public using (Maybe; just; nothing) renaming (map to mmap)

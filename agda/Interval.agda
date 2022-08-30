@@ -4,6 +4,8 @@ module Interval where
 
 open import Prelude
 
+open import Data.Integer.DivMod using (_modℕ_)
+
 open import Pitch
 open import Util using (allPairs; ◯pairs; firstPairs)
 

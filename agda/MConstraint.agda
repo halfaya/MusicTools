@@ -82,7 +82,7 @@ data MIntervalConstraint : Type where
   inSet : List NInt → NP → MIntervalConstraint
 
 ic→sc : MIntervalConstraint → SetConstraint
-ic→sc (inSet xs x) = inSet (map (+_ ∘ name→upi) xs) (toUpi (np→p x))
+ic→sc (inSet xs x) = inSet (map (+_ ∘ name→upi) xs) (toOpi (np→p x))
 
 -- interval constraint indexed with range
 locIntervalConstraint : List NInt → LP → Ranged MIntervalConstraint

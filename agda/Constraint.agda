@@ -49,15 +49,15 @@ data MotionConstraint : Type where
 
 compileMotionConstraint : MotionConstraint → BExpr
 compileMotionConstraint (contrary ((a , b) , c , d)) =
-  (a < c ∧ d < b) ∨ (c < a ∧ b < d) 
+  (a < c ∧ b > d) ∨ (a > c ∧ b < d) 
 compileMotionConstraint (oblique ((a , b) , c , d)) =
   (a == c ∧ b ≠ d) ∨ (a ≠ c ∧ b == d) 
 compileMotionConstraint (parallel ((a , b) , c , d)) =
   c - a == d - b
 compileMotionConstraint (similar ((a , b) , c , d)) =
-  ((a < c ∧ b < d) ∨ (c < a ∧ d < b)) ∧ (c - a ≠ d - b)
+  ((a < c ∧ b < d) ∨ (a > c ∧ b > d)) ∧ (c - a ≠ d - b)
 compileMotionConstraint (similarOrParallel ((a , b) , c , d)) =
-  (a < c ∧ b < d) ∨ (c < a ∧ d < b) ∨ (a == c ∧ b == d)
+  (a < c ∧ b < d) ∨ (a > c ∧ b > d) ∨ (a == c ∧ b == d)
 compileMotionConstraint (notSimilarIntoPerfect ((a , b) , c , d)) =
   ¬ (perfectInterval4 c d ∧ compileMotionConstraint (similarOrParallel ((a , b) , c , d)))
   -- note that we currently include 4ths as perfect intervals

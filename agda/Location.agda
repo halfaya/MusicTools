@@ -15,13 +15,16 @@ data Location : Type where
   voiceBeat    : Voice →       Beat → Location
   voiceBarBeat : Voice → Bar → Beat → Location
 
+-- Assumes bars and beats are indexed starting at 1
 toVoiceBeat : ℕ → Location → Location
 toVoiceBeat _           vb@(voiceBeat _ _)        = vb
-toVoiceBeat beatsPerBar (voiceBarBeat v bar beat) = voiceBeat v (bar * beatsPerBar + beat)
+toVoiceBeat beatsPerBar (voiceBarBeat v bar beat) = voiceBeat v (pred bar * beatsPerBar + beat)
 
+-- Assumes bars and beats are indexed starting at 1
 -- For now assume no pickup bar.
 toVoiceBarBeat : (n : ℕ) → Location → Location
-toVoiceBarBeat beatsPerBar     (voiceBeat    v b )  = voiceBarBeat v (b divℕ beatsPerBar) (b modℕ beatsPerBar)
+toVoiceBarBeat beatsPerBar     (voiceBeat    v b )  =
+  voiceBarBeat v (suc ((pred b) divℕ beatsPerBar)) (suc ((pred b) modℕ beatsPerBar))
 toVoiceBarBeat _           vbb@(voiceBarBeat _ _ _) = vbb
 
 showLocation : Location → String
@@ -50,6 +53,14 @@ showRange : Range → String
 showRange (location loc) = "[" ++s showLocation loc ++s "]"
 showRange (range l1 l2)  = "[" ++s showLocation l1 ++s ", " ++s showLocation l2 ++s "]"
 
+toVBrange : ℕ → Range → Range
+toVBrange n (location loc) = location (toVoiceBeat n loc)
+toVBrange n (range  l1 l2) = range (toVoiceBeat n l1) (toVoiceBeat n l2)
+
+toVBBrange : ℕ → Range → Range
+toVBBrange n (location loc) = location (toVoiceBarBeat n loc)
+toVBBrange n (range  l1 l2) = range (toVoiceBarBeat n l1) (toVoiceBarBeat n l2)
+
 data Ranged (A : Type) : Type where
   ranged : Range → A → Ranged A
 
@@ -59,6 +70,9 @@ unrange (ranged _ x) = x
 -- Creates a range from (Voice 1, Beat 1) to (Voice 2, Beat n) where n is the length of the list.
 fullRange2 : {A : Type} → List A → Range
 fullRange2 xs = range (voiceBeat 1 1) (voiceBeat 2 (length xs))
+
+mapRange : {A : Type} → (Range → Range) → Ranged A → Ranged A
+mapRange f (ranged r x) = ranged (f r) x
 
 mapRanged : {A B : Type} → (A → B) → Ranged A → Ranged B
 mapRanged f (ranged r x) = ranged r (f x)

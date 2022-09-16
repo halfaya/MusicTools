@@ -6,7 +6,7 @@ module Counterpoint where
 open import Prelude
 
 open import Interval
-open import Constraint hiding (motionConstraint; notSimilarIntoPerfect)
+open import Constraint hiding (motionConstraint; notDirectIntoPerfect)
 open import Location
 open import MConstraint
 open import Symbolic
@@ -29,7 +29,7 @@ firstSpeciesConstraints k ns =
       v2 = map fst lp
   in map (mapRanged scaleConstraint ∘ locScaleConstraint k) (v1 ++ v2) ++
      map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals4) lp ++
-     map (mapRanged motionConstraint ∘ locMotionConstraint notSimilarIntoPerfect) (pairs lp)
+     map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 
 -- Constraints to make the music more interesting
 interestingConstraints : List NP → List (Ranged MConstraint)

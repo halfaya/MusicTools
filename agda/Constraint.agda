@@ -44,8 +44,8 @@ data MotionConstraint : Type where
   oblique               : PP → MotionConstraint
   parallel              : PP → MotionConstraint
   similar               : PP → MotionConstraint
-  similarOrParallel     : PP → MotionConstraint
-  notSimilarIntoPerfect : PP → MotionConstraint
+  direct                : PP → MotionConstraint -- similar or parallel
+  notDirectIntoPerfect : PP → MotionConstraint
 
 compileMotionConstraint : MotionConstraint → BExpr
 compileMotionConstraint (contrary ((a , b) , c , d)) =
@@ -56,10 +56,10 @@ compileMotionConstraint (parallel ((a , b) , c , d)) =
   c - a == d - b
 compileMotionConstraint (similar ((a , b) , c , d)) =
   ((a < c ∧ b < d) ∨ (a > c ∧ b > d)) ∧ (c - a ≠ d - b)
-compileMotionConstraint (similarOrParallel ((a , b) , c , d)) =
+compileMotionConstraint (direct ((a , b) , c , d)) =
   (a < c ∧ b < d) ∨ (a > c ∧ b > d) ∨ (a == c ∧ b == d)
-compileMotionConstraint (notSimilarIntoPerfect ((a , b) , c , d)) =
-  ¬ (perfectInterval4 c d ∧ compileMotionConstraint (similarOrParallel ((a , b) , c , d)))
+compileMotionConstraint (notDirectIntoPerfect ((a , b) , c , d)) =
+  ¬ (perfectInterval4 c d ∧ compileMotionConstraint (direct ((a , b) , c , d)))
   -- note that we currently include 4ths as perfect intervals
 
 data NumericConstraint : Type where

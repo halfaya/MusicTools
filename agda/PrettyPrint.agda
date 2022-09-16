@@ -43,16 +43,16 @@ ppMotionConstraint (contrary x)              = "Contrary "                      
 ppMotionConstraint (oblique x)               = "Oblique "                         ++s ppPP x
 ppMotionConstraint (parallel x)              = "Parallel "                        ++s ppPP x
 ppMotionConstraint (similar x)               = "Similar "                         ++s ppPP x
-ppMotionConstraint (similarOrParallel x)     = "SimilarOrParallel "               ++s ppPP x
-ppMotionConstraint (notSimilarIntoPerfect x) = "NotParallelOrSimilarIntoPerfect " ++s ppPP x
+ppMotionConstraint (direct x)                = "Direct "                          ++s ppPP x
+ppMotionConstraint (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppPP x
 
 ppMMotionConstraint : MMotionConstraint → String
 ppMMotionConstraint (contrary x)              = "Contrary "                        ++s ppNPNP x
 ppMMotionConstraint (oblique x)               = "Oblique "                         ++s ppNPNP x
 ppMMotionConstraint (parallel x)              = "Parallel "                        ++s ppNPNP x
 ppMMotionConstraint (similar x)               = "Similar "                         ++s ppNPNP x
-ppMMotionConstraint (similarOrParallel x)     = "SimilarOrParallel "               ++s ppNPNP x
-ppMMotionConstraint (notSimilarIntoPerfect x) = "NotParallelOrSimilarIntoPerfect " ++s ppNPNP x
+ppMMotionConstraint (direct x)                = "Direct "                          ++s ppNPNP x
+ppMMotionConstraint (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppNPNP x
 
 ppMIntervalConstraint : MIntervalConstraint → String
 ppMIntervalConstraint (inSet xs x) =

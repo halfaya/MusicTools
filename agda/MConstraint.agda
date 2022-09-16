@@ -50,24 +50,24 @@ data Motion : Type where
   oblique               : Motion
   parallel              : Motion
   similar               : Motion
-  similarOrParallel     : Motion
-  notSimilarIntoPerfect : Motion
+  direct                : Motion
+  notDirectIntoPerfect  : Motion
 
 data MMotionConstraint : Type where
   contrary              : NPNP → MMotionConstraint
   oblique               : NPNP → MMotionConstraint
   parallel              : NPNP → MMotionConstraint
   similar               : NPNP → MMotionConstraint
-  similarOrParallel     : NPNP → MMotionConstraint
-  notSimilarIntoPerfect : NPNP → MMotionConstraint
+  direct                : NPNP → MMotionConstraint
+  notDirectIntoPerfect  : NPNP → MMotionConstraint
 
 mmc→mc : MMotionConstraint → MotionConstraint
 mmc→mc (contrary              x) = contrary              (npnp→pp x)
 mmc→mc (oblique               x) = oblique               (npnp→pp x)
 mmc→mc (parallel              x) = parallel              (npnp→pp x)
 mmc→mc (similar               x) = similar               (npnp→pp x)
-mmc→mc (similarOrParallel     x) = similarOrParallel     (npnp→pp x)
-mmc→mc (notSimilarIntoPerfect x) = notSimilarIntoPerfect (npnp→pp x)
+mmc→mc (direct                x) = direct                (npnp→pp x)
+mmc→mc (notDirectIntoPerfect  x) = notDirectIntoPerfect  (npnp→pp x)
 
 -- motion constraint indexed with range
 locMotionConstraint : Motion → LPLP → Ranged MMotionConstraint
@@ -75,8 +75,8 @@ locMotionConstraint contrary              x = ranged (lplpRange x) (contrary    
 locMotionConstraint oblique               x = ranged (lplpRange x) (oblique               (lplp→npnp x))
 locMotionConstraint parallel              x = ranged (lplpRange x) (parallel              (lplp→npnp x))
 locMotionConstraint similar               x = ranged (lplpRange x) (similar               (lplp→npnp x))
-locMotionConstraint similarOrParallel     x = ranged (lplpRange x) (similarOrParallel     (lplp→npnp x))
-locMotionConstraint notSimilarIntoPerfect x = ranged (lplpRange x) (notSimilarIntoPerfect (lplp→npnp x))
+locMotionConstraint direct                x = ranged (lplpRange x) (direct                (lplp→npnp x))
+locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→npnp x))
 
 data MIntervalConstraint : Type where
   inSet : List NInt → NP → MIntervalConstraint

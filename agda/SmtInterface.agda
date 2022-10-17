@@ -14,6 +14,7 @@ open import Instruments using (piano)
 open import MidiEvent
 open import Note
 open import Pitch
+open import Util using (_divℕ_)
 open import Smt using (HMaybe; just; nothing; HBExpr; B→HBExpr; solveConstraints)
 open import Symbolic
 
@@ -60,13 +61,13 @@ solvePitches cons ns = do
   let f      = iExpr→Pitch (varDictionary vnames res)
   return (map (λ x → f (fst x) , f (snd x)) xs)
 
-solveToMidi : (List NP → List MConstraint) → List NP → IO (List MidiTrack)
-solveToMidi cons ns = do
+solveToMidi : Duration → (List NP → List MConstraint) → List NP → IO (List MidiTrack)
+solveToMidi dur cons ns = do
   ps      ← solvePitches cons ns
       -- note that higher MIDI voice is at top, but the input has lower voice first
-  let ps1 = map (tone half ∘ snd) ps
-      ps2 = map (tone half ∘ fst) ps
-      tempo = 240
+  let ps1 = map (tone dur ∘ snd) ps
+      ps2 = map (tone dur ∘ fst) ps
+      tempo = (480 * 16) divℕ dur
       tr1 = track "Voice 1" piano channel1 tempo (notes→events defaultVelocity ps1)
       tr2 = track "Voice 2" piano channel2 tempo (notes→events defaultVelocity ps2)
   return (tr1 ∷ tr2 ∷ [])

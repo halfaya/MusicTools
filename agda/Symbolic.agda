@@ -198,6 +198,11 @@ data NInt : Type where
   Per11 : NInt
   Aug11 : NInt
   Per12 : NInt
+  Min13 : NInt
+  Maj13 : NInt
+  Min14 : NInt
+  Maj14 : NInt
+  Per15 : NInt
   Int   : Upi → NInt
 
 showNInt : NInt → String
@@ -221,6 +226,11 @@ showNInt Maj10   = "Maj10"
 showNInt Per11   = "Per11"
 showNInt Aug11   = "Aug11"
 showNInt Per12   = "Per12"
+showNInt Min13   = "Min13"
+showNInt Maj13   = "Maj13"
+showNInt Min14   = "Min14"
+showNInt Maj14   = "Maj14"
+showNInt Per15   = "Per15"
 showNInt (Int n) = "Int" ++s primShowNat n
 
 name→upi : NInt → Upi
@@ -244,6 +254,11 @@ name→upi Maj10   = maj10
 name→upi Per11   = per11
 name→upi Aug11   = aug11
 name→upi Per12   = per12
+name→upi Min13   = min13
+name→upi Maj13   = maj13
+name→upi Min14   = min14
+name→upi Maj14   = maj14
+name→upi Per15   = per15
 name→upi (Int n) = n
 
 upi→name : Upi → NInt
@@ -261,13 +276,18 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))) = Mi
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))) = Maj7
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))) = Per8
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))) = Min9
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = Min10
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = Maj10
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = Per11
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = Aug11
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = Per12
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))) =
-  Int (20 + n)
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = Maj9
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = Min10
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = Maj10
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = Per11
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = Aug11
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))) = Per12
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))) = Min13
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = Maj13
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = Min14
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = Maj14
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))))) = Per15
+upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
 
 nint : NPitch → NPitch → NInt
 nint a b = upi→name (upi (name→p a) (name→p b))

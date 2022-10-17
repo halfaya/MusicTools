@@ -4,11 +4,24 @@ module Beethoven where
 
 open import Prelude
 
+open import Music
 open import Symbolic
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
-beethoven146 : List (NPitch × NPitch)
+beethoven146 : Vec (Vec NPitch 12) 4
 beethoven146 =
+  (C 6 ∷ E 6 ∷ G 6 ∷ F 6 ∷ E 6 ∷ C 6 ∷ A 6 ∷ F 6 ∷ G 6 ∷ E 6 ∷ D 6 ∷ C 6 ∷ []) ∷
+  (G 5 ∷ C 6 ∷ B 5 ∷ A 5 ∷ G 5 ∷ F 5 ∷ A 5 ∷ C 6 ∷ B 5 ∷ G 5 ∷ G 5 ∷ G 5 ∷ []) ∷
+  (E 5 ∷ C 5 ∷ D 5 ∷ D 5 ∷ B 4 ∷ A 4 ∷ C 5 ∷ C 5 ∷ D 5 ∷ C 5 ∷ B 4 ∷ C 5 ∷ []) ∷
+  (C 5 ∷ A 4 ∷ G 4 ∷ D 4 ∷ E 4 ∷ F 4 ∷ F 4 ∷ A 4 ∷ G 4 ∷ C 5 ∷ G 4 ∷ C 4 ∷ []) ∷ []
+
+beethoven146c : Counterpoint 4 12
+beethoven146c = cp (vmap (pitches→melody 1 ∘ vmap name→p) beethoven146)
+
+-- Example 146 (page 29, number 2) in Beethoven Werke XIII
+-- Soprano and Alto voice only
+beethoven146sa : List (NPitch × NPitch)
+beethoven146sa =
    (G 5 , C 6) ∷
    (C 6 , E 6) ∷
    (B 5 , G 6) ∷

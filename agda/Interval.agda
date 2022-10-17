@@ -77,6 +77,11 @@ maj10 = 16
 per11 = 17
 aug11 = 18
 per12 = 19
+min13 = 20
+maj13 = 21
+min14 = 22
+maj14 = 23
+per15 = 24
 
 showInterval : Upi → String
 showInterval zero = "per1"
@@ -98,8 +103,12 @@ showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (s
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = "per11"
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = "aug11"
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = "per12"
-showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))) =
-  "interval " ++s primShowNat (20 + n)
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))) = "min13"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))) = "maj13"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = "min14"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = "maj14"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = "per15"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n)))))))))))))))))))))))) = "interval " ++s primShowNat (25 + n)
 
 isConsonant : Upi → Bool
 isConsonant iv =

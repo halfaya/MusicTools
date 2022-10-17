@@ -6,17 +6,20 @@ open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_)
 
 open import Beethoven
 open import Constraint
+open import Kennan
 open import MConstraint
 open import Counterpoint
 open import Expr
 open import Location
 open import PrettyPrint
 open import Symbolic
+open import Tanaka
 
 open import Util using (filter)
 
 test : List (Ranged MConstraint)
-test = firstSpeciesConstraints (key C major) beethoven146
+--test = firstSpeciesConstraints (key C major) tanaka1 --beethoven146
+test = firstSpeciesConstraints (key C major) k2-2
 
 test1 : List String
 test1 = map (showRanged ppMConstraint) test

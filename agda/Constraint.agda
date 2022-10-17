@@ -2,7 +2,7 @@
 
 module Constraint where
 
-open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_; ∣_∣)
+open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_; ∣_∣; _≤_)
 
 open import Expr
 open import Interval

@@ -48,6 +48,11 @@ allPairs : {ℓ : Level} {A : Type ℓ} → List A → List (A × A)
 allPairs [] = []
 allPairs (x ∷ xs) = map (x ,_) xs ++ allPairs xs
 
+-- Returns a concatenated list of all pairs of elements in each pair of lists.
+-- Assumes all lists have the same length.
+allPairsConcat : {ℓ : Level} {A : Type ℓ} → List (List A) → List (A × A)
+allPairsConcat xss = concat (map (uncurry zip) (allPairs xss))
+
 -- Drops the last element of a list
 dropLast : {ℓ : Level} {A : Type ℓ} → List A → List A
 dropLast []           = []

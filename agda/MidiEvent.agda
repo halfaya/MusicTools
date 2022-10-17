@@ -77,11 +77,11 @@ counterpoint→events v (cp ms) = vmap (melody→events v) ms
 harmony→events : {v d : ℕ} → Velocity → Harmony v d → Vec (List MidiEvent) v
 harmony→events v = counterpoint→events v ∘ harmony→counterpoint
 
-events→tracks : {v : ℕ} → {v ≤ maxChannels} → Vec (List MidiEvent) v → Vec MidiTrack v
-events→tracks {v} {v≤mc} events =
+events→tracks : {v : ℕ} → {v ≤ maxChannels} → Tempo → Vec (List MidiEvent) v → Vec MidiTrack v
+events→tracks {v} {v≤mc} tempo events =
   let xs = zipWithIndex events
       f : Fin v × List MidiEvent → MidiTrack
       f x = track ("Track " ++s (primShowNat (suc (toℕ (fst x)))))
                   (# 0) -- piano
-                  (inject≤ (fst x) v≤mc) defaultTempo (snd x)
+                  (inject≤ (fst x) v≤mc) tempo (snd x)
   in vmap f xs

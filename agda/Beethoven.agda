@@ -5,6 +5,7 @@ module Beethoven where
 open import Prelude
 
 open import Music
+open import Note
 open import Symbolic
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
@@ -15,8 +16,8 @@ beethoven146 =
   (E 5 ∷ C 5 ∷ D 5 ∷ D 5 ∷ B 4 ∷ A 4 ∷ C 5 ∷ C 5 ∷ D 5 ∷ C 5 ∷ B 4 ∷ C 5 ∷ []) ∷
   (C 5 ∷ A 4 ∷ G 4 ∷ D 4 ∷ E 4 ∷ F 4 ∷ F 4 ∷ A 4 ∷ G 4 ∷ C 5 ∷ G 4 ∷ C 4 ∷ []) ∷ []
 
-beethoven146c : Counterpoint 4 12
-beethoven146c = cp (vmap (pitches→melody 1 ∘ vmap name→p) beethoven146)
+beethoven146c : Counterpoint 4 (12 * half)
+beethoven146c = cp (vmap (pitches→melody half ∘ vmap name→p) beethoven146)
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
 -- Soprano and Alto voice only

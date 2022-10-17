@@ -17,8 +17,9 @@ open import SmtInterface using (solveToMidi)
 main : IO ⊤
 main = do
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
+      tempo        = 240
       file         = "/Users/leo/Music/MusicTools/test.mid"
   let events       = counterpoint→events defaultVelocity beethoven146c
-  let song         = toList (events→tracks {4} {s≤s (s≤s (s≤s (s≤s z≤n)))} events)
+  let song         = toList (events→tracks {4} {s≤s (s≤s (s≤s (s≤s z≤n)))} tempo events)
 --  song             ← solveToMidi whole defaultConstraints k2-1
   exportTracks file ticksPerBeat (map track→htrack song)

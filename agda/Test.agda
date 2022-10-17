@@ -19,7 +19,8 @@ open import Util using (filter)
 
 test : List (Ranged MConstraint)
 --test = firstSpeciesConstraints (key C major) tanaka1 --beethoven146
-test = firstSpeciesConstraints (key C major) k2-2
+--test = firstSpeciesConstraints (key C major) (index2VoiceBeat k2-2)
+test = firstSpeciesConstraintsAll (key C major) (indexVoiceBeat beethoven146)
 
 test1 : List String
 test1 = map (showRanged ppMConstraint) test

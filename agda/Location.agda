@@ -4,7 +4,7 @@ module Location where
 
 open import Prelude
 
-open import Util using (_divℕ_; _modℕ_)
+open import Util using (_divℕ_; _modℕ_; zipWithIndex)
 
 Voice Bar Beat : Type
 Voice = ℕ
@@ -44,6 +44,16 @@ index2VoiceBeat xs = i2vb 1 xs where -- start counting at beat 1
   i2vb : {A : Type} → ℕ → List (A × A) → List (Located A × Located A)
   i2vb n []             = []
   i2vb n ((a , b) ∷ xs) = (located (voiceBeat 2 n) a , located (voiceBeat 1 n) b) ∷ i2vb (suc n) xs
+
+index1VoiceBeat : {A : Type} {n : ℕ}  → ℕ → Vec A n → Vec (Located A) n
+index1VoiceBeat voice xs =
+  let f x = located (voiceBeat voice (suc (toℕ (fst x)))) (snd x)
+  in vmap f (zipWithIndex xs)
+
+indexVoiceBeat : {A : Type} {n v : ℕ}  → Vec (Vec A n) v → Vec (Vec (Located A) n) v
+indexVoiceBeat xs = 
+  let f x = index1VoiceBeat (suc (toℕ (fst x))) (snd x)
+  in vmap f (zipWithIndex xs)
 
 data Range : Type where
   location : Location → Range

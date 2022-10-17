@@ -10,7 +10,7 @@ open import Constraint hiding (motionConstraint; notDirectIntoPerfect)
 open import Location
 open import MConstraint
 open import Symbolic
-open import Util using (pairs; filter; middle)
+open import Util using (pairs; filter; middle; allPairsConcat)
 
 ------------------------------------------------
 
@@ -22,14 +22,20 @@ firstSpeciesIntervals = Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ Per8 ∷ Mi
 firstSpeciesIntervals4 : List NInt
 firstSpeciesIntervals4 = Per4 ∷ Per11 ∷ firstSpeciesIntervals
 
-firstSpeciesConstraints : Key → List NP → List (Ranged MConstraint)
-firstSpeciesConstraints k ns =
-  let lp = index2VoiceBeat ns
-      v1 = map snd lp
+-- Expects lower voice first in each pair.
+firstSpeciesConstraints : Key → List LP → List (Ranged MConstraint)
+firstSpeciesConstraints k lp =
+  let v1 = map snd lp
       v2 = map fst lp
   in map (mapRanged scaleConstraint ∘ locScaleConstraint k) (v1 ++ v2) ++
      map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
+
+allPairsConcatSwap : {A : Type} {n v : ℕ} → Vec (Vec A n) v → List (A × A)
+allPairsConcatSwap xss = map swap (allPairsConcat (toList (vmap toList xss)))
+
+firstSpeciesConstraintsAll : {n v : ℕ} → Key → Vec (Vec (Located NPitch) n) v → List (Ranged MConstraint)
+firstSpeciesConstraintsAll k xss = firstSpeciesConstraints k (allPairsConcatSwap xss)
 
 -- Constraints to make the music more interesting
 interestingConstraints : List NP → List (Ranged MConstraint)
@@ -44,4 +50,4 @@ interestingConstraints ns =
 
 -- For synthesis, so don't need range
 defaultConstraints : List NP → List MConstraint
-defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) ns ++ interestingConstraints ns)
+defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) (index2VoiceBeat ns) ++ interestingConstraints ns)

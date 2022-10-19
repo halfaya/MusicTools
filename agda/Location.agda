@@ -45,15 +45,15 @@ index2VoiceBeat xs = i2vb 1 xs where -- start counting at beat 1
   i2vb n []             = []
   i2vb n ((a , b) ∷ xs) = (located (voiceBeat 2 n) a , located (voiceBeat 1 n) b) ∷ i2vb (suc n) xs
 
-index1VoiceBeat : {A : Type} {n : ℕ}  → ℕ → Vec A n → Vec (Located A) n
+index1VoiceBeat : {A : Type} → ℕ → List A → List (Located A)
 index1VoiceBeat voice xs =
-  let f x = located (voiceBeat voice (suc (toℕ (fst x)))) (snd x)
-  in vmap f (zipWithIndex xs)
+  let f x = located (voiceBeat voice (suc (fst x))) (snd x)
+  in map f (zipWithIndex xs)
 
-indexVoiceBeat : {A : Type} {n v : ℕ}  → Vec (Vec A n) v → Vec (Vec (Located A) n) v
+indexVoiceBeat : {A : Type} → List (List A) → List (List (Located A))
 indexVoiceBeat xs = 
-  let f x = index1VoiceBeat (suc (toℕ (fst x))) (snd x)
-  in vmap f (zipWithIndex xs)
+  let f x = index1VoiceBeat (suc (fst x)) (snd x)
+  in map f (zipWithIndex xs)
 
 data Range : Type where
   location : Location → Range

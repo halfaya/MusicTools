@@ -7,7 +7,7 @@ open import Prelude
 open import Music using (Melody; melody; Counterpoint; cp; Harmony; melody→notes; harmony→counterpoint)
 open import Note  using (Note; tone; rest)
 open import Pitch using (Pitch)
-open import Util  using (zipWithIndex)
+open import Util  using (vzipWithIndex)
 
 -- General MIDI instrument numbers range from 1 to 128,
 -- so this is the actual instrument number minus 1.
@@ -79,7 +79,7 @@ harmony→events v = counterpoint→events v ∘ harmony→counterpoint
 
 events→tracks : {v : ℕ} → {v ≤ maxChannels} → Tempo → Vec (List MidiEvent) v → Vec MidiTrack v
 events→tracks {v} {v≤mc} tempo events =
-  let xs = zipWithIndex events
+  let xs = vzipWithIndex events
       f : Fin v × List MidiEvent → MidiTrack
       f x = track ("Track " ++s (primShowNat (suc (toℕ (fst x)))))
                   (# 0) -- piano

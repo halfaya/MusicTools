@@ -9,6 +9,8 @@ open import Interval
 open import Pitch
 open import Util using (pairs)
 
+-- NOTE: The convention is that the higher pitch is the first in any pair.
+
 -- Pairs and pairs of pairs of IExpr
 P PP : Type
 P  = IExpr × IExpr
@@ -16,7 +18,7 @@ PP = P × P
 
 -- Convert a pair of pitches to an Opi
 toOpi : P → IExpr
-toOpi (p , q) = q - p
+toOpi (p , q) = p - q
 
 -- Convert a pair of pitches to a Upi
 toUpi : P → IExpr
@@ -33,12 +35,12 @@ perInts perInts4 : List Opi
 perInts  = map +_ (per1 ∷ per5 ∷ per8 ∷ [])
 perInts4 = perInts ++ map +_ (per4 ∷ []) -- inclues 4th also
 
--- Assumes a ≤ b
+-- Assumes a ≥ b
 perfectInterval perfectInterval4 : IExpr → IExpr → BExpr
-perfectInterval a b  = compileSetConstraint (inSet perInts  ((b - a) mod 12))
-perfectInterval4 a b = compileSetConstraint (inSet perInts4 ((b - a) mod 12))
+perfectInterval a b  = compileSetConstraint (inSet perInts  ((a - b) mod 12))
+perfectInterval4 a b = compileSetConstraint (inSet perInts4 ((a - b) mod 12))
 
--- Given input (a,b),(c,d), assumes a ≤ b and c ≤ d
+-- Given input (a,b),(c,d), assumes a ≥ b and c ≥ d
 data MotionConstraint : Type where
   contrary              : PP → MotionConstraint
   oblique               : PP → MotionConstraint

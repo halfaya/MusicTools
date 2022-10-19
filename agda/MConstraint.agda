@@ -30,13 +30,13 @@ lp→np (located _ a , located _ b) = a , b
 lplp→npnp : LPLP → NPNP
 lplp→npnp (a , b) = lp→np a , lp→np b
 
--- Assumes lower voice is first; range starts with higher voice
+-- Assumes higher voice is first; range starts with higher voice
 lpRange : LP → Range
-lpRange (located l1 _ , located l2 _) = range l2 l1
+lpRange (located l1 _ , located l2 _) = range l1 l2
 
--- Assumes lower voice is first; range starts with higher voice
+-- Assumes higher voice is first; range starts with higher voice
 lplpRange : LPLP → Range
-lplpRange ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = range l2 l3
+lplpRange ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = range l1 l4
 
 -- Convert a pair of npitches to an NInt
 -- If one or both is a variable, could result in a strange value.a

@@ -14,6 +14,7 @@ open import Util using (allPairs; ◯pairs; firstPairs)
 ic7 : ℕ
 ic7 = 7
 
+-- Higher pitch assumed first.
 PitchPair : Type
 PitchPair = Pitch × Pitch
 
@@ -148,26 +149,26 @@ PitchInterval : Type
 PitchInterval = Pitch × Upi
 
 pitchIntervalToPitchPair : PitchInterval → PitchPair
-pitchIntervalToPitchPair (p , n) = (p , transposePitch (+ n)  p)
+pitchIntervalToPitchPair (p , n) = (transposePitch (+ n)  p , p)
 
 secondPitch : PitchInterval → Pitch
 secondPitch = snd ∘ pitchIntervalToPitchPair
 
 pitchPairToOpi : PitchPair → Opi
-pitchPairToOpi (p , q) = (+ q) - (+ p)
+pitchPairToOpi (p , q) = (+ p) - (+ q)
 
 toIC : PCPair → IC
 toIC (p , q) =
-  let x = toℕ (∣ (+ (toℕ q)) - (+ (toℕ p)) ∣ mod s12)
+  let x = toℕ (∣ (+ (toℕ p)) - (+ (toℕ q)) ∣ mod s12)
   in x ⊓ (s12 ∸ x) mod ic7
 
 toPCI : PCPair → PCI
 toPCI (p , q) =
- (((+ (toℕ q)) - (+ (toℕ p))) modℕ s12) mod s12
+ (((+ (toℕ p)) - (+ (toℕ q))) modℕ s12) mod s12
 
--- Assumes p ≤ q
+-- Assumes p ≥ q
 toPitchInterval : PitchPair → PitchInterval
-toPitchInterval pq = fst pq , absoluteInterval (pitchPairToOpi pq)
+toPitchInterval pq = snd pq , absoluteInterval (pitchPairToOpi pq)
 
 -- DEPRECATED? Note that the first and last pitches are compared in normal order, not circular order.
 ◯pcIntervals : List PC → List PCI
@@ -178,12 +179,12 @@ pcIntervals : List PC → List PCI
 pcIntervals = map toPCI ∘ reverse ∘ firstPairs
 
 stepUp : Pitch → Pitch → Bool
-stepUp p q with pitchPairToOpi (p , q)
+stepUp p q with pitchPairToOpi (q , p)
 ... | +_     n = isStep n
 ... | -[1+_] n = false
 
 stepDown : Pitch → Pitch → Bool
-stepDown p q with pitchPairToOpi (p , q)
+stepDown p q with pitchPairToOpi (q , p)
 ... | +_     n = false
 ... | -[1+_] n = isStep n
 
@@ -195,7 +196,7 @@ isPassingTone p q r =
   (isThird (absoluteInterval (pitchPairToOpi (p , r))))
 
 moveUp : Pitch → Pitch → Bool
-moveUp p q with pitchPairToOpi (p , q)
+moveUp p q with pitchPairToOpi (q , p)
 ... | +_     _ = true
 ... | -[1+_] _ = false
 

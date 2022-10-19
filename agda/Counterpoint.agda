@@ -10,7 +10,7 @@ open import Constraint hiding (motionConstraint; notDirectIntoPerfect)
 open import Location
 open import MConstraint
 open import Symbolic
-open import Util using (pairs; filter; middle; allPairsConcat)
+open import Util using (pairs; filter; middle; allPairs)
 
 ------------------------------------------------
 
@@ -22,20 +22,26 @@ firstSpeciesIntervals = Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ Per8 ∷ Mi
 firstSpeciesIntervals4 : List NInt
 firstSpeciesIntervals4 = Per4 ∷ Per11 ∷ firstSpeciesIntervals
 
--- Expects lower voice first in each pair.
-firstSpeciesConstraints : Key → List LP → List (Ranged MConstraint)
-firstSpeciesConstraints k lp =
-  let v1 = map snd lp
-      v2 = map fst lp
-  in map (mapRanged scaleConstraint ∘ locScaleConstraint k) (v1 ++ v2) ++
+firstSpeciesConstraintsVoice : Key → List (Located NPitch) → List (Ranged MConstraint)
+firstSpeciesConstraintsVoice k v =
+  map (mapRanged scaleConstraint ∘ locScaleConstraint k) v
+
+-- Expects higher voice first in each pair.
+firstSpeciesConstraints2 : List LP → List (Ranged MConstraint)
+firstSpeciesConstraints2 lp =
      map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 
-allPairsConcatSwap : {A : Type} {n v : ℕ} → Vec (Vec A n) v → List (A × A)
-allPairsConcatSwap xss = map swap (allPairsConcat (toList (vmap toList xss)))
+-- Returns a list of lists of all pairs of elements in each pair of lists.
+-- Assumes all lists have the same length.
+allPairsPairs : {ℓ : Level} {A : Type ℓ} → List (List A) → List (List (A × A))
+allPairsPairs xss = map (uncurry zip) (allPairs xss)
 
-firstSpeciesConstraintsAll : {n v : ℕ} → Key → Vec (Vec (Located NPitch) n) v → List (Ranged MConstraint)
-firstSpeciesConstraintsAll k xss = firstSpeciesConstraints k (allPairsConcatSwap xss)
+firstSpeciesConstraints : Key → List (List (Located NPitch)) → List (Ranged MConstraint)
+firstSpeciesConstraints k xss =
+  let voiceConstraints = concat (map (firstSpeciesConstraintsVoice k) xss)
+      pairConstraints  = concat (map firstSpeciesConstraints2 (allPairsPairs xss))
+  in voiceConstraints ++ pairConstraints
 
 -- Constraints to make the music more interesting
 interestingConstraints : List NP → List (Ranged MConstraint)
@@ -49,5 +55,5 @@ interestingConstraints ns =
      --map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) (middle lp)
 
 -- For synthesis, so don't need range
-defaultConstraints : List NP → List MConstraint
-defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) (index2VoiceBeat ns) ++ interestingConstraints ns)
+--defaultConstraints : List NP → List MConstraint
+--defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) (index2VoiceBeat ns) ++ interestingConstraints ns)

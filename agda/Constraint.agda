@@ -2,7 +2,7 @@
 
 module Constraint where
 
-open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_; ∣_∣; _≤_)
+open import Prelude hiding (_∨_; _∧_; _==_; _-_; _mod_; #_; _+_; ∣_∣; _≤_; if_then_else_)
 
 open import Expr
 open import Interval
@@ -11,14 +11,13 @@ open import Util using (pairs)
 
 -- NOTE: The convention is that the higher pitch is the first in any pair.
 
--- Pairs and pairs of pairs of IExpr
-P PP : Type
-P  = IExpr × IExpr
-PP = P × P
-
 -- Convert a pair of pitches to an Opi
 toOpi : P → IExpr
 toOpi (p , q) = p - q
+
+-- Convert a pair of pitches to an Opi mod 12
+toOpi12 : P → IExpr
+toOpi12 (p , q) = (p - q) mod 12
 
 -- Convert a pair of pitches to a Upi
 toUpi : P → IExpr
@@ -42,11 +41,11 @@ perfectInterval4 a b = compileSetConstraint (inSet perInts4 ((a - b) mod 12))
 
 -- Given input (a,b),(c,d), assumes a ≥ b and c ≥ d
 data MotionConstraint : Type where
-  contrary              : PP → MotionConstraint
-  oblique               : PP → MotionConstraint
-  parallel              : PP → MotionConstraint
-  similar               : PP → MotionConstraint
-  direct                : PP → MotionConstraint -- similar or parallel
+  contrary             : PP → MotionConstraint
+  oblique              : PP → MotionConstraint
+  parallel             : PP → MotionConstraint
+  similar              : PP → MotionConstraint
+  direct               : PP → MotionConstraint -- similar or parallel
   notDirectIntoPerfect : PP → MotionConstraint
 
 compileMotionConstraint : MotionConstraint → BExpr
@@ -65,10 +64,12 @@ compileMotionConstraint (notDirectIntoPerfect ((a , b) , c , d)) =
   -- note that we currently include 4ths as perfect intervals
 
 data NumericConstraint : Type where
-  numContrary≥ :     ℤ → List PP     → NumericConstraint
-  numLeaps≤    : ℤ → ℤ → List IExpr  → NumericConstraint -- first argument is max size of non-leap in semitones
+  between      : IExpr → IExpr → IExpr → NumericConstraint -- a ≤ c ≤ b
+  numContrary≥ :     ℤ → List PP       → NumericConstraint
+  numLeaps≤    : ℤ → ℤ → List IExpr    → NumericConstraint -- first argument is max size of non-leap in semitones
 
 compileNumericConstraint : NumericConstraint → BExpr
+compileNumericConstraint (between a b c)     = a ≤ c ∧ c ≤ b
 compileNumericConstraint (numContrary≥ n xs) =
   foldr (λ pp x → χ (compileMotionConstraint (contrary pp)) + x) (N 0) xs ≥ (# n)
 compileNumericConstraint (numLeaps≤ max n ps) =

@@ -7,6 +7,7 @@ open import Prelude
 open import Expr hiding (_+_; #_)
 open import Pitch
 open import Interval
+open import Location
 
 -- Named Pitch
 data NoteName : Type where
@@ -334,3 +335,46 @@ pitch→npitch : Pitch → NPitch
 pitch→npitch n =
   let (p , o) = absoluteToRelative n
   in noteName→npitch (lookup chromaticScale p) o
+
+-- Pairs and pairs of pairs of NPitch
+NP NPNP LP LPLP [N] [[N]] [L] [[L]] : Type
+NP    = NPitch × NPitch
+NPNP  = NP × NP
+LP    = Located NPitch × Located NPitch
+LPLP  = LP × LP
+[N]   = List NPitch
+[[N]] = List [N]
+[L]   = List (Located NPitch)
+[[L]] = List [L]
+
+np→p : NP → P
+np→p (a , b) = name→pitch a , name→pitch b
+
+npnp→pp : NPNP → PP
+npnp→pp (a , b) = np→p a , np→p b
+
+[n]→[p] : [N] → [P]
+[n]→[p] = map name→pitch
+
+[[n]]→[[p]] : [[N]] → [[P]]
+[[n]]→[[p]] = map [n]→[p]
+
+lp→np : LP → NP
+lp→np (located _ a , located _ b) = a , b
+
+lplp→npnp : LPLP → NPNP
+lplp→npnp (a , b) = lp→np a , lp→np b
+
+[l]→[p] : [L] → [P]
+[l]→[p] = map (name→pitch ∘ unlocate)
+
+[[l]]→[[p]] : [[L]] → [[P]]
+[[l]]→[[p]] = map [l]→[p]
+
+-- Assumes higher voice is first; range starts with higher voice
+lpRange : LP → Range
+lpRange (located l1 _ , located l2 _) = range l1 l2
+
+-- Assumes higher voice is first; range starts with higher voice
+lplpRange : LPLP → Range
+lplpRange ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = range l1 l4

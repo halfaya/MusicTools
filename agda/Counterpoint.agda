@@ -14,13 +14,13 @@ open import Util using (pairs; filter; middle; allPairs)
 
 ------------------------------------------------
 
--- Allow up to two octaves.
+-- Assumes test interval is within an octave
 firstSpeciesIntervals : List NInt
-firstSpeciesIntervals = Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ Per8 ∷ Min10 ∷ Maj10 ∷ Per12 ∷ Min13 ∷ Maj13 ∷ Per15 ∷ []
+firstSpeciesIntervals = Per1 ∷ Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ []
 
 -- Allow perfect 4ths also.
 firstSpeciesIntervals4 : List NInt
-firstSpeciesIntervals4 = Per4 ∷ Per11 ∷ firstSpeciesIntervals
+firstSpeciesIntervals4 = Per4 ∷ firstSpeciesIntervals
 
 firstSpeciesConstraintsVoice : Key → List (Located NPitch) → List (Ranged MConstraint)
 firstSpeciesConstraintsVoice k v =
@@ -29,7 +29,8 @@ firstSpeciesConstraintsVoice k v =
 -- Expects higher voice first in each pair.
 firstSpeciesConstraints2 : List LP → List (Ranged MConstraint)
 firstSpeciesConstraints2 lp =
-     map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) lp ++
+     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals4) lp ++
+     map (mapRanged intervalConstraint ∘ locMaxIntervalConstraint (Int 28)) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 
 -- Returns a list of lists of all pairs of elements in each pair of lists.
@@ -37,7 +38,7 @@ firstSpeciesConstraints2 lp =
 allPairsPairs : {ℓ : Level} {A : Type ℓ} → List (List A) → List (List (A × A))
 allPairsPairs xss = map (uncurry zip) (allPairs xss)
 
-firstSpeciesConstraints : Key → List (List (Located NPitch)) → List (Ranged MConstraint)
+firstSpeciesConstraints : Key → [[L]] → List (Ranged MConstraint)
 firstSpeciesConstraints k xss =
   let voiceConstraints = concat (map (firstSpeciesConstraintsVoice k) xss)
       pairConstraints  = concat (map firstSpeciesConstraints2 (allPairsPairs xss))
@@ -54,6 +55,5 @@ interestingConstraints ns =
      ranged r (constraint ((numericConstraint ∘ numLeaps≤ (+ maj3) (+ 2) ∘ map snd) ps)) ∷ []
      --map (mapRanged intervalConstraint ∘ locIntervalConstraint firstSpeciesIntervals) (middle lp)
 
--- For synthesis, so don't need range
---defaultConstraints : List NP → List MConstraint
---defaultConstraints ns = map unrange (firstSpeciesConstraints (key C major) (index2VoiceBeat ns) ++ interestingConstraints ns)
+defaultConstraints : [[L]] → List (Ranged MConstraint)
+defaultConstraints = firstSpeciesConstraints (key C major)

@@ -119,7 +119,7 @@ data HMidiTrack : Set where
 {-# COMPILE GHC HMidiTrack = data HsMidiTrack (HsMidiTrack) #-}
 
 track→htrack : MidiTrack → HMidiTrack
-track→htrack (track n i c t m) = htrack n (toℕ i) (toℕ c) t (concatMap event→messages m)
+track→htrack (track n i c t m) = htrack n (toℕ i) c t (concatMap event→messages m)
 
 postulate 
   exportTracks : FilePath        → -- path to the file to save the MIDI data to

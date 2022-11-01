@@ -11,6 +11,7 @@ open import MConstraint
 open import Counterpoint
 open import Expr
 open import Location
+open import Misc
 open import PrettyPrint
 open import Symbolic
 open import Tanaka
@@ -19,8 +20,6 @@ open import Util
 
 
 test : List (Ranged MConstraint)
---test = firstSpeciesConstraints (key C major) tanaka1 --beethoven146
---test = firstSpeciesConstraints (key C major) (index2VoiceBeat k2-2)
 test = firstSpeciesConstraints (key C major) (indexVoiceBeat beethoven146)
 
 test1 : List String
@@ -36,4 +35,8 @@ test4 : List String
 test4 = map (showRanged ppMConstraint) test3
 
 test5 : List String
-test5 = map (showRanged ppMConstraint ∘ mapRange (toVBBrange 2)) test3
+test5 = map (showVBBRanged 2 ppMConstraint) test3
+
+test6 : List (List (Located NPitch))
+test6 = makeVariables (range (location 2 2) (location 4 11))
+                      (indexVoiceBeat beethoven146)

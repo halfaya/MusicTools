@@ -2,7 +2,7 @@
 
 module MConstraint where
 
-open import Prelude hiding (_-_; ∣_∣)
+open import Prelude hiding (_-_; ∣_∣; #_)
 
 open import Constraint
 open import Expr
@@ -10,33 +10,6 @@ open import Location
 open import Symbolic
 
 -- Higher-level musical constraints
-
--- Pairs and pairs of pairs of NPitch
-NP NPNP LP LPLP : Type
-NP   = NPitch × NPitch
-NPNP = NP × NP
-LP   = Located NPitch × Located NPitch
-LPLP = LP × LP
-
-np→p : NP → P
-np→p (a , b) = name→pitch a , name→pitch b
-
-npnp→pp : NPNP → PP
-npnp→pp (a , b) = np→p a , np→p b
-
-lp→np : LP → NP
-lp→np (located _ a , located _ b) = a , b
-
-lplp→npnp : LPLP → NPNP
-lplp→npnp (a , b) = lp→np a , lp→np b
-
--- Assumes higher voice is first; range starts with higher voice
-lpRange : LP → Range
-lpRange (located l1 _ , located l2 _) = range l1 l2
-
--- Assumes higher voice is first; range starts with higher voice
-lplpRange : LPLP → Range
-lplpRange ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = range l1 l4
 
 -- Convert a pair of npitches to an NInt
 -- If one or both is a variable, could result in a strange value.a
@@ -79,20 +52,26 @@ locMotionConstraint direct                x = ranged (lplpRange x) (direct      
 locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→npnp x))
 
 data MIntervalConstraint : Type where
-  inSet : List NInt → NP → MIntervalConstraint
+  hasQuality  : List NInt → NP → MIntervalConstraint
+  maxInterval : NInt      → NP → MIntervalConstraint
 
-ic→sc : MIntervalConstraint → SetConstraint
-ic→sc (inSet xs x) = inSet (map (+_ ∘ name→upi) xs) (toOpi (np→p x))
+ic→c : MIntervalConstraint → Constraint
+ic→c (hasQuality xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (np→p x)))
+ic→c (maxInterval m x) =
+  numericConstraint (between (# (+ 1)) (# (+ (name→upi m))) (toOpi (np→p x)))
 
--- interval constraint indexed with range
-locIntervalConstraint : List NInt → LP → Ranged MIntervalConstraint
-locIntervalConstraint xs lp = ranged (lpRange lp) (inSet xs (lp→np lp))
+-- interval constraints indexed with range
+locQualityConstraint : List NInt → LP → Ranged MIntervalConstraint
+locQualityConstraint xs lp = ranged (lpRange lp) (hasQuality xs (lp→np lp))
+
+locMaxIntervalConstraint : NInt → LP → Ranged MIntervalConstraint
+locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→np lp))
 
 data MScaleConstraint : Type where
   inScale : Key → NPitch → MScaleConstraint
 
-msc→sc : MScaleConstraint → Constraint
-msc→sc (inScale k x) = inScaleConstraint (toScale (scale k)) (name→pitch x)
+msc→c : MScaleConstraint → Constraint
+msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→pitch x)
 
 -- interval constraint indexed with range
 locScaleConstraint : Key → Located NPitch → Ranged MScaleConstraint
@@ -105,8 +84,8 @@ data MConstraint : Type where
   constraint         : Constraint          → MConstraint -- allows embedding arbitary lower-level constraints
 
 mc→c : MConstraint → Constraint
-mc→c (scaleConstraint    x) = msc→sc x
-mc→c (intervalConstraint x) = setConstraint    (ic→sc x)
+mc→c (scaleConstraint    x) = msc→c x
+mc→c (intervalConstraint x) = ic→c x
 mc→c (motionConstraint   x) = motionConstraint (mmc→mc x)
 mc→c (constraint         x) = x
 

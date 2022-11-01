@@ -98,3 +98,10 @@ e mod n = e % N n
 -- indicator function
 χ : BExpr → IExpr
 χ b = if b then N 1 else N 0
+
+-- Aggregates of IExpr
+P PP [P] [[P]] : Type
+P     = IExpr × IExpr
+PP    = P × P
+[P]   = List IExpr
+[[P]] = List [P]

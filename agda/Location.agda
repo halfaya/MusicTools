@@ -75,30 +75,20 @@ indexVoiceBeat xs =
   in map f (zipWithIndex xs)
 
 data Range : Type where
-  location : Location → Range
-  range    : Location → Location → Range -- start and end of the range, left high voice first
+  point     : Location → Range
+  rectangle : Location → Location → Range -- left high and right low points of rectangle
 
 showRange : Range → String
-showRange (location loc) = "[" ++s showLocation loc ++s "]"
-showRange (range l1 l2)  = "[" ++s showLocation l1 ++s ", " ++s showLocation l2 ++s "]"
+showRange (point loc)        = "[" ++s showLocation loc ++s "]"
+showRange (rectangle l1 l2)  = "[" ++s showLocation l1 ++s ", " ++s showLocation l2 ++s "]"
 
 showVBBRange : BeatsPerBar → Range → String
-showVBBRange b (location loc) = "[" ++s showVBB b loc ++s "]"
-showVBBRange b (range l1 l2)  = "[" ++s showVBB b l1 ++s ", " ++s showVBB b l2 ++s "]"
+showVBBRange b (point loc)        = "[" ++s showVBB b loc ++s "]"
+showVBBRange b (rectangle l1 l2)  = "[" ++s showVBB b l1 ++s ", " ++s showVBB b l2 ++s "]"
 
 _∈range_ : Location → Range → Bool
-x ∈range location y = x ==loc y
-x ∈range range a b  = (a ≤loc x) ∧ (x ≤loc b) 
-
-{-
-toVBrange : Range → Range
-toVBrange (location loc) = loc
-toVBrange (range l1 l2) = range (toVoiceBeat n l1) (toVoiceBeat n l2)
-
-toVBBrange : ℕ → Range → Range
-toVBBrange n (location loc) = location (toVoiceBarBeat n loc)
-toVBBrange n (range  l1 l2) = range (toVoiceBarBeat n l1) (toVoiceBarBeat n l2)
-p-}
+x ∈range point y        = x ==loc y
+x ∈range rectangle a b  = (a ≤loc x) ∧ (x ≤loc b) 
 
 data Ranged (A : Type) : Type where
   ranged : Range → A → Ranged A
@@ -108,7 +98,7 @@ unrange (ranged _ x) = x
 
 -- Creates a range from (Voice 1, Beat 1) to (Voice 2, Beat n) where n is the length of the list.
 fullRange2 : {A : Type} → List A → Range
-fullRange2 xs = range (location 1 1) (location 2 (length xs))
+fullRange2 xs = rectangle (location 1 1) (location 2 (length xs))
 
 mapRange : {A : Type} → (Range → Range) → Ranged A → Ranged A
 mapRange f (ranged r x) = ranged (f r) x

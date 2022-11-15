@@ -55,8 +55,8 @@ ppMMotionConstraint (direct x)                = "Direct "                       
 ppMMotionConstraint (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppNPNP x
 
 ppMIntervalConstraint : MIntervalConstraint → String
-ppMIntervalConstraint (hasQuality xs x) =
-  "HasQuality " ++s ppList showNInt xs ++s " " ++s ppNInt x
+ppMIntervalConstraint (intervalType xs x) =
+  "ItervalType " ++s ppList showNInt xs ++s " " ++s ppNInt x
 ppMIntervalConstraint (maxInterval m x) =
   "IntervalBetween 1 ≤ " ++s ppNInt x ++s " ≤ " ++s showNInt m
 

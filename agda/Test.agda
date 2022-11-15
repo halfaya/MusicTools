@@ -38,5 +38,5 @@ test5 : List String
 test5 = map (showVBBRanged 2 ppMConstraint) test3
 
 test6 : List (List (Located NPitch))
-test6 = makeVariables (range (location 2 2) (location 4 11))
+test6 = makeVariables (rectangle (location 2 2) (location 4 11))
                       (indexVoiceBeat beethoven146)

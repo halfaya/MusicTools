@@ -52,17 +52,17 @@ locMotionConstraint direct                x = ranged (lplpRange x) (direct      
 locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→npnp x))
 
 data MIntervalConstraint : Type where
-  hasQuality  : List NInt → NP → MIntervalConstraint
-  maxInterval : NInt      → NP → MIntervalConstraint
+  intervalType : List NInt → NP → MIntervalConstraint
+  maxInterval  : NInt      → NP → MIntervalConstraint
 
 ic→c : MIntervalConstraint → Constraint
-ic→c (hasQuality xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (np→p x)))
+ic→c (intervalType xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (np→p x)))
 ic→c (maxInterval m x) =
   numericConstraint (between (# (+ 1)) (# (+ (name→upi m))) (toOpi (np→p x)))
 
 -- interval constraints indexed with range
 locQualityConstraint : List NInt → LP → Ranged MIntervalConstraint
-locQualityConstraint xs lp = ranged (lpRange lp) (hasQuality xs (lp→np lp))
+locQualityConstraint xs lp = ranged (lpRange lp) (intervalType xs (lp→np lp))
 
 locMaxIntervalConstraint : NInt → LP → Ranged MIntervalConstraint
 locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→np lp))
@@ -75,7 +75,7 @@ msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→pitch x)
 
 -- interval constraint indexed with range
 locScaleConstraint : Key → Located NPitch → Ranged MScaleConstraint
-locScaleConstraint k (located loc x) = ranged (location loc) (inScale k x)
+locScaleConstraint k (located loc x) = ranged (point loc) (inScale k x)
 
 data MConstraint : Type where
   scaleConstraint    : MScaleConstraint    → MConstraint

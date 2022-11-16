@@ -12,9 +12,8 @@ open import Symbolic
 -- Higher-level musical constraints
 
 -- Convert a pair of npitches to an NInt
--- If one or both is a variable, could result in a strange value.a
-toNInt : NP → NInt
-toNInt (p , q) with evalI (name→pitch p - name→pitch q)
+toNInt : Dict → NP → NInt
+toNInt d (p , q) with evalI d (name→pitch p - name→pitch q)
 ... | +_     n = upi→name n
 ... | -[1+_] n = upi→name (suc n)
 

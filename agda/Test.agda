@@ -23,19 +23,19 @@ test : List (Ranged MConstraint)
 test = firstSpeciesConstraints (key C major) (indexVoiceBeat beethoven146)
 
 test1 : List String
-test1 = map (showRanged ppMConstraint) test
+test1 = map (showRanged (ppMConstraint [])) test
 
 test2 : List BExpr
 test2 = map (compileConstraint ∘ mc→c ∘ unrange) test
 
 test3 : List (Ranged MConstraint)
-test3 = filter (not ∘ evalB ∘ compileConstraint ∘ mc→c ∘ unrange) test
+test3 = filter (not ∘ evalB [] ∘ compileConstraint ∘ mc→c ∘ unrange) test
 
 test4 : List String
-test4 = map (showRanged ppMConstraint) test3
+test4 = map (showRanged (ppMConstraint [])) test3
 
 test5 : List String
-test5 = map (showVBBRanged 2 ppMConstraint) test3
+test5 = map (showVBBRanged 2 (ppMConstraint [])) test3
 
 test6 : List (List (Located NPitch))
 test6 = makeVariables (rectangle (location 2 2) (location 4 11))

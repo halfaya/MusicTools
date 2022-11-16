@@ -27,38 +27,38 @@ ppInterval x y with (y -ℤ x)
 ... | +_     n = ppNoteName x ++s "," ++s ppNoteName y ++s "(" ++s showInterval n ++s ")"
 ... | -[1+_] n = "Invalid interval -" ++s primShowNat (suc n)
 
-ppNInt : NP → String
-ppNInt (a , b) = showNPitch a ++s "," ++s showNPitch b ++s "(" ++s showNInt (nint a b) ++s ")"
+ppNInt : Dict → NP → String
+ppNInt d (a , b) = showNPitch a ++s "," ++s showNPitch b ++s "(" ++s showNInt (nint d a b) ++s ")"
 
-ppPP : PP → String
-ppPP ((a , b) , c , d) =
-  ppInterval (evalI a) (evalI b) ++s " , " ++s ppInterval (evalI c) (evalI d)
+ppPP : Dict → PP → String
+ppPP d ((a , b) , c , e) =
+  ppInterval (evalI d a) (evalI d b) ++s " , " ++s ppInterval (evalI d c) (evalI d e)
 
-ppNPNP : NPNP → String
-ppNPNP (a , b) =
-  ppNInt a ++s " , " ++s ppNInt b
+ppNPNP : Dict → NPNP → String
+ppNPNP d (a , b) =
+  ppNInt d a ++s " , " ++s ppNInt d b
 
-ppMotionConstraint : MotionConstraint → String
-ppMotionConstraint (contrary x)              = "Contrary "                        ++s ppPP x
-ppMotionConstraint (oblique x)               = "Oblique "                         ++s ppPP x
-ppMotionConstraint (parallel x)              = "Parallel "                        ++s ppPP x
-ppMotionConstraint (similar x)               = "Similar "                         ++s ppPP x
-ppMotionConstraint (direct x)                = "Direct "                          ++s ppPP x
-ppMotionConstraint (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppPP x
+ppMotionConstraint : Dict → MotionConstraint → String
+ppMotionConstraint d (contrary x)              = "Contrary "                        ++s ppPP d x  
+ppMotionConstraint d (oblique x)               = "Oblique "                         ++s ppPP d x
+ppMotionConstraint d (parallel x)              = "Parallel "                        ++s ppPP d x
+ppMotionConstraint d (similar x)               = "Similar "                         ++s ppPP d x
+ppMotionConstraint d (direct x)                = "Direct "                          ++s ppPP d x
+ppMotionConstraint d (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppPP d x
 
-ppMMotionConstraint : MMotionConstraint → String
-ppMMotionConstraint (contrary x)              = "Contrary "                        ++s ppNPNP x
-ppMMotionConstraint (oblique x)               = "Oblique "                         ++s ppNPNP x
-ppMMotionConstraint (parallel x)              = "Parallel "                        ++s ppNPNP x
-ppMMotionConstraint (similar x)               = "Similar "                         ++s ppNPNP x
-ppMMotionConstraint (direct x)                = "Direct "                          ++s ppNPNP x
-ppMMotionConstraint (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppNPNP x
+ppMMotionConstraint : Dict → MMotionConstraint → String
+ppMMotionConstraint d (contrary x)              = "Contrary "                        ++s ppNPNP d x
+ppMMotionConstraint d (oblique x)               = "Oblique "                         ++s ppNPNP d x
+ppMMotionConstraint d (parallel x)              = "Parallel "                        ++s ppNPNP d x
+ppMMotionConstraint d (similar x)               = "Similar "                         ++s ppNPNP d x
+ppMMotionConstraint d (direct x)                = "Direct "                          ++s ppNPNP d x
+ppMMotionConstraint d (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppNPNP d x
 
-ppMIntervalConstraint : MIntervalConstraint → String
-ppMIntervalConstraint (intervalType xs x) =
-  "ItervalType " ++s ppList showNInt xs ++s " " ++s ppNInt x
-ppMIntervalConstraint (maxInterval m x) =
-  "IntervalBetween 1 ≤ " ++s ppNInt x ++s " ≤ " ++s showNInt m
+ppMIntervalConstraint : Dict → MIntervalConstraint → String
+ppMIntervalConstraint d (intervalType xs x) =
+  "ItervalType " ++s ppList showNInt xs ++s " " ++s ppNInt d x
+ppMIntervalConstraint d (maxInterval m x) =
+  "IntervalBetween 1 ≤ " ++s ppNInt d x ++s " ≤ " ++s showNInt m
 
 ppMScaleConstraint : MScaleConstraint → String
 ppMScaleConstraint (inScale k x) = "InScaleOfKey " ++s showKey k ++s " " ++s showNPitch x
@@ -68,8 +68,8 @@ ppConstraint (setConstraint x)     = "set constraint"
 ppConstraint (motionConstraint x)  = "motion constraint"
 ppConstraint (numericConstraint x) = "numeric constraint"
 
-ppMConstraint : MConstraint → String
-ppMConstraint (scaleConstraint    x) = ppMScaleConstraint x
-ppMConstraint (intervalConstraint x) = ppMIntervalConstraint x
-ppMConstraint (motionConstraint   x) = ppMMotionConstraint x
-ppMConstraint (constraint         x) = ppConstraint x
+ppMConstraint : Dict → MConstraint → String
+ppMConstraint _ (scaleConstraint    x) = ppMScaleConstraint x
+ppMConstraint d (intervalConstraint x) = ppMIntervalConstraint d x
+ppMConstraint d (motionConstraint   x) = ppMMotionConstraint d x
+ppMConstraint _ (constraint         x) = ppConstraint x

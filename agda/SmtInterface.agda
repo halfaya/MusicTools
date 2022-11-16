@@ -22,22 +22,18 @@ open import Symbolic
 compileConstraints : List MConstraint → List HBExpr
 compileConstraints = map (B→HBExpr ∘ compileConstraint ∘ mc→c)
 
--- Any result which is nonexistant or negative is converted to 0.
-HMaybeℤ→Pitch : HMaybe ℤ → Pitch
-HMaybeℤ→Pitch nothing           = 0
-HMaybeℤ→Pitch (just (+_     n)) = n
-HMaybeℤ→Pitch (just (-[1+_] _)) = 0
+-- Any negative value is changed to zero.
+lookupPitch : Dict → String → ℕ
+lookupPitch d s with lookup d s
+... | +_ n     = n
+... | -[1+_] n = 0
 
-Dict : Type
-Dict = List (String × Pitch)
+fromHMaybe : {A : Type} → A → HMaybe A → A
+fromHMaybe default nothing  = default
+fromHMaybe _       (just x) = x
 
 varDictionary : List String → List (HMaybe ℤ) → Dict
-varDictionary xs ys = zip xs (map HMaybeℤ→Pitch ys)
-
--- Returns 0 if not found.
-lookup : Dict → String → Pitch
-lookup []             s = 0
-lookup ((x , n) ∷ xs) s = if x ==s s then n else lookup xs s
+varDictionary xs ys = zip xs (map (fromHMaybe (+ 0)) ys)
 
 varNames1 : [P] → List String
 varNames1 []             = []
@@ -53,7 +49,7 @@ varNames2 ((a , b) ∷ xs) = varNamesI a ++ varNamesI b ++ varNames2 xs
 iExpr→Pitch : Dict → IExpr → Pitch
 iExpr→Pitch d (# +_ n)      = n
 iExpr→Pitch d (# -[1+_] n)  = 0
-iExpr→Pitch d (var s)       = lookup d s
+iExpr→Pitch d (var s)       = lookupPitch d s
 iExpr→Pitch d (_ + _)       = 0
 iExpr→Pitch d (_ - _)       = 0
 iExpr→Pitch d (_ % _)       = 0

@@ -20,7 +20,7 @@ beethoven146 : List (List NPitch)
 beethoven146 = toList (vmap toList beethoven146v)
 
 beethoven146c : Counterpoint 4 (12 * half)
-beethoven146c = cp (vmap (pitches→melody half ∘ vmap name→p) beethoven146v)
+beethoven146c = cp (vmap (pitches→melody half ∘ vmap (name→p [])) beethoven146v)
 
 -- Example 146 (page 29, number 2) in Beethoven Werke XIII
 -- Soprano and Alto voice only

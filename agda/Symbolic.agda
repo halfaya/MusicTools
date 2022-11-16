@@ -4,7 +4,7 @@ module Symbolic where
 
 open import Prelude
 
-open import Expr hiding (_+_; #_)
+open import Expr hiding (_+_; #_; lookup)
 open import Pitch
 open import Interval
 open import Location
@@ -172,8 +172,8 @@ name→pitch2 : NPitch × NPitch → IExpr × IExpr
 name→pitch2 (a , b ) = name→pitch a , name→pitch b
 
 -- Variables map to pitch 0
-name→p : NPitch → Pitch
-name→p np with evalI (name→pitch np)
+name→p : Dict → NPitch → Pitch
+name→p d np with evalI d (name→pitch np)
 ... | +_     n = n
 ... | -[1+_] _ = 0
 
@@ -290,8 +290,8 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))))) = Per15
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
 
-nint : NPitch → NPitch → NInt
-nint a b = upi→name (upi (name→p a) (name→p b))
+nint : Dict → NPitch → NPitch → NInt
+nint d a b = upi→name (upi (name→p d a) (name→p d b))
 
 -- Keys (just a few for now)
 data KeyRoot : Type where

@@ -2,7 +2,7 @@
 
 module Expr where
 
-open import Prelude hiding (#_; _==_; _+_; _mod_; ∣_∣; _≤_)
+open import Prelude hiding (#_; _==_; _+_; _mod_; ∣_∣; _≤_; lookup)
                     renaming ( _∨_ to _∨b_; _∧_ to _∧b_; _-_ to _-ℤ_; if_then_else_ to i_t_e_)
 
 open import Util using (_==ℤ_; _≠ℤ_; _<ℤ_; _≤ℤ_; _>ℤ_; _≥ℤ_; _modℤ_)
@@ -15,8 +15,16 @@ infix  7 _==_ _≠_ _<_ _≤_ _>_ _≥_
 infixr 6 _∧_
 infixr 5 _∨_
 
+Dict : Type
+Dict = List (String × ℤ)
+
+-- Returns 0 if not found.
+lookup : Dict → String → ℤ
+lookup []             s = + 0
+lookup ((x , n) ∷ xs) s = i x ==s s t n e lookup xs s
+
 data BExpr : Type
-evalB : BExpr → Bool
+evalB : Dict → BExpr → Bool
 
 data IExpr : Type where
   #_            : ℤ → IExpr
@@ -39,27 +47,26 @@ data BExpr where
   _>_   : IExpr → IExpr → BExpr
   _≥_   : IExpr → IExpr → BExpr
 
--- For now variables are evaluated to -9999
-evalI : IExpr → ℤ
-evalI (#   n)              = n
-evalI (var _)              = -[1+ 9998 ]
-evalI (a + b)              = evalI a +ℤ evalI b
-evalI (a - b)              = evalI a -ℤ evalI b
-evalI (a % b)              = evalI a modℤ evalI b
-evalI (if b then a else c) = i (evalB b) t (evalI a) e (evalI c) 
+evalI : Dict → IExpr → ℤ
+evalI _ (#   n)              = n
+evalI d (var s)              = lookup d s
+evalI d (a + b)              = evalI d a +ℤ evalI d b
+evalI d (a - b)              = evalI d a -ℤ evalI d b
+evalI d (a % b)              = evalI d a modℤ evalI d b
+evalI d (if b then a else c) = i (evalB d b) t (evalI d a) e (evalI d c) 
 
 --evalB : BExpr → Bool
-evalB false    = false
-evalB true     = true
-evalB (x ∧ y)  = evalB x ∧b evalB y
-evalB (x ∨ y)  = evalB x ∨b evalB y
-evalB (¬ x)    = not (evalB x)
-evalB (x == y) = evalI x ==ℤ evalI y
-evalB (x ≠ y)  = evalI x ≠ℤ evalI y
-evalB (x < y)  = evalI x <ℤ evalI y
-evalB (x ≤ y)  = evalI x ≤ℤ evalI y
-evalB (x > y)  = evalI x >ℤ evalI y
-evalB (x ≥ y)  = evalI x ≥ℤ evalI y
+evalB _ false    = false
+evalB _ true     = true
+evalB d (x ∧ y)  = evalB d x ∧b evalB d y
+evalB d (x ∨ y)  = evalB d x ∨b evalB d y
+evalB d (¬ x)    = not (evalB d x)
+evalB d (x == y) = evalI d x ==ℤ evalI d y
+evalB d (x ≠ y)  = evalI d x ≠ℤ evalI d y
+evalB d (x < y)  = evalI d x <ℤ evalI d y
+evalB d (x ≤ y)  = evalI d x ≤ℤ evalI d y
+evalB d (x > y)  = evalI d x >ℤ evalI d y
+evalB d (x ≥ y)  = evalI d x ≥ℤ evalI d y
 
 varNamesB : BExpr → List String
 

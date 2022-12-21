@@ -4,178 +4,128 @@ module Symbolic where
 
 open import Prelude
 
-open import Expr hiding (_+_; #_; lookup)
+open import Expr hiding (_+_; #_; lookup; _mod_)
 open import Pitch
 open import Interval
 open import Location
 
--- Named Pitch
-data NoteName : Type where
-  C  : NoteName
-  C♯ : NoteName
-  D♭ : NoteName
-  D  : NoteName
-  D♯ : NoteName
-  E♭ : NoteName
-  E  : NoteName
-  F  : NoteName
-  F♯ : NoteName
-  G♭ : NoteName
-  G  : NoteName
-  G♯ : NoteName
-  A♭ : NoteName
-  A  : NoteName
-  A♯ : NoteName
-  B♭ : NoteName
-  B  : NoteName
+data Letter : Type where
+  C : Letter
+  D : Letter
+  E : Letter
+  F : Letter
+  G : Letter
+  A : Letter
+  B : Letter
+
+showLetter : Letter → String
+showLetter C = "C"
+showLetter D = "D"
+showLetter E = "E"
+showLetter F = "F"
+showLetter G = "G"
+showLetter A = "A"
+showLetter B = "B"
+
+-- Accidentals
+data Acc : Type where
+  ♮ : Acc
+  ♭ : Acc
+  ♯ : Acc
+  𝄫 : Acc
+  𝄪 : Acc
+
+showAcc : Acc → String
+showAcc ♮ = ""
+showAcc ♭ = "♭"
+showAcc ♯ = "♯"
+showAcc 𝄫 = "𝄫"
+showAcc 𝄪 = "𝄪"
+
+record NoteName : Type where
+  constructor nn
+  field
+    ltr : Letter
+    acc : Acc
+
+-- Specific notes
+C♮ = nn C ♮
+C♯ = nn C ♯
+D♭ = nn D ♭
+D♮ = nn D ♮
+D♯ = nn D ♯
+E♭ = nn E ♭
+E♮ = nn E ♮
+F♮ = nn F ♮
+F♯ = nn F ♯
+G♭ = nn G ♭
+G♮ = nn G ♮
+G♯ = nn G ♯
+A♭ = nn A ♭
+A♮ = nn A ♮
+A♯ = nn A ♯
+B♭ = nn B ♭
+B♮ = nn B ♮
 
 showNoteName : NoteName → String
-showNoteName C  = "C"
-showNoteName C♯ = "C♯"
-showNoteName D♭ = "D♭"
-showNoteName D  = "D"
-showNoteName D♯ = "D♯"
-showNoteName E♭ = "E♭"
-showNoteName E  = "E"
-showNoteName F  = "F"
-showNoteName F♯ = "F♯"
-showNoteName G♭ = "G♭"
-showNoteName G  = "G"
-showNoteName G♯ = "G♯"
-showNoteName A♭ = "A♭"
-showNoteName A  = "A"
-showNoteName A♯ = "A♯"
-showNoteName B♭ = "B♭"
-showNoteName B  = "B"
+showNoteName (nn l a) = showLetter l ++s showAcc a
+
+letter→PC : Letter → PC
+letter→PC C = # 0
+letter→PC D = # 2
+letter→PC E = # 4
+letter→PC F = # 5
+letter→PC G = # 7
+letter→PC A = # 9
+letter→PC B = # 11
+
+-- Actual modifier is this value minus 2.
+acc→mod : Acc → ℕ
+acc→mod ♮ = 2
+acc→mod ♭ = 1
+acc→mod ♯ = 3
+acc→mod 𝄫 = 0
+acc→mod 𝄪 = 4
 
 noteName→PC : NoteName → PC
-noteName→PC C  = # 0
-noteName→PC C♯ = # 1
-noteName→PC D♭ = # 1
-noteName→PC D  = # 2
-noteName→PC D♯ = # 3
-noteName→PC E♭ = # 3
-noteName→PC E  = # 4
-noteName→PC F  = # 5
-noteName→PC F♯ = # 6
-noteName→PC G♭ = # 6
-noteName→PC G  = # 7
-noteName→PC G♯ = # 8
-noteName→PC A♭ = # 8
-noteName→PC A  = # 9
-noteName→PC A♯ = # 10
-noteName→PC B♭ = # 10
-noteName→PC B  = # 11
+noteName→PC (nn l a) = (toℕ (letter→PC l) + acc→mod a + 10) mod s12
 
 -- Named Pitch
--- We don't use a product type here since it would be more verbose.
-data NPitch : Type where
-  C  : Octave → NPitch
-  C♯ : Octave → NPitch
-  D♭ : Octave → NPitch
-  D  : Octave → NPitch
-  D♯ : Octave → NPitch
-  E♭ : Octave → NPitch
-  E  : Octave → NPitch
-  F  : Octave → NPitch
-  F♯ : Octave → NPitch
-  G♭ : Octave → NPitch
-  G  : Octave → NPitch
-  G♯ : Octave → NPitch
-  A♭ : Octave → NPitch
-  A  : Octave → NPitch
-  A♯ : Octave → NPitch
-  B♭ : Octave → NPitch
-  B  : Octave → NPitch
-  ?? : String → NPitch -- unknown note with a unique variable name
+record NPitch : Type where
+  constructor np
+  field
+    nam : NoteName
+    oct : Octave
 
 showNPitch : NPitch → String
-showNPitch (C  o) = "C"  ++s primShowNat o
-showNPitch (C♯ o) = "C♯" ++s primShowNat o
-showNPitch (D♭ o) = "D♭" ++s primShowNat o
-showNPitch (D  o) = "D"  ++s primShowNat o
-showNPitch (D♯ o) = "D♯" ++s primShowNat o
-showNPitch (E♭ o) = "E♭" ++s primShowNat o
-showNPitch (E  o) = "E"  ++s primShowNat o
-showNPitch (F  o) = "F"  ++s primShowNat o
-showNPitch (F♯ o) = "F♯" ++s primShowNat o
-showNPitch (G♭ o) = "G♭" ++s primShowNat o
-showNPitch (G  o) = "G"  ++s primShowNat o
-showNPitch (G♯ o) = "G♯" ++s primShowNat o
-showNPitch (A♭ o) = "A♭" ++s primShowNat o
-showNPitch (A  o) = "A"  ++s primShowNat o
-showNPitch (A♯ o) = "A♯" ++s primShowNat o
-showNPitch (B♭ o) = "B♭" ++s primShowNat o
-showNPitch (B  o) = "B"  ++s primShowNat o
-showNPitch (?? s) = "?"  ++s s
+showNPitch (np n o) = showNoteName n ++s primShowNat o
 
-noteName→npitch : NoteName → Octave → NPitch
-noteName→npitch C  o = C  o
-noteName→npitch C♯ o = C♯ o
-noteName→npitch D♭ o = D♭ o
-noteName→npitch D  o = D  o
-noteName→npitch D♯ o = D♯ o
-noteName→npitch E♭ o = E♭ o
-noteName→npitch E  o = E  o
-noteName→npitch F  o = F  o
-noteName→npitch F♯ o = F♯ o
-noteName→npitch G♭ o = G♭ o
-noteName→npitch G  o = G  o
-noteName→npitch G♯ o = G♯ o
-noteName→npitch A♭ o = A♭ o
-noteName→npitch A  o = A  o
-noteName→npitch A♯ o = A♯ o
-noteName→npitch B♭ o = B♭ o
-noteName→npitch B  o = B  o
+-- Maybe named pitch; the alternative is a variable with a unique name
+data MPitch : Type where
+  !! : NPitch → MPitch
+  ?? : String → MPitch
 
-npitch→noteName : NPitch → NoteName
-npitch→noteName (C  o) = C
-npitch→noteName (C♯ o) = C♯
-npitch→noteName (D♭ o) = D♭
-npitch→noteName (D  o) = D
-npitch→noteName (D♯ o) = D♯
-npitch→noteName (E♭ o) = E♭
-npitch→noteName (E  o) = E
-npitch→noteName (F  o) = F
-npitch→noteName (F♯ o) = F♯
-npitch→noteName (G♭ o) = G♭
-npitch→noteName (G  o) = G
-npitch→noteName (G♯ o) = G♯
-npitch→noteName (A♭ o) = A♭
-npitch→noteName (A  o) = A
-npitch→noteName (A♯ o) = A♯
-npitch→noteName (B♭ o) = B♭
-npitch→noteName (B  o) = B
-npitch→noteName (?? s) = C -- make this C for now; should fix this somewhow
+showMPitch : MPitch → String
+showMPitch (!! x) = showNPitch x
+showMPitch (?? s) = "?" ++s s
 
-name→pitch : NPitch → IExpr
-name→pitch (C  o) = N (o * s12 + 0)
-name→pitch (C♯ o) = N (o * s12 + 1)
-name→pitch (D♭ o) = N (o * s12 + 1)
-name→pitch (D  o) = N (o * s12 + 2)
-name→pitch (D♯ o) = N (o * s12 + 3)
-name→pitch (E♭ o) = N (o * s12 + 3)
-name→pitch (E  o) = N (o * s12 + 4)
-name→pitch (F  o) = N (o * s12 + 5)
-name→pitch (F♯ o) = N (o * s12 + 6)
-name→pitch (G♭ o) = N (o * s12 + 6)
-name→pitch (G  o) = N (o * s12 + 7)
-name→pitch (G♯ o) = N (o * s12 + 8)
-name→pitch (A♭ o) = N (o * s12 + 8)
-name→pitch (A  o) = N (o * s12 + 9)
-name→pitch (A♯ o) = N (o * s12 + 10)
-name→pitch (B♭ o) = N (o * s12 + 10)
-name→pitch (B  o) = N (o * s12 + 11)
+-- Note: This doesn't work for C♭, etc, with values < 0.
+np→pitch : NPitch → IExpr
+np→pitch (np n o) = N (o * s12 + toℕ (noteName→PC n))
+
+name→pitch : MPitch → IExpr
+name→pitch (!! n) = np→pitch n
 name→pitch (?? s) = var s
 
-name→pitch2 : NPitch × NPitch → IExpr × IExpr
+name→pitch2 : MPitch × MPitch → IExpr × IExpr
 name→pitch2 (a , b ) = name→pitch a , name→pitch b
 
--- Variables map to pitch 0
-name→p : Dict → NPitch → Pitch
-name→p d np with evalI d (name→pitch np)
+-- Map unknown pitches to 0 for now.
+name→p : Dict → MPitch → Pitch
+name→p d (!! namp) with evalI d (np→pitch namp)
 ... | +_     n = n
 ... | -[1+_] _ = 0
+name→p _ (?? _) = 0
 
 -- Named Interval
 data NInt : Type where
@@ -290,7 +240,7 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))))) = Per15
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
 
-nint : Dict → NPitch → NPitch → NInt
+nint : Dict → MPitch → MPitch → NInt
 nint d a b = upi→name (upi (name→p d a) (name→p d b))
 
 -- Keys (just a few for now)
@@ -321,12 +271,12 @@ showKey : Key → String
 showKey (key k q) = showKeyRoot k ++s showKeyQuality q
 
 scale : Key → Vec NoteName s7
-scale (key C major) = C ∷ D ∷ E ∷ F ∷ G ∷ A ∷ B ∷ []
-scale (key F major) = F ∷ G ∷ A ∷ B♭ ∷ C ∷ D ∷ E ∷ []
-scale (key G major) = G ∷ A ∷ B ∷ C ∷ D ∷ E ∷ F♯ ∷ []
+scale (key C major) = C♮ ∷ D♮ ∷ E♮ ∷ F♮ ∷ G♮ ∷ A♮ ∷ B♮ ∷ []
+scale (key F major) = F♮ ∷ G♮ ∷ A♮ ∷ B♭ ∷ C♮ ∷ D♮ ∷ E♮ ∷ []
+scale (key G major) = G♮ ∷ A♮ ∷ B♮ ∷ C♮ ∷ D♮ ∷ E♮ ∷ F♯ ∷ []
 
 chromaticScale : Vec NoteName s12
-chromaticScale = C ∷ C♯ ∷ D ∷ E♭ ∷ E ∷ F ∷ F♯ ∷ G ∷ A♭ ∷ A ∷ B♭ ∷ B ∷ []
+chromaticScale = C♮ ∷ C♯ ∷ D♮ ∷ E♭ ∷ E♮ ∷ F♮ ∷ F♯ ∷ G♮ ∷ A♭ ∷ A♮ ∷ B♭ ∷ B♮ ∷ []
 
 toScale : {n : ℕ} → Vec NoteName n → Scale n
 toScale = vmap noteName→PC
@@ -334,17 +284,17 @@ toScale = vmap noteName→PC
 pitch→npitch : Pitch → NPitch
 pitch→npitch n =
   let (p , o) = absoluteToRelative n
-  in noteName→npitch (lookup chromaticScale p) o
+  in np (lookup chromaticScale p) o
 
--- Pairs and pairs of pairs of NPitch
+-- Pairs and pairs of pairs of MPitch
 NP NPNP LP LPLP [N] [[N]] [L] [[L]] : Type
-NP    = NPitch × NPitch
+NP    = MPitch × MPitch
 NPNP  = NP × NP
-LP    = Located NPitch × Located NPitch
+LP    = Located MPitch × Located MPitch
 LPLP  = LP × LP
-[N]   = List NPitch
+[N]   = List MPitch
 [[N]] = List [N]
-[L]   = List (Located NPitch)
+[L]   = List (Located MPitch)
 [[L]] = List [L]
 
 np→p : NP → P

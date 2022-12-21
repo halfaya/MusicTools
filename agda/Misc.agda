@@ -8,16 +8,16 @@ open import Location
 open import Symbolic
 
 -- Change pitches in the given range to be a varible, named by its location.
-makeVariable : Range → Located NPitch → Located NPitch
-makeVariable r x@(located l _) =
+makeVariable : Range → Located NPitch → Located MPitch
+makeVariable r (located l x) =
   if l ∈range r
   then located l (?? (showLocation l))
-  else x
+  else located l (!! x)
 
 -- Change all pitches in the given range to be varibles, named by their location.
-makeVariables1 : Range → [L] → [L]
+makeVariables1 : Range → List (Located NPitch) → [L]
 makeVariables1 r xs = map (makeVariable r) xs
 
 -- Change all pitches in the given range to be varibles, named by their location.
-makeVariables : Range → [[L]] → [[L]]
+makeVariables : Range → List (List (Located NPitch)) → [[L]]
 makeVariables r xss = map (makeVariables1 r) xss

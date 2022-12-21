@@ -2,7 +2,7 @@
 
 module Exec where
 
-open import Reflection
+open import Reflection using (TC; Term; _>>=_; unify; lit; string)
 
 open import Prelude
 
@@ -12,8 +12,9 @@ postulate
 
 {-# BUILTIN AGDATCMEXEC execTC #-}
 
+-- You must add /bin/cat to ~/.agda/executables to run this.
 macro
-  readFile : String → Term → TC ⊤
+  readFile : String → Term → TC ⊤ -- returns the contents of the file as a String
   readFile file hole = do
     (exitCode , (stdOut , stdErr)) ← execTC "cat" (file ∷ []) ""
     unify hole (lit (string stdOut))

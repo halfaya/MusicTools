@@ -28,7 +28,7 @@ ppInterval x y with (y -ℤ x)
 ... | -[1+_] n = "Invalid interval -" ++s primShowNat (suc n)
 
 ppNInt : Dict → NP → String
-ppNInt d (a , b) = showNPitch a ++s "," ++s showNPitch b ++s "(" ++s showNInt (nint d a b) ++s ")"
+ppNInt d (a , b) = showMPitch a ++s "," ++s showMPitch b ++s "(" ++s showNInt (nint d a b) ++s ")"
 
 ppPP : Dict → PP → String
 ppPP d ((a , b) , c , e) =
@@ -61,7 +61,7 @@ ppMIntervalConstraint d (maxInterval m x) =
   "IntervalBetween 1 ≤ " ++s ppNInt d x ++s " ≤ " ++s showNInt m
 
 ppMScaleConstraint : MScaleConstraint → String
-ppMScaleConstraint (inScale k x) = "InScaleOfKey " ++s showKey k ++s " " ++s showNPitch x
+ppMScaleConstraint (inScale k x) = "InScaleOfKey " ++s showKey k ++s " " ++s showMPitch x
 
 ppConstraint : Constraint → String
 ppConstraint (setConstraint x)     = "set constraint"

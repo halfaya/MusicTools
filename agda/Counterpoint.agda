@@ -22,14 +22,14 @@ firstSpeciesIntervals = Per1 ∷ Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ []
 firstSpeciesIntervals4 : List NInt
 firstSpeciesIntervals4 = Per4 ∷ firstSpeciesIntervals
 
-firstSpeciesConstraintsVoice : Key → List (Located NPitch) → List (Ranged MConstraint)
+firstSpeciesConstraintsVoice : Key → List (Located MPitch) → List (Ranged MConstraint)
 firstSpeciesConstraintsVoice k v =
   map (mapRanged scaleConstraint ∘ locScaleConstraint k) v
 
 -- Expects higher voice first in each pair.
 firstSpeciesConstraints2 : List LP → List (Ranged MConstraint)
 firstSpeciesConstraints2 lp =
-     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals) lp ++
+     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals4) lp ++
      map (mapRanged intervalConstraint ∘ locMaxIntervalConstraint (Int 28)) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 

@@ -6,7 +6,7 @@ open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_)
 
 open import Beethoven
 open import Constraint
-open import Kennan
+--open import Kennan
 open import MConstraint
 open import Counterpoint
 open import Expr
@@ -14,13 +14,13 @@ open import Location
 open import Misc
 open import PrettyPrint
 open import Symbolic
-open import Tanaka
+--open import Tanaka
 
 open import Util
 
 
 test : List (Ranged MConstraint)
-test = firstSpeciesConstraints (key C major) (indexVoiceBeat beethoven146)
+test = firstSpeciesConstraints (key C major) (indexVoiceBeat (take 2 beethoven146m))
 
 test1 : List String
 test1 = map (showRanged (ppMConstraint [])) test
@@ -37,6 +37,6 @@ test4 = map (showRanged (ppMConstraint [])) test3
 test5 : List String
 test5 = map (showVBBRanged 2 (ppMConstraint [])) test3
 
-test6 : List (List (Located NPitch))
+test6 : List (List (Located MPitch))
 test6 = makeVariables (rectangle (location 2 2) (location 4 11))
                       (indexVoiceBeat beethoven146)

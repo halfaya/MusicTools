@@ -67,13 +67,13 @@ locMaxIntervalConstraint : NInt → LP → Ranged MIntervalConstraint
 locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→np lp))
 
 data MScaleConstraint : Type where
-  inScale : Key → NPitch → MScaleConstraint
+  inScale : Key → MPitch → MScaleConstraint
 
 msc→c : MScaleConstraint → Constraint
 msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→pitch x)
 
 -- interval constraint indexed with range
-locScaleConstraint : Key → Located NPitch → Ranged MScaleConstraint
+locScaleConstraint : Key → Located MPitch → Ranged MScaleConstraint
 locScaleConstraint k (located loc x) = ranged (point loc) (inScale k x)
 
 data MConstraint : Type where

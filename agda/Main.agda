@@ -6,8 +6,6 @@ open import Prelude
 open import IO.Primitive
 
 open import Beethoven
-open import Kennan
-open import Tanaka
 open import Counterpoint using (defaultConstraints)
 open import Location     using (indexVoiceBeat; location; rectangle)
 open import Midi         using (exportTracks; track→htrack)
@@ -20,9 +18,9 @@ main : IO ⊤
 main = do
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
---      range        = rectangle (location 2 2) (location 4 11)
---      source       = makeVariables range (indexVoiceBeat (take 3 beethoven146))
-      range        = rectangle (location 1 2) (location 1 9)
-      source       = makeVariables range (indexVoiceBeat tanaka)
+      range        = rectangle (location 2 2) (location 4 11)
+      source       = makeVariables range (indexVoiceBeat (take 3 beethoven146))
+--      range        = rectangle (location 1 2) (location 1 9)
+--      source       = makeVariables range (indexVoiceBeat tanaka)
   song             ← solveToMidi half defaultConstraints source
   exportTracks file ticksPerBeat (map track→htrack song)

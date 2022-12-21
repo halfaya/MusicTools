@@ -1,8 +1,8 @@
-{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Music where
 
-open import Prelude hiding (sym; subst)
+open import Prelude
 
 open import Relation.Binary.PropositionalEquality using (sym; subst)
 open import Data.Nat.Properties using (<⇒≤)

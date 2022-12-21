@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Pitch where
 
@@ -7,7 +7,7 @@ open import Prelude
 open import Relation.Nullary using (yes; no)
 
 open import BitVec          using (BitVec; insert; empty; show)
-open import Util            using (n∸k<n; _+N_; opposite)
+open import Util            using (n∸k<n; _+N_; opposite; _modℕ_)
 
 -- Position of a pitch on an absolute scale
 -- 0 is C(-1) on the international scale (where C4 is middle C)
@@ -20,7 +20,11 @@ Pitch = ℕ
 
 -- Number of notes in the chromatic scale.
 s12 : ℕ
-s12 = 12
+s12 = suc 11
+
+instance
+  s12≠0 : NonZero s12
+  s12≠0 = record { nonZero = tt }
 
 -- Number of notes in the diatonic scale.
 s7 : ℕ

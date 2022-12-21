@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 -- First and second species counterpoint
 module Counterpoint where
@@ -29,7 +29,7 @@ firstSpeciesConstraintsVoice k v =
 -- Expects higher voice first in each pair.
 firstSpeciesConstraints2 : List LP → List (Ranged MConstraint)
 firstSpeciesConstraints2 lp =
-     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals4) lp ++
+     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals) lp ++
      map (mapRanged intervalConstraint ∘ locMaxIntervalConstraint (Int 28)) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 

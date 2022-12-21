@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical #-}
+{-# OPTIONS --without-K #-}
 
 module SmtInterface where
 

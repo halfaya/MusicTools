@@ -1,4 +1,4 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Misc where
 

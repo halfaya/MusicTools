@@ -1,9 +1,8 @@
-{-# OPTIONS --erased-cubical #-}
+{-# OPTIONS --without-K #-}
 
 module Smt where
 
-open import Cubical.Core.Everything using (Type)
-
+open import Prelude             using (Type)
 open import Agda.Builtin.String using (String)
 open import Data.List           using (List; map)
 open import Data.Integer        using (ℤ)

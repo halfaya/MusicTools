@@ -1,18 +1,21 @@
-{-# OPTIONS --erased-cubical --safe #-}
+{-# OPTIONS --without-K --safe #-}
 
 module Interval where
 
 open import Prelude
 
-open import Data.Integer.DivMod using (_modℕ_)
+open import Data.Integer.DivMod using (_%ℕ_)
 
 open import Pitch
 open import Util using (allPairs; ◯pairs; firstPairs)
 
-
 -- Maximum number of interval classes (0 to 6).
 ic7 : ℕ
 ic7 = 7
+
+instance
+  ic7≠0 : NonZero ic7
+  ic7≠0 = record { nonZero = tt }
 
 -- Higher pitch assumed first.
 PitchPair : Type
@@ -164,7 +167,7 @@ toIC (p , q) =
 
 toPCI : PCPair → PCI
 toPCI (p , q) =
- (((+ (toℕ p)) - (+ (toℕ q))) modℕ s12) mod s12
+ (((+ (toℕ p)) - (+ (toℕ q))) %ℕ s12) mod s12
 
 -- Assumes p ≥ q
 toPitchInterval : PitchPair → PitchInterval

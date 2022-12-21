@@ -1,11 +1,11 @@
-{-# OPTIONS --erased-cubical --safe -W noNoEquivWhenSplitting #-}
+{-# OPTIONS --without-K --safe  #-}
 
 module Util where
 
 open import Prelude
 
 open import Data.Integer public  using () renaming (_≤ᵇ_ to _≤ℤ_)
-open import Data.Integer.DivMod  using () renaming (_modℕ_ to _modN_)
+open import Data.Integer.DivMod  using () renaming (_%ℕ_ to _modN_)
 open import Data.Nat             using (_<_; _<ᵇ_)
 open import Data.Nat.Properties  using (≤-step; ≤-trans; ≤-refl)
 open import Relation.Nullary.Decidable using (False)
@@ -138,9 +138,9 @@ opposite {suc n} fz          = fz
 opposite {suc n} (fs fz)     = fromℕ n
 opposite {suc n} (fs (fs i)) = inject₁ (opposite (fs i))
 
-_modℕ'_ : (dividend : ℤ) (divisor : ℕ) {≢0 : False (divisor ≟ 0)} → Fin divisor
-((+ n)    modℕ' d) {d≠0} = (n mod d) {d≠0}
-(-[1+ n ] modℕ' d) {d≠0} = opposite ((suc n mod d) {d≠0})
+--_modℕ'_ : (dividend : ℤ) (divisor : ℕ) {≢0 : False (divisor ≟ 0)} → Fin divisor
+--((+ n)    modℕ' d) {d≠0} = (n mod d) {d≠0}
+--a(-[1+ n ] modℕ' d) {d≠0} = opposite ((suc n mod d) {d≠0})
 
 vzipWithIndex : {ℓ : Level} {A : Type ℓ} {k : ℕ} → Vec A k → Vec (Fin k × A) k
 vzipWithIndex {k = k} = vzip (fins k)

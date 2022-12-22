@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K  --allow-exec #-}
 
 module Test where
 
@@ -6,12 +6,14 @@ open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_)
 
 open import Beethoven
 open import Constraint
+open import Exec
 --open import Kennan
 open import MConstraint
 open import Counterpoint
 open import Expr
 open import Location
 open import Misc
+open import Parse
 open import PrettyPrint
 open import Symbolic
 --open import Tanaka
@@ -19,8 +21,17 @@ open import Symbolic
 open import Util
 
 
+fileName : String
+fileName = "/Users/leo/Downloads/Test 1.xml"
+
+t1 : String
+t1 = readFile fileName
+
+t1n = parseMusic t1
+t1m = map (map !!) t1n
+
 test : List (Ranged MConstraint)
-test = firstSpeciesConstraints (key C major) (indexVoiceBeat (take 2 beethoven146m))
+test = firstSpeciesConstraints (key C major) (indexVoiceBeat t1m)
 
 test1 : List String
 test1 = map (showRanged (ppMConstraint [])) test

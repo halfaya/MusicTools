@@ -29,17 +29,17 @@ showLetter B = "B"
 
 -- Accidentals
 data Acc : Type where
-  ♮ : Acc
-  ♭ : Acc
-  ♯ : Acc
   𝄫 : Acc
+  ♭ : Acc
+  ♮ : Acc
+  ♯ : Acc
   𝄪 : Acc
 
 showAcc : Acc → String
-showAcc ♮ = ""
-showAcc ♭ = "♭"
-showAcc ♯ = "♯"
 showAcc 𝄫 = "𝄫"
+showAcc ♭ = "♭"
+showAcc ♮ = ""
+showAcc ♯ = "♯"
 showAcc 𝄪 = "𝄪"
 
 record NoteName : Type where
@@ -81,10 +81,10 @@ letter→PC B = # 11
 
 -- Actual modifier is this value minus 2.
 acc→mod : Acc → ℕ
-acc→mod ♮ = 2
-acc→mod ♭ = 1
-acc→mod ♯ = 3
 acc→mod 𝄫 = 0
+acc→mod ♭ = 1
+acc→mod ♮ = 2
+acc→mod ♯ = 3
 acc→mod 𝄪 = 4
 
 noteName→PC : NoteName → PC

@@ -16,11 +16,5 @@ postulate
 macro
   readFile : String → Term → TC ⊤ -- returns the contents of the file as a String
   readFile file hole = do
-    (exitCode , (stdOut , stdErr)) ← execTC "cat" (file ∷ []) ""
+    (exitCode , (stdOut , stdErr)) ← execTC "HMusicTools" (file ∷ []) ""
     unify hole (lit (string stdOut))
-
-fileName : String
-fileName = "/Users/leo/Downloads/Test 1.xml"
-
-s : String
-s = readFile fileName

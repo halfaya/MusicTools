@@ -35,57 +35,49 @@ fromHMaybe _       (just x) = x
 varDictionary : List String → List (HMaybe ℤ) → Dict
 varDictionary xs ys = zip xs (map (fromHMaybe (+ 0)) ys)
 
-varNames1 : [P] → List String
-varNames1 []             = []
-varNames1 (x ∷ xs) = varNamesI x ++ varNames1 xs
+varNames1 : [M] → List String
+varNames1 []          = []
+varNames1 (!! x ∷ xs) = varNames1 xs
+varNames1 (?? x ∷ xs) = x ∷ varNames1 xs
 
-varNames : [[P]] → List String
+varNames : [[M]] → List String
 varNames = concatMap varNames1
 
-varNames2 : List P → List String
+varNames2 : List MP → List String
 varNames2 []             = []
-varNames2 ((a , b) ∷ xs) = varNamesI a ++ varNamesI b ++ varNames2 xs
-
-iExpr→Pitch : Dict → IExpr → Pitch
-iExpr→Pitch d (# +_ n)      = n
-iExpr→Pitch d (# -[1+_] n)  = 0
-iExpr→Pitch d (var s)       = lookupPitch d s
-iExpr→Pitch d (_ + _)       = 0
-iExpr→Pitch d (_ - _)       = 0
-iExpr→Pitch d (_ % _)       = 0
-iExpr→Pitch d (i _ t _ e _) = 0
+varNames2 ((a , b) ∷ xs) = varNames1 (a ∷ []) ++ varNames1 (b ∷ []) ++ varNames2 xs
 
 solvePitches : ([[L]] → List (Ranged MConstraint)) → [[L]] → IO (List (List Pitch))
-solvePitches cons nss = do
-  let xss    = [[l]]→[[p]] nss
-      vnames = varNames xss
-      cs     = compileConstraints (map unrange (cons nss))
+solvePitches cons lss = do
+  let mss    = [[l]]→[[m]] lss
+      vnames = varNames mss
+      cs     = compileConstraints (map unrange (cons lss))
   res        ← solveConstraints vnames cs
-  let f      = iExpr→Pitch (varDictionary vnames res)
-  return (map (map f) xss)
+  let f      = name→pitch (varDictionary vnames res)
+  return (map (map f) mss)
 
 solveToMidi : Duration → ([[L]] → List (Ranged MConstraint)) → [[L]] → IO (List MidiTrack)
-solveToMidi dur cons nss = do
-  pss      ← solvePitches cons nss
+solveToMidi dur cons lss = do
+  pss      ← solvePitches cons lss
   let tempo = 60 * dur -- 240 per note
       ess   = map (notes→events defaultVelocity ∘ (map (tone dur))) pss
   return (events→tracks tempo ess)
 
-solvePitches2 : (List NP → List MConstraint) → List NP → IO (List (Pitch × Pitch))
-solvePitches2 cons ns = do
-  let xs     = map np→p ns
-      vnames = varNames2 xs
-      cs     = compileConstraints (cons ns)
+solvePitches2 : (List MP → List MConstraint) → List MP → IO (List (Pitch × Pitch))
+solvePitches2 cons ms = do
+  let vnames = varNames2 ms
+      cs     = compileConstraints (cons ms)
   res        ← solveConstraints vnames cs
-  let f      = iExpr→Pitch (varDictionary vnames res)
-  return (map (λ x → f (fst x) , f (snd x)) xs)
+  let f      = name→pitch (varDictionary vnames res)
+  return (map (λ x → f (fst x) , f (snd x)) ms)
 
-solveToMidi2 : Duration → (List NP → List MConstraint) → List NP → IO (List MidiTrack)
-solveToMidi2 dur cons ns = do
-  ps      ← solvePitches2 cons ns
+solveToMidi2 : Duration → (List MP → List MConstraint) → List MP → IO (List MidiTrack)
+solveToMidi2 dur cons ms = do
+  ps      ← solvePitches2 cons ms
   let ps1 = map (tone dur ∘ fst) ps
       ps2 = map (tone dur ∘ snd) ps
       tempo = 60 * dur -- 240 per note
       tr1 = track "Voice 1" piano channel1 tempo (notes→events defaultVelocity ps1)
       tr2 = track "Voice 2" piano channel2 tempo (notes→events defaultVelocity ps2)
   return (tr1 ∷ tr2 ∷ [])
+

@@ -68,6 +68,7 @@ evalB d (x ≤ y)  = evalI d x ≤ℤ evalI d y
 evalB d (x > y)  = evalI d x >ℤ evalI d y
 evalB d (x ≥ y)  = evalI d x ≥ℤ evalI d y
 
+{-
 varNamesB : BExpr → List String
 
 varNamesI : IExpr → List String
@@ -90,6 +91,7 @@ varNamesB (x < y)   = varNamesI x ++ varNamesI y
 varNamesB (x ≤ y)   = varNamesI x ++ varNamesI y
 varNamesB (x > y)   = varNamesI x ++ varNamesI y
 varNamesB (x ≥ y)   = varNamesI x ++ varNamesI y
+-}
 
 -- Utility functions
 
@@ -107,8 +109,11 @@ e mod n = e % N n
 χ b = if b then N 1 else N 0
 
 -- Aggregates of IExpr
+PP : Type
+PP = (IExpr × IExpr) × (IExpr × IExpr)
+{-
 P PP [P] [[P]] : Type
 P     = IExpr × IExpr
-PP    = P × P
 [P]   = List IExpr
 [[P]] = List [P]
+-}

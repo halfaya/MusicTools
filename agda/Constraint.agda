@@ -12,15 +12,15 @@ open import Util using (pairs)
 -- NOTE: The convention is that the higher pitch is the first in any pair.
 
 -- Convert a pair of pitches to an Opi
-toOpi : P → IExpr
+toOpi : (IExpr × IExpr) → IExpr
 toOpi (p , q) = p - q
 
 -- Convert a pair of pitches to an Opi mod 12
-toOpi12 : P → IExpr
+toOpi12 : (IExpr × IExpr) → IExpr
 toOpi12 (p , q) = (p - q) mod 12
 
 -- Convert a pair of pitches to a Upi
-toUpi : P → IExpr
+toUpi : (IExpr × IExpr) → IExpr
 toUpi pq = ∣ toOpi pq ∣
 
 data SetConstraint : Type where

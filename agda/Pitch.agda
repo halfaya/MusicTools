@@ -22,10 +22,6 @@ Pitch = ℕ
 s12 : ℕ
 s12 = suc 11
 
-instance
-  s12≠0 : NonZero s12
-  s12≠0 = record { nonZero = tt }
-
 -- Number of notes in the diatonic scale.
 s7 : ℕ
 s7 = 7

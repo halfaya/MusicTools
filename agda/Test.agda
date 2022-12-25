@@ -15,6 +15,7 @@ open import Location
 open import Misc
 open import Parse
 open import PrettyPrint
+open import Serial
 open import Symbolic
 --open import Tanaka
 
@@ -38,6 +39,9 @@ test1 = map (showRanged (ppMConstraint [])) test
 
 test2 : List BExpr
 test2 = map (compileConstraint ∘ mc→c ∘ unrange) test
+
+test2a : List String
+test2a = map bserial test2
 
 test3 : List (Ranged MConstraint)
 test3 = filter (not ∘ evalB [] ∘ compileConstraint ∘ mc→c ∘ unrange) test

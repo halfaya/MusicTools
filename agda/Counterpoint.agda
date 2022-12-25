@@ -45,9 +45,9 @@ firstSpeciesConstraints k xss =
   in voiceConstraints ++ pairConstraints
 
 -- Constraints to make the music more interesting
-interestingConstraints : List NP → List (Ranged MConstraint)
+interestingConstraints : List MP → List (Ranged MConstraint)
 interestingConstraints ns =
-  let ps = map np→p ns
+  let ps = map mp→p ns
       lp = index2VoiceBeat ns
       r  = fullRange2 ns
   in ranged r (constraint ((numericConstraint ∘ numContrary≥ (+ 6) ∘ pairs) ps)) ∷

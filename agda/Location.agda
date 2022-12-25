@@ -36,11 +36,11 @@ _≤loc_ : Location → Location → Bool
 location a b ≤loc location c d = (a ≤ᵇ c) ∧ (b ≤ᵇ d)
 
 showLocation : Location → String
-showLocation (location v b)    = "Voice " ++s primShowNat v ++s " Beat " ++s primShowNat b
+showLocation (location v b)    = "Voice " ++s showℕ v ++s " Beat " ++s showℕ b
 
 showVoiceBarBeat : VoiceBarBeat → String
 showVoiceBarBeat (voiceBarBeat _ v bar beat) =
-  "Voice " ++s primShowNat v ++s " Bar " ++s primShowNat bar ++s " Beat " ++s primShowNat beat
+  "Voice " ++s showℕ v ++s " Bar " ++s showℕ bar ++s " Beat " ++s showℕ beat
 
 showVBB : BeatsPerBar → Location → String
 showVBB b = showVoiceBarBeat ∘ toVoiceBarBeat b

@@ -81,7 +81,7 @@ events→tracks : Tempo → List (List MidiEvent) → List MidiTrack
 events→tracks tempo events =
   let xs = zipWithIndex events
       f : ℕ × List MidiEvent → MidiTrack
-      f x = track ("Voice " ++s (primShowNat (suc (fst x))))
+      f x = track ("Voice " ++s (showℕ (suc (fst x))))
                   (# 0) -- piano
                   (fst x) tempo (snd x)
   in map f xs

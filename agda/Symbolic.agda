@@ -4,7 +4,7 @@ module Symbolic where
 
 open import Prelude
 
-open import Expr hiding (_+_; #_; lookup; _mod_)
+open import Expr hiding (_+_; #_; _mod_) renaming (lookup to lookupE)
 open import Pitch
 open import Interval
 open import Location
@@ -98,7 +98,7 @@ record NPitch : Type where
     oct : Octave
 
 showNPitch : NPitch → String
-showNPitch (np n o) = showNoteName n ++s primShowNat o
+showNPitch (np n o) = showNoteName n ++s showℕ o
 
 -- Maybe named pitch; the alternative is a variable with a unique name
 data MPitch : Type where
@@ -110,22 +110,25 @@ showMPitch (!! x) = showNPitch x
 showMPitch (?? s) = "?" ++s s
 
 -- Note: This doesn't work for C♭, etc, with values < 0.
-np→pitch : NPitch → IExpr
-np→pitch (np n o) = N (o * s12 + toℕ (noteName→PC n))
+np→pitch : NPitch → Pitch
+np→pitch (np n o) = relativeToAbsolute (noteName→PC n , o)
 
-name→pitch : MPitch → IExpr
-name→pitch (!! n) = np→pitch n
-name→pitch (?? s) = var s
-
-name→pitch2 : MPitch × MPitch → IExpr × IExpr
-name→pitch2 (a , b ) = name→pitch a , name→pitch b
+np→iexpr : NPitch → IExpr
+np→iexpr n = N (np→pitch n)
 
 -- Map unknown pitches to 0 for now.
-name→p : Dict → MPitch → Pitch
-name→p d (!! namp) with evalI d (np→pitch namp)
-... | +_     n = n
-... | -[1+_] _ = 0
-name→p _ (?? _) = 0
+name→pitch : Dict → MPitch → Pitch
+name→pitch d (!! n) = np→pitch n
+name→pitch d (?? s) with lookupE d s
+... | +_ p     = p
+... | -[1+_] p = 0
+
+name→iexpr : MPitch → IExpr
+name→iexpr (!! n) = np→iexpr n
+name→iexpr (?? s) = var s
+
+name→iexpr2 : MPitch × MPitch → IExpr × IExpr
+name→iexpr2 (a , b ) = name→iexpr a , name→iexpr b
 
 -- Named Interval
 data NInt : Type where
@@ -182,7 +185,7 @@ showNInt Maj13   = "Maj13"
 showNInt Min14   = "Min14"
 showNInt Maj14   = "Maj14"
 showNInt Per15   = "Per15"
-showNInt (Int n) = "Int" ++s primShowNat n
+showNInt (Int n) = "Int" ++s showℕ n
 
 name→upi : NInt → Upi
 name→upi Per1    = per1
@@ -241,7 +244,7 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
 
 nint : Dict → MPitch → MPitch → NInt
-nint d a b = upi→name (upi (name→p d a) (name→p d b))
+nint d a b = upi→name (upi (name→pitch d a) (name→pitch d b))
 
 -- Keys (just a few for now)
 data KeyRoot : Type where
@@ -287,39 +290,41 @@ pitch→npitch n =
   in np (lookup chromaticScale p) o
 
 -- Pairs and pairs of pairs of MPitch
-NP NPNP LP LPLP [N] [[N]] [L] [[L]] : Type
-NP    = MPitch × MPitch
-NPNP  = NP × NP
+MP MPMP LP LPLP [M] [[M]] [L] [[L]] : Type
+MP    = MPitch × MPitch
+MPMP  = MP × MP
 LP    = Located MPitch × Located MPitch
 LPLP  = LP × LP
-[N]   = List MPitch
-[[N]] = List [N]
+[M]   = List MPitch
+[[M]] = List [M]
 [L]   = List (Located MPitch)
 [[L]] = List [L]
 
-np→p : NP → P
-np→p (a , b) = name→pitch a , name→pitch b
-
-npnp→pp : NPNP → PP
-npnp→pp (a , b) = np→p a , np→p b
-
+{-
 [n]→[p] : [N] → [P]
 [n]→[p] = map name→pitch
 
 [[n]]→[[p]] : [[N]] → [[P]]
 [[n]]→[[p]] = map [n]→[p]
+-}
 
-lp→np : LP → NP
-lp→np (located _ a , located _ b) = a , b
+lp→mp : LP → MP
+lp→mp (located _ a , located _ b) = a , b
 
-lplp→npnp : LPLP → NPNP
-lplp→npnp (a , b) = lp→np a , lp→np b
+lplp→mpmp : LPLP → MPMP
+lplp→mpmp (a , b) = lp→mp a , lp→mp b
 
-[l]→[p] : [L] → [P]
-[l]→[p] = map (name→pitch ∘ unlocate)
+mp→p : MP → (IExpr × IExpr)
+mp→p (a , b) = name→iexpr a , name→iexpr b
 
-[[l]]→[[p]] : [[L]] → [[P]]
-[[l]]→[[p]] = map [l]→[p]
+mpmp→pp : MPMP → PP
+mpmp→pp (a , b) = mp→p a , mp→p b
+
+[l]→[m] : [L] → [M]
+[l]→[m] = map unlocate
+
+[[l]]→[[m]] : [[L]] → [[M]]
+[[l]]→[[m]] = map [l]→[m]
 
 -- Assumes higher voice is first; range starts with higher voice
 lpRange : LP → Range

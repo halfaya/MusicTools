@@ -11,9 +11,9 @@ open import Symbolic
 
 -- Higher-level musical constraints
 
--- Convert a pair of npitches to an NInt
-toNInt : Dict → NP → NInt
-toNInt d (p , q) with evalI d (name→pitch p - name→pitch q)
+-- Convert a pair of mpitches to an NInt
+toNInt : Dict → MP → NInt
+toNInt d (p , q) with evalI d (name→iexpr p - name→iexpr q)
 ... | +_     n = upi→name n
 ... | -[1+_] n = upi→name (suc n)
 
@@ -26,51 +26,51 @@ data Motion : Type where
   notDirectIntoPerfect  : Motion
 
 data MMotionConstraint : Type where
-  contrary              : NPNP → MMotionConstraint
-  oblique               : NPNP → MMotionConstraint
-  parallel              : NPNP → MMotionConstraint
-  similar               : NPNP → MMotionConstraint
-  direct                : NPNP → MMotionConstraint
-  notDirectIntoPerfect  : NPNP → MMotionConstraint
+  contrary              : MPMP → MMotionConstraint
+  oblique               : MPMP → MMotionConstraint
+  parallel              : MPMP → MMotionConstraint
+  similar               : MPMP → MMotionConstraint
+  direct                : MPMP → MMotionConstraint
+  notDirectIntoPerfect  : MPMP → MMotionConstraint
 
 mmc→mc : MMotionConstraint → MotionConstraint
-mmc→mc (contrary              x) = contrary              (npnp→pp x)
-mmc→mc (oblique               x) = oblique               (npnp→pp x)
-mmc→mc (parallel              x) = parallel              (npnp→pp x)
-mmc→mc (similar               x) = similar               (npnp→pp x)
-mmc→mc (direct                x) = direct                (npnp→pp x)
-mmc→mc (notDirectIntoPerfect  x) = notDirectIntoPerfect  (npnp→pp x)
+mmc→mc (contrary              x) = contrary              (mpmp→pp x)
+mmc→mc (oblique               x) = oblique               (mpmp→pp x)
+mmc→mc (parallel              x) = parallel              (mpmp→pp x)
+mmc→mc (similar               x) = similar               (mpmp→pp x)
+mmc→mc (direct                x) = direct                (mpmp→pp x)
+mmc→mc (notDirectIntoPerfect  x) = notDirectIntoPerfect  (mpmp→pp x)
 
 -- motion constraint indexed with range
 locMotionConstraint : Motion → LPLP → Ranged MMotionConstraint
-locMotionConstraint contrary              x = ranged (lplpRange x) (contrary              (lplp→npnp x))
-locMotionConstraint oblique               x = ranged (lplpRange x) (oblique               (lplp→npnp x))
-locMotionConstraint parallel              x = ranged (lplpRange x) (parallel              (lplp→npnp x))
-locMotionConstraint similar               x = ranged (lplpRange x) (similar               (lplp→npnp x))
-locMotionConstraint direct                x = ranged (lplpRange x) (direct                (lplp→npnp x))
-locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→npnp x))
+locMotionConstraint contrary              x = ranged (lplpRange x) (contrary              (lplp→mpmp x))
+locMotionConstraint oblique               x = ranged (lplpRange x) (oblique               (lplp→mpmp x))
+locMotionConstraint parallel              x = ranged (lplpRange x) (parallel              (lplp→mpmp x))
+locMotionConstraint similar               x = ranged (lplpRange x) (similar               (lplp→mpmp x))
+locMotionConstraint direct                x = ranged (lplpRange x) (direct                (lplp→mpmp x))
+locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→mpmp x))
 
 data MIntervalConstraint : Type where
-  intervalType : List NInt → NP → MIntervalConstraint
-  maxInterval  : NInt      → NP → MIntervalConstraint
+  intervalType : List NInt → MP → MIntervalConstraint
+  maxInterval  : NInt      → MP → MIntervalConstraint
 
 ic→c : MIntervalConstraint → Constraint
-ic→c (intervalType xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (np→p x)))
+ic→c (intervalType xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (mp→p x)))
 ic→c (maxInterval m x) =
-  numericConstraint (between (# (+ 1)) (# (+ (name→upi m))) (toOpi (np→p x)))
+  numericConstraint (between (# (+ 1)) (# (+ (name→upi m))) (toOpi (mp→p x)))
 
 -- interval constraints indexed with range
 locQualityConstraint : List NInt → LP → Ranged MIntervalConstraint
-locQualityConstraint xs lp = ranged (lpRange lp) (intervalType xs (lp→np lp))
+locQualityConstraint xs lp = ranged (lpRange lp) (intervalType xs (lp→mp lp))
 
 locMaxIntervalConstraint : NInt → LP → Ranged MIntervalConstraint
-locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→np lp))
+locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→mp lp))
 
 data MScaleConstraint : Type where
   inScale : Key → MPitch → MScaleConstraint
 
 msc→c : MScaleConstraint → Constraint
-msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→pitch x)
+msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→iexpr x)
 
 -- interval constraint indexed with range
 locScaleConstraint : Key → Located MPitch → Ranged MScaleConstraint

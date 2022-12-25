@@ -13,10 +13,6 @@ open import Util using (allPairs; ◯pairs; firstPairs)
 ic7 : ℕ
 ic7 = 7
 
-instance
-  ic7≠0 : NonZero ic7
-  ic7≠0 = record { nonZero = tt }
-
 -- Higher pitch assumed first.
 PitchPair : Type
 PitchPair = Pitch × Pitch
@@ -112,7 +108,7 @@ showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (s
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = "min14"
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = "maj14"
 showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = "per15"
-showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n)))))))))))))))))))))))) = "interval " ++s primShowNat (25 + n)
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n)))))))))))))))))))))))) = "interval " ++s showℕ (25 + n)
 
 isConsonant : Upi → Bool
 isConsonant iv =

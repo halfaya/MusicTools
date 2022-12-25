@@ -75,7 +75,6 @@ B→HBExpr (x ≥ y)  = I→HIExpr x ≥ I→HIExpr y
 {-# FOREIGN GHC
   import Data.SBV
   import Data.Text (Text, unpack, pack)
-  import System.IO.Unsafe (unsafePerformIO)
 
   data IExpr =
     Const Integer     |

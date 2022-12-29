@@ -38,7 +38,7 @@ compileBExpr vt (BAnd a b) = compileBExpr vt a .&& compileBExpr vt b
 compileBExpr vt (BOr a b)  = compileBExpr vt a .|| compileBExpr vt b
 compileBExpr vt (BNot a)   = sNot (compileBExpr vt a)
 
-getResults :: [String] -> IO SatResult -> IO [Maybe Integer]
+getResults :: [String] -> IO SatResult -> IO [Maybe Int8]
 getResults xs res = do
   r <- res
   return $ map (flip getModelValue r) xs
@@ -49,5 +49,5 @@ runSat ts xs = satWith z3 {verbose=False} $ do -- change verbose=True to debug
   let bs = map (compileBExpr vt) xs
   solve bs
 
-solveConstraints :: [String] -> [BExpr] -> IO [Maybe Integer]
+solveConstraints :: [String] -> [BExpr] -> IO [Maybe Int8]
 solveConstraints ts bs = getResults ts (runSat ts bs)

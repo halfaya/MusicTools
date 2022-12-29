@@ -18,6 +18,7 @@ open import Pitch
 open import Util using (_divℕ_)
 open import Smt using (HMaybe; just; nothing; HBExpr; B→HBExpr; solveConstraints)
 open import Symbolic
+open import Variable
 
 compileConstraints : List MConstraint → List HBExpr
 compileConstraints = map (B→HBExpr ∘ compileConstraint ∘ mc→c)
@@ -34,18 +35,6 @@ fromHMaybe _       (just x) = x
 
 varDictionary : List String → List (HMaybe ℤ) → Dict
 varDictionary xs ys = zip xs (map (fromHMaybe (+ 0)) ys)
-
-varNames1 : [M] → List String
-varNames1 []          = []
-varNames1 (!! x ∷ xs) = varNames1 xs
-varNames1 (?? x ∷ xs) = x ∷ varNames1 xs
-
-varNames : [[M]] → List String
-varNames = concatMap varNames1
-
-varNames2 : List MP → List String
-varNames2 []             = []
-varNames2 ((a , b) ∷ xs) = varNames1 (a ∷ []) ++ varNames1 (b ∷ []) ++ varNames2 xs
 
 solvePitches : ([[L]] → List (Ranged MConstraint)) → [[L]] → IO (List (List Pitch))
 solvePitches cons lss = do

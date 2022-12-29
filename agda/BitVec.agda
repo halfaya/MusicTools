@@ -2,9 +2,9 @@
 
 module BitVec where
 
-open import Prelude hiding (_==_)
+open import Prelude hiding (_==_; fromList)
 
-open import Data.String     using (fromList)
+open import Data.String using (fromList)
 
 -- Bit vector representation of finite sets
 

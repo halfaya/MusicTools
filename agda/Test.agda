@@ -2,7 +2,7 @@
 
 module Test where
 
-open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_)
+open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_; _≤_)
 
 open import Beethoven
 open import Constraint
@@ -12,15 +12,14 @@ open import MConstraint
 open import Counterpoint
 open import Expr
 open import Location
-open import Misc
 open import Parse
 open import PrettyPrint
 open import Serial
 open import Symbolic
+open import Variable
 --open import Tanaka
 
 open import Util
-
 
 fileName : String
 fileName = "/Users/leo/Downloads/XML/Test 1.xml"
@@ -53,5 +52,17 @@ test5 : List String
 test5 = map (showVBBRanged 2 (ppMConstraint [])) test3
 
 test6 : List (List (Located MPitch))
-test6 = makeVariables (rectangle (location 2 2) (location 4 11))
-                      (indexVoiceBeat beethoven146)
+test6 = makeVars (rectangle (location 2 2) (location 4 11))
+                 (indexVoiceBeat beethoven146)
+
+---
+
+range   = rectangle (location 2 2) (location 4 11)
+source  = makeVars range (indexVoiceBeat (take 3 beethoven146))
+vars    = varNames (map (map unlocate) source)
+cons    = map (compileConstraint ∘ mc→c ∘ unrange) (defaultConstraints source)
+
+x1 = intersperse "\n" vars
+x2 = map bserial cons
+
+b1 = solve vars cons

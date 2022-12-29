@@ -15,13 +15,20 @@ map1 f (a , b) = (f a , b)
 map2 :: (b -> c) -> (a , b) -> (a , c)
 map2 f (a , b) = (a , f b)
 
-seq2 :: (b -> c -> d) -> (a -> (b , a)) -> (a -> (c , a)) -> a -> (d , a)
+seq2 :: (b -> c -> d) ->
+        (a -> (b , a)) ->
+        (a -> (c , a)) ->
+        a -> (d , a)
 seq2 f g h a =
   let (b , a1) = g a
       (c , a2) = h a1
   in (f b c , a2)
 
-seq3 :: (b -> c -> d -> e) -> (a -> (b , a)) -> (a -> (c , a)) -> (a -> (d , a)) -> a -> (e , a)
+seq3 :: (b -> c -> d -> e) ->
+        (a -> (b , a)) ->
+        (a -> (c , a)) ->
+        (a -> (d , a)) ->
+        a -> (e , a)
 seq3 f g h i a =
   let (b , a1) = g a
       (c , a2) = h a1
@@ -29,7 +36,8 @@ seq3 f g h i a =
   in (f b c d, a3)
 
 readInt8 :: String -> (Int8, String)
-readInt8 s = map1 read (span (\c -> c == '-' || isDigit c) s)
+readInt8 ('-' : s) = map1 (negate . read) (span isDigit s)
+readInt8 s         = map1 read (span isDigit s)
 
 readString :: String -> (String, String)
 readString s = map2 tail (span (\c -> c /= '\'') s)
@@ -54,3 +62,7 @@ bdserial ('<' : s) = seq2 BLt idserial idserial s
 bdserial ('≤' : s) = seq2 BLe idserial idserial s
 bdserial ('>' : s) = seq2 BGt idserial idserial s
 bdserial ('≥' : s) = seq2 BGe idserial idserial s
+
+bdserialTop :: String -> BExpr
+bdserialTop = fst . bdserial
+

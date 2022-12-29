@@ -16,5 +16,5 @@ postulate
 macro
   readFile : String → Term → TC ⊤ -- returns the contents of the file as a String
   readFile file hole = do
-    (exitCode , (stdOut , stdErr)) ← execTC "HMusicTools" (file ∷ []) ""
+    (exitCode , (stdOut , stdErr)) ← execTC "HMusicTools" ("readXML" ∷ file ∷ []) ""
     unify hole (lit (string stdOut))

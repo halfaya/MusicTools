@@ -66,3 +66,5 @@ x1 = intersperse "\n" vars
 x2 = map bserial cons
 
 b1 = solve vars cons
+b2 = instantiatePitchesL (makeDict vars b1) source
+b3 = map (intersperse " " ∘ map showNPitch) b2

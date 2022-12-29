@@ -117,9 +117,9 @@ np→iexpr : NPitch → IExpr
 np→iexpr n = N (np→pitch n)
 
 -- Map unknown pitches to 0 for now.
-name→pitch : Dict → MPitch → Pitch
-name→pitch d (!! n) = np→pitch n
-name→pitch d (?? s) with lookupE d s
+mp→pitch : Dict → MPitch → Pitch
+mp→pitch d (!! n) = np→pitch n
+mp→pitch d (?? s) with lookupE d s
 ... | +_ p     = p
 ... | -[1+_] p = 0
 
@@ -244,7 +244,7 @@ upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
 
 nint : Dict → MPitch → MPitch → NInt
-nint d a b = upi→name (upi (name→pitch d a) (name→pitch d b))
+nint d a b = upi→name (upi (mp→pitch d a) (mp→pitch d b))
 
 -- Keys (just a few for now)
 data KeyRoot : Type where
@@ -284,10 +284,17 @@ chromaticScale = C♮ ∷ C♯ ∷ D♮ ∷ E♭ ∷ E♮ ∷ F♮ ∷ F♯ ∷ 
 toScale : {n : ℕ} → Vec NoteName n → Scale n
 toScale = vmap noteName→PC
 
-pitch→npitch : Pitch → NPitch
-pitch→npitch n =
+pitch→np : Pitch → NPitch
+pitch→np n =
   let (p , o) = absoluteToRelative n
   in np (lookup chromaticScale p) o
+
+-- Map unknown pitches to C♮0 for now.
+mp→np : Dict → MPitch → NPitch
+mp→np d (!! n) = n
+mp→np d (?? s) with lookupE d s
+... | +_ p     = pitch→np p
+... | -[1+_] _ = pitch→np 0
 
 -- Pairs and pairs of pairs of MPitch
 MP MPMP LP LPLP [M] [[M]] [L] [[L]] : Type

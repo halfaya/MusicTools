@@ -14,6 +14,7 @@ open import Data.List           public using (List; []; _∷_; _∷ʳ_; foldl; f
 open import Data.Maybe          public using (Maybe; just; nothing; fromMaybe) renaming (map to mmap)
 open import Data.Nat            public using (ℕ; zero; suc; pred; _+_; _*_; _<ᵇ_; _≤ᵇ_; _<?_; _≟_; _∸_; s≤s; z≤n; _⊓_; _⊔_; ⌊_/2⌋; _≤_; nonZero) renaming (_≡ᵇ_ to _==_)
 open import Data.Nat.DivMod     public using (_mod_; _div_)
+open import Data.Nat.Show       public using (readMaybe)
 open import Data.Sign           public using (Sign)
 open import Data.Sum            public using (_⊎_; inj₁; inj₂)
 open import Data.String         public using (String; intersperse; words; lines) renaming (_++_ to _++s_; _==_ to _==s_; toList to toChars)

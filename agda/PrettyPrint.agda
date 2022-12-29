@@ -19,7 +19,7 @@ ppList f xs = "[" ++s ppl f xs ++s "]" where
   ppl f (x ∷ y ∷ xs) = f x ++s "," ++s ppl f (y ∷ xs)
 
 ppNoteName : ℤ → String
-ppNoteName (+_     n) = showNPitch (pitch→npitch n)
+ppNoteName (+_     n) = showNPitch (pitch→np n)
 ppNoteName (-[1+_] n) = "Invalid note -" ++s showℕ (suc n)
 
 ppInterval : ℤ → ℤ → String

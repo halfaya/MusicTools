@@ -23,12 +23,6 @@ open import Variable
 compileConstraints : List MConstraint → List HBExpr
 compileConstraints = map (B→HBExpr ∘ compileConstraint ∘ mc→c)
 
--- Any negative value is changed to zero.
-lookupPitch : Dict → String → ℕ
-lookupPitch d s with lookup d s
-... | +_ n     = n
-... | -[1+_] n = 0
-
 fromHMaybe : {A : Type} → A → HMaybe A → A
 fromHMaybe default nothing  = default
 fromHMaybe _       (just x) = x

@@ -13,6 +13,9 @@ import Smt
 import Xml
 
 run :: String -> [String] -> IO String
+run "writeXML" args = do
+  writeFile (head args) test4
+  return ""
 run "readXML" args = do
   s <- readFile (head args)
   let ms   = xmlToMeasures s

@@ -4,10 +4,10 @@ module Test where
 
 open import Prelude hiding (#_; _==_; _∨_; _∧_; _-_; _+_; if_then_else_; _≤_)
 
-open import Beethoven
+open import Beethoven hiding (C; D; E; F; G; A; B)
 open import Constraint
 open import Exec
---open import Kennan
+open import Kennan hiding (C; D; E; F; G; A; B)
 open import MConstraint
 open import Counterpoint
 open import Expr
@@ -16,8 +16,8 @@ open import Parse
 open import PrettyPrint
 open import Serial
 open import Symbolic
+open import Tanaka hiding (C; D; E; F; G; A; B)
 open import Variable
---open import Tanaka
 
 open import Util
 
@@ -29,6 +29,7 @@ t1 = readFile fileName
 
 t1n = parseMusic t1
 t1m = map (map !!) t1n
+t1p = ppList (ppList showNPitch) t1n
 
 test : List (Ranged MConstraint)
 test = firstSpeciesConstraints (key C major) (indexVoiceBeat t1m)

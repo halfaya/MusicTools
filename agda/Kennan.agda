@@ -4,7 +4,17 @@ module Kennan where
 
 open import Prelude
 
-open import Symbolic
+open import Pitch using (Octave)
+open import Symbolic hiding (C; D; E; F; G; A; B)
+
+C D E F G A B : Octave → NPitch
+C = np C♮ 
+D = np D♮
+E = np E♮
+F = np F♮
+G = np G♮
+A = np A♮
+B = np B♮
 
 -- Workbook page 2, number 1
 k2-1 : List (NPitch × NPitch)

@@ -47,7 +47,7 @@ defaultTempo = 120
 record MidiEvent : Type where
   constructor midiEvent
   field
-    pitch            : Pitch -- Pitch was defined to correspond to MIDI pitch
+    pitch            : Pitch -- pitch here is MIDI pitch, 12 greater than internal pitch
     start            : Tick
     stop             : Tick
     velocity         : Velocity
@@ -61,11 +61,13 @@ record MidiTrack : Type where
     tempo            : Tempo -- initial tempo
     events           : List MidiEvent
 
+-- Add 12 to pitch to translate from internal representation of middle C
+-- as C4 (48) to MIDI represenation of middle C as C5 (60)
 notes→events : Velocity → List Note → List MidiEvent
 notes→events v ns = me 0 ns where
   me : Tick → List Note → List MidiEvent
   me t [] = []
-  me t (tone d p ∷ ns) = midiEvent p t (t + d) v ∷ me (t + d) ns
+  me t (tone d p ∷ ns) = midiEvent (p + 12) t (t + d) v ∷ me (t + d) ns
   me t (rest d   ∷ ns) = me (t + d) ns
 
 melody→events : {n : ℕ} → Velocity → Melody n → List MidiEvent

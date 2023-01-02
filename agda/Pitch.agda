@@ -9,12 +9,10 @@ open import Relation.Nullary using (yes; no)
 open import BitVec          using (BitVec; insert; empty; show)
 open import Util            using (n∸k<n; _+N_; opposite; _modℕ_)
 
--- Position of a pitch on an absolute scale
--- 0 is C(-1) on the international scale (where C4 is middle C)
--- or C0 on the Midi scale (where C5 is middle C)
--- Pitch is intentially set to match Midi pitch.
--- However it is fine to let 0 represent some other note and
--- translate appropriately at the end.
+-- Position of a pitch on an absolute scale.
+-- By default we assume 0 is C0 in International Pitch Notation
+-- (where 48 = C4 is middle C). Note that in the MIDI standard
+-- middle C is 60 = C5, so the appropirate translation must be done.
 Pitch : Type
 Pitch = ℕ
 
@@ -27,7 +25,7 @@ s7 : ℕ
 s7 = 7
 
 -- Pitch Class: position of a pitch within an octave, in the range [0..s12-1].
--- Pitch class 0 corresponds to C (assuming pitch 0 is Midi C0), which is standard.
+-- Pitch class 0 corresponds to C (assuming pitch 0 is C0), which is standard.
 PC : Type
 PC = Fin s12
 
@@ -134,7 +132,7 @@ I = toPCSet ∘ map Ip ∘ fromPCSet
 -- Standard Midi pitches
 
 -- first argument is relative pitch within octave
--- second argument is octave (C5 = middle C for Midi)
+-- second argument is octave (C4 = middle C)
 standardMidiPitch : Fin s12 → ℕ → Pitch
 standardMidiPitch p o = relativeToAbsolute (p , o)
 

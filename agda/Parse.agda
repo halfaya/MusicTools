@@ -25,10 +25,8 @@ parseAcc c =
   else if c ==c '♯' then ♯
   else 𝄪
 
--- Need to add one to the octave since the MIDI standard is
--- middle C = C5, but the MusicXML standard is C4
 parseOctave : Char -> Octave
-parseOctave c = suc (char→ℕ c ∸ char→ℕ '0')
+parseOctave c = char→ℕ c ∸ char→ℕ '0'
 
 parseNPitch : List Char → NPitch
 parseNPitch (l ∷ a ∷ o ∷ _) = np (nn (parseLetter l) (parseAcc a)) (parseOctave o)

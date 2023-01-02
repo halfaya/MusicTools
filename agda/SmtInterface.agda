@@ -36,7 +36,7 @@ solvePitches cons lss = do
       vnames = varNames mss
       cs     = compileConstraints (map unrange (cons lss))
   res        ← solveConstraints vnames cs
-  let f      = name→pitch (varDictionary vnames res)
+  let f      = mp→pitch (varDictionary vnames res)
   return (map (map f) mss)
 
 solveToMidi : Duration → ([[L]] → List (Ranged MConstraint)) → [[L]] → IO (List MidiTrack)
@@ -51,7 +51,7 @@ solvePitches2 cons ms = do
   let vnames = varNames2 ms
       cs     = compileConstraints (cons ms)
   res        ← solveConstraints vnames cs
-  let f      = name→pitch (varDictionary vnames res)
+  let f      = mp→pitch (varDictionary vnames res)
   return (map (λ x → f (fst x) , f (snd x)) ms)
 
 solveToMidi2 : Duration → (List MP → List MConstraint) → List MP → IO (List MidiTrack)

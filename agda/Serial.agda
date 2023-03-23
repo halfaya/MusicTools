@@ -13,8 +13,8 @@ cat3 x y z = x ++s y ++s z
 iserial : IExpr → String
 bserial : BExpr → String
 
-iserial (# x)    = "#" ++s showℤ x
-iserial (var x)  = "'" ++s x ++s "'"
+iserial (# x)   = "#" ++s showℤ x
+iserial (var x) = cat3 "'" x           "'"
 iserial (x + y) = cat3 "+" (iserial x) (iserial y) 
 iserial (x - y) = cat3 "-" (iserial x) (iserial y) 
 iserial (x % y) = cat3 "%" (iserial x) (iserial y) 

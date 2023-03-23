@@ -14,7 +14,7 @@ postulate
 
 {-# BUILTIN AGDATCMEXEC execTC #-}
 
--- You must add the full path to the compiled HMusicTools to ~/.agda/executables to run this.
+-- You must add the full path to the compiled HMusicTools to ~/.agda/executables to run these macros.
 macro
   readFile : String → Term → TC ⊤ -- returns the contents of the file as a String
   readFile file hole = do

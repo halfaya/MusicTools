@@ -22,7 +22,7 @@ open import Variable
 open import Util
 
 fileName : String
-fileName = "/Users/leo/Downloads/XML/Test 1.xml"
+fileName = "/Users/leo/Music/XML/Test 1.xml"
 
 t1 : String
 t1 = readFile fileName

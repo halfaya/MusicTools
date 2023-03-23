@@ -1,9 +1,14 @@
-{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE
+  ScopedTypeVariables,
+  NamedFieldPuns,
+  RecordWildCards,
+  OverloadedRecordDot
+#-}
 
 module Xml where
 
 import Data.List (transpose, intercalate, intersperse, groupBy)
-import Data.List.Split (chunksOf)
+import Data.List.Split (splitOn, chunksOf)
 import Text.XML.Light
 import Text.XML.Light.Output
 
@@ -21,38 +26,87 @@ attr s e = case findAttrBy (\q -> qName q == s) e of
 children :: String -> Element -> [Element]
 children s = filterChildrenName (\q -> qName q == s)
 
-child :: String -> Element -> Element
-child s e = head (children s e)
+child :: String -> Element -> Maybe Element
+child s e = case (children s e) of
+  []      -> Nothing
+  (x : _) -> Just x
+
+-- When you're sure there's a child.
+childX :: String -> Element -> Element
+childX s e = let (Just x) = (child s e) in x
+
+childR :: [String] -> Element -> Maybe Element
+childR []       _ = Nothing
+childR [x]      e = child x e
+childR (x : xs) e = child x e >>= childR xs
 
 cval :: String -> Element -> String
-cval s e = strContent (child s e)
+cval s e = case (child s e) of
+  Nothing -> ""
+  Just x  -> strContent x
+
+-- d is default value if not found
+cvald :: String -> String -> Element -> String
+cvald d s e = case (child s e) of
+  Nothing -> d
+  Just x  -> strContent x
+
+cvalR :: [String] -> Element -> Maybe String
+cvalR xs e = fmap strContent (childR xs e)
 
 type Duration = Int
 type Step     = String
 type Octave   = String
+type Alter    = String
 type Voice    = String
 type MNum     = String
 
-type Pitch    = (Step, Octave)
-type Note     = (Voice, Duration, Pitch)
-type Measure  = (MNum, [Note])
+data Pitch = Pitch {
+  pStep   :: Step,
+  pOctave :: Octave,
+  pAlter  :: Alter }
+  deriving Show
+  
+data Note = Note {
+  nVoice    :: Voice,
+  nDuration :: Duration,
+  nPitch    :: Pitch }
+  deriving Show
+
+data Measure = Measure {
+  mNum   :: MNum,
+  mNotes :: [Note] }
+  deriving Show
+
+showAlter :: Alter -> String
+showAlter "0"  = "♮"
+showAlter "-1" = "♭"
+showAlter "1"  = "♯"
+showAlter s    = s
+
+readAlter :: String -> Alter
+readAlter "♮" = "0"
+readAlter "♭" = "-1" 
+readAlter "♯" = "1"
+readAlter s   = s
 
 pitch :: Element -> Pitch
-pitch e = (cval "step" e , cval "octave" e)
+pitch e = Pitch (cval "step" e) (cval "octave" e) (cvald "0" "alter" e)
 
 xpitch :: Pitch -> Element
-xpitch (s,o) = unode "pitch" [unode "step" s, unode "octave" o]
+xpitch Pitch{..} = unode "pitch" [unode "step" pStep,
+                                  unode "octave" pOctave,
+                                  unode "alter" pAlter]
 
 showPitch :: Pitch -> String
-showPitch (s,o) = s ++ "♮" ++ o
+showPitch Pitch{..} = pStep ++ showAlter pAlter ++ pOctave
 
--- Does not yet handle accidentals.
 parsePitch :: String -> Pitch
-parsePitch (s : o : []) = (s :[] , o : [])
-parsePitch (s : a : o : []) = (s :[] , o : []) -- discards accidental
+parsePitch (s : o : [])     = Pitch (s : []) (o : []) "0"
+parsePitch (s : a : o : []) = Pitch (s : []) (o : []) (a : [])
 
 note :: Element -> Note
-note e = (cval "voice" e , read (cval "duration" e), pitch (child "pitch" e))
+note e = Note (cval "voice" e) (read (cval "duration" e)) (pitch (childX "pitch" e))
 
 noteStaff :: Voice -> String
 noteStaff v = if v == "3" || v == "4" then "2" else "1"
@@ -61,19 +115,19 @@ noteStem :: Voice -> String
 noteStem v = if v == "2" || v == "4" then "down" else "up"
 
 xnote :: Note -> Element
-xnote (v,d,p) = unode "note"
-  [xpitch p,
-   unode "duration" (show d),
-   unode "voice" v,
+xnote Note{..} = unode "note"
+  [xpitch nPitch,
+   unode "duration" (show nDuration),
+   unode "voice" nVoice,
    unode "type" "half",
-   unode "stem" (noteStem v),
-   unode "staff" (noteStaff v)]
+   unode "stem" (noteStem nVoice),
+   unode "staff" (noteStaff nVoice)]
 
 showNote :: Note -> String
-showNote (_,_,p) = showPitch p
+showNote (Note _ d p) = showPitch p ++ "." ++ show d
 
 parseNote :: Voice -> String -> Note
-parseNote v s = (v, 8, parsePitch s)
+parseNote v s = let (p : d : []) = splitOn "." s in Note v (read d) (parsePitch p)
 
 -- List of space-separated notes.
 parseNotesV :: Voice -> String -> [Note]
@@ -83,7 +137,7 @@ parseNotes :: [String] -> [[Note]]
 parseNotes xs = map (\(i,s) -> parseNotesV (show i) s) (zip [1..] xs)
 
 measure :: Element -> Measure
-measure e = (attr "number" e , map note (children "note" e))
+measure e = Measure (attr "number" e) (map note (children "note" e))
 
 measures :: Element -> [Measure]
 measures e = map measure (children "measure" e)
@@ -98,7 +152,6 @@ xkey num = unode "key" ([numattr num], [unode "fifths" "0", unode "mode" "major"
 
 xtime :: Element
 xtime = unode "time" [unode "beats" "4", unode "beat-type" "4"]
-
 
 measureAttributes :: Element
 measureAttributes =
@@ -115,22 +168,22 @@ backup :: Element
 backup = unode "backup" (unode "duration" "16")
 
 part :: [Content] -> Element
-part xs = child "part" (onlyElems xs !! 1)
+part xs = childX "part" (onlyElems xs !! 1)
 
 splitByVoice :: [Note] -> [[Note]]
-splitByVoice = groupBy (\(v,_,_) (w,_,_) -> v == w)
+splitByVoice = groupBy (\(Note v _ _) (Note w _ _) -> v == w)
 
 -- Reorganize measures so that notes in each voice are put together.
 -- Assumes voice ordering in each measure is the same.
 reorg :: [Measure] -> [[Note]]
-reorg ms = map concat (transpose (map (splitByVoice . snd) ms))
+reorg ms = map concat (transpose (map (splitByVoice . mNotes) ms))
 
 -- Reorganize list of voices of notes into measures.
 deorg :: Int -> [[Note]] -> [Measure]
 deorg notesPerMeasure nss =
   let xss = map (chunksOf notesPerMeasure) nss
       yss = map concat (transpose xss)
-  in map (\(mn,ns) -> (show mn, ns)) (zip [1..] yss)
+  in map (\(mn,ns) -> Measure (show mn) ns) (zip [1..] yss)
 
 showMeasures :: [Measure] -> String
 showMeasures ms = intercalate "\n" (map (\ns -> intercalate " " (map showNote ns)) (reorg ms))
@@ -139,7 +192,7 @@ xmlToMeasures :: String -> [Measure]
 xmlToMeasures = measures . part . parseXML
 
 xmeasure :: Measure -> Element
-xmeasure (mn, notes) = unode "measure"
+xmeasure (Measure mn notes) = unode "measure"
   ([numattr mn],
    (if mn == "1" then [measureAttributes] else []) ++
    intercalate [backup] (map (map xnote) (splitByVoice notes)))
@@ -166,12 +219,14 @@ ppScore e = header ++ ppElement e
 -----
 
 test =
-  "C5 E5 G5 F5 E5 C5 A5 F5 G5 E5 D5 C5" :
-  "G4 C5 B4 A4 C5 A4 F4 A4 E5 G4 G4 G4" :
-  "E4 E4 E4 F4 G3 C4 A3 F4 E4 E4 B3 C4" : []
+  "C5.8 E5.8 G5.8 F5.8 E5.8 C5.8 A5.8 F5.8 G5.8 E5.8 D5.8 C5.8" :
+  "G4.8 C5.8 B4.8 A4.8 C5.8 A4.8 F4.8 A4.8 E5.8 G4.8 G4.8 G4.8" :
+  "E4.8 E4.8 E4.8 F4.8 G3.8 C4.8 A3.8 F4.8 E4.8 E4.8 B3.8 C4.8" : []
 
 test1 = parseNotes test
 test2 = deorg 2 test1
 test3 = measuresToXml test2
 
 test4 = ppScore test3
+test5 = xmlToMeasures test4
+test6 = showMeasures test5

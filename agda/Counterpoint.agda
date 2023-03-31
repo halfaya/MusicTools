@@ -15,11 +15,11 @@ open import Util using (pairs; filter; middle; allPairs)
 ------------------------------------------------
 
 -- Assumes test interval is within an octave
-firstSpeciesIntervals : List NInt
+firstSpeciesIntervals : List SInt
 firstSpeciesIntervals = Per1 ∷ Min3 ∷ Maj3 ∷ Per5 ∷ Min6 ∷ Maj6 ∷ []
 
 -- Allow perfect 4ths also.
-firstSpeciesIntervals4 : List NInt
+firstSpeciesIntervals4 : List SInt
 firstSpeciesIntervals4 = Per4 ∷ firstSpeciesIntervals
 
 firstSpeciesConstraintsVoice : Key → List (Located MPitch) → List (Ranged MConstraint)
@@ -29,7 +29,7 @@ firstSpeciesConstraintsVoice k v =
 -- Expects higher voice first in each pair.
 firstSpeciesConstraints2 : List LP → List (Ranged MConstraint)
 firstSpeciesConstraints2 lp =
-     map (mapRanged intervalConstraint ∘ locQualityConstraint firstSpeciesIntervals4) lp ++
+     map (mapRanged intervalConstraint ∘ locIntervalTypeConstraint firstSpeciesIntervals4) lp ++
      map (mapRanged intervalConstraint ∘ locMaxIntervalConstraint (Int 28)) lp ++
      map (mapRanged motionConstraint ∘ locMotionConstraint notDirectIntoPerfect) (pairs lp)
 

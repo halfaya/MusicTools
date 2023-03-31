@@ -12,10 +12,10 @@ open import Symbolic
 -- Higher-level musical constraints
 
 -- Convert a pair of mpitches to an NInt
-toNInt : Dict → MP → NInt
-toNInt d (p , q) with evalI d (name→iexpr p - name→iexpr q)
-... | +_     n = upi→name n
-... | -[1+_] n = upi→name (suc n)
+toSInt : Dict → MP → SInt
+toSInt d (p , q) with evalI d (name→iexpr p - name→iexpr q)
+... | +_     n = upi→sint n
+... | -[1+_] n = upi→sint (suc n)
 
 data Motion : Type where
   contrary              : Motion
@@ -51,19 +51,19 @@ locMotionConstraint direct                x = ranged (lplpRange x) (direct      
 locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→mpmp x))
 
 data MIntervalConstraint : Type where
-  intervalType : List NInt → MP → MIntervalConstraint
-  maxInterval  : NInt      → MP → MIntervalConstraint
+  intervalType : List SInt → MP → MIntervalConstraint
+  maxInterval  : SInt      → MP → MIntervalConstraint
 
 ic→c : MIntervalConstraint → Constraint
-ic→c (intervalType xs x) = setConstraint (inSet (map (+_ ∘ name→upi) xs) (toOpi12 (mp→p x)))
+ic→c (intervalType xs x) = setConstraint (inSet (map (+_ ∘ sint→upi) xs) (toOpi12 (mp→p x)))
 ic→c (maxInterval m x) =
-  numericConstraint (between (# (+ 1)) (# (+ (name→upi m))) (toOpi (mp→p x)))
+  numericConstraint (between (# (+ 1)) (# (+ (sint→upi m))) (toOpi (mp→p x)))
 
 -- interval constraints indexed with range
-locQualityConstraint : List NInt → LP → Ranged MIntervalConstraint
-locQualityConstraint xs lp = ranged (lpRange lp) (intervalType xs (lp→mp lp))
+locIntervalTypeConstraint : List SInt → LP → Ranged MIntervalConstraint
+locIntervalTypeConstraint xs lp = ranged (lpRange lp) (intervalType xs (lp→mp lp))
 
-locMaxIntervalConstraint : NInt → LP → Ranged MIntervalConstraint
+locMaxIntervalConstraint : SInt → LP → Ranged MIntervalConstraint
 locMaxIntervalConstraint m lp = ranged (lpRange lp) (maxInterval m (lp→mp lp))
 
 data MScaleConstraint : Type where
@@ -72,19 +72,45 @@ data MScaleConstraint : Type where
 msc→c : MScaleConstraint → Constraint
 msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→iexpr x)
 
--- interval constraint indexed with range
+-- scale constraint indexed with range
 locScaleConstraint : Key → Located MPitch → Ranged MScaleConstraint
 locScaleConstraint k (located loc x) = ranged (point loc) (inScale k x)
+
+{-
+data MBooleanConstraint : Type where
+  andConstraint : MConstraint → MConstraint → MBooleanConstraint
+  orConstraint  : MConstraint → MConstraint → MBooleanConstraint
+  notConstraint : MConstraint →               MBooleanConstraint
+
+
+mbc→c : MBooleanConstraint → Constraint
+mbc→c (andConstraint a b) = booleanConstraint (andConstraint (mc→c a) (mc→c b))
+mbc→c (orConstraint  a b) = booleanConstraint (orConstraint  (mc→c a) (mc→c b))
+mbc→c (notConstraint a)   = booleanConstraint (notConstraint (mc→c a))
+-}
+
+data MMelodyConstraint : Type where
+  passingTone : M3 → MMelodyConstraint
+
+mmelc→c : MMelodyConstraint → Constraint
+mmelc→c (passingTone (a , b , c)) =
+  booleanConstraint (andConstraint (ic→c (intervalType steps (a , b)))
+                                   (ic→c (intervalType steps (b , c))))
 
 data MConstraint : Type where
   scaleConstraint    : MScaleConstraint    → MConstraint
   intervalConstraint : MIntervalConstraint → MConstraint
   motionConstraint   : MMotionConstraint   → MConstraint
+--  booleanConstraint  : MBooleanConstraint  → MConstraint
+  melodyConstraint   : MMelodyConstraint   → MConstraint
   constraint         : Constraint          → MConstraint -- allows embedding arbitary lower-level constraints
 
 mc→c : MConstraint → Constraint
 mc→c (scaleConstraint    x) = msc→c x
 mc→c (intervalConstraint x) = ic→c x
 mc→c (motionConstraint   x) = motionConstraint (mmc→mc x)
+--mc→c (booleanConstraint  x) = mbc→c x
+mc→c (melodyConstraint   x) = mmelc→c x
 mc→c (constraint         x) = x
+
 

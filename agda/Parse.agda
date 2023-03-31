@@ -4,8 +4,15 @@ module Parse where
 
 open import Prelude
 
+open import Data.Nat.Show using (readMaybe)
+
 open import Pitch using (Octave)
 open import Symbolic
+
+readNat : String → ℕ
+readNat s with readMaybe 10 s
+... | just n  = n
+... | nothing = 0
 
 parseLetter : Char → Letter
 parseLetter c =
@@ -28,12 +35,16 @@ parseAcc c =
 parseOctave : Char -> Octave
 parseOctave c = char→ℕ c ∸ char→ℕ '0'
 
-parseNPitch : List Char → NPitch
-parseNPitch (l ∷ a ∷ o ∷ _) = np (nn (parseLetter l) (parseAcc a)) (parseOctave o)
-parseNPitch _               = np C♮ 0 -- default in case of parse failure
+parseSPitch : List Char → SPitch
+parseSPitch (l ∷ a ∷ o ∷ _) = sp (nn (parseLetter l) (parseAcc a)) (parseOctave o)
+parseSPitch _               = sp C♮ 0 -- default in case of parse failure
 
-parseVoice : String → List NPitch
-parseVoice s = map (parseNPitch ∘ toChars) (words s)
+parseSNote : List Char → SNote
+parseSNote (l ∷ a ∷ o ∷ d) = sn (!! (parseSPitch (l ∷ a ∷ o ∷ []))) (readNat (fromChars d))
+parseSNote _               = sn (!! (sp C♮ 0)) 8  -- default in case of parse failure
 
-parseMusic : String → List (List NPitch)
+parseVoice : String → List SNote
+parseVoice s = map (parseSNote ∘ toChars) (words s)
+
+parseMusic : String → List (List SNote)
 parseMusic s = map parseVoice (lines s)

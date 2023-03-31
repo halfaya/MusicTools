@@ -5,6 +5,7 @@ module Symbolic where
 open import Prelude
 
 open import Expr hiding (_+_; #_; _mod_) renaming (lookup to lookupE)
+open import Note using (Duration)
 open import Pitch
 open import Interval
 open import Location
@@ -90,30 +91,30 @@ acc→mod 𝄪 = 4
 noteName→PC : NoteName → PC
 noteName→PC (nn l a) = (toℕ (letter→PC l) + acc→mod a + 10) mod s12
 
--- Named Pitch
-record NPitch : Type where
-  constructor np
+-- Symbolic Pitch
+record SPitch : Type where
+  constructor sp
   field
     nam : NoteName
     oct : Octave
 
-showNPitch : NPitch → String
-showNPitch (np n o) = showNoteName n ++s showℕ o
+showSPitch : SPitch → String
+showSPitch (sp n o) = showNoteName n ++s showℕ o
 
 -- Maybe named pitch; the alternative is a variable with a unique name
 data MPitch : Type where
-  !! : NPitch → MPitch
+  !! : SPitch → MPitch
   ?? : String → MPitch
 
 showMPitch : MPitch → String
-showMPitch (!! x) = showNPitch x
+showMPitch (!! x) = showSPitch x
 showMPitch (?? s) = "?" ++s s
 
 -- Note: This doesn't work for C♭, etc, with values < 0.
-np→pitch : NPitch → Pitch
-np→pitch (np n o) = relativeToAbsolute (noteName→PC n , o)
+np→pitch : SPitch → Pitch
+np→pitch (sp n o) = relativeToAbsolute (noteName→PC n , o)
 
-np→iexpr : NPitch → IExpr
+np→iexpr : SPitch → IExpr
 np→iexpr n = N (np→pitch n)
 
 -- Map unknown pitches to 0 for now.
@@ -130,121 +131,134 @@ name→iexpr (?? s) = var s
 name→iexpr2 : MPitch × MPitch → IExpr × IExpr
 name→iexpr2 (a , b ) = name→iexpr a , name→iexpr b
 
--- Named Interval
-data NInt : Type where
-  Per1  : NInt
-  Min2  : NInt
-  Maj2  : NInt
-  Min3  : NInt
-  Maj3  : NInt
-  Per4  : NInt
-  Aug4  : NInt
-  Per5  : NInt
-  Min6  : NInt
-  Maj6  : NInt
-  Min7  : NInt
-  Maj7  : NInt
-  Per8  : NInt
-  Min9  : NInt
-  Maj9  : NInt
-  Min10 : NInt
-  Maj10 : NInt
-  Per11 : NInt
-  Aug11 : NInt
-  Per12 : NInt
-  Min13 : NInt
-  Maj13 : NInt
-  Min14 : NInt
-  Maj14 : NInt
-  Per15 : NInt
-  Int   : Upi → NInt
+-- Symbolic Note
+record SNote : Type where
+  constructor sn
+  field
+    pit : MPitch
+    dur : Duration
 
-showNInt : NInt → String
-showNInt Per1    = "Per1"
-showNInt Min2    = "Min2"
-showNInt Maj2    = "Maj2"
-showNInt Min3    = "Min3"
-showNInt Maj3    = "Maj3"
-showNInt Per4    = "Per4"
-showNInt Aug4    = "Aug4"
-showNInt Per5    = "Per5"
-showNInt Min6    = "Min6"
-showNInt Maj6    = "Maj6"
-showNInt Min7    = "Min7"
-showNInt Maj7    = "Maj7"
-showNInt Per8    = "Per8"
-showNInt Min9    = "Min9"
-showNInt Maj9    = "Maj9"
-showNInt Min10   = "Min10"
-showNInt Maj10   = "Maj10"
-showNInt Per11   = "Per11"
-showNInt Aug11   = "Aug11"
-showNInt Per12   = "Per12"
-showNInt Min13   = "Min13"
-showNInt Maj13   = "Maj13"
-showNInt Min14   = "Min14"
-showNInt Maj14   = "Maj14"
-showNInt Per15   = "Per15"
-showNInt (Int n) = "Int" ++s showℕ n
+showSNote : SNote → String
+showSNote (sn p d) = showMPitch p ++s showℕ d
 
-name→upi : NInt → Upi
-name→upi Per1    = per1
-name→upi Min2    = min2
-name→upi Maj2    = maj2
-name→upi Min3    = min3
-name→upi Maj3    = maj3
-name→upi Per4    = per4
-name→upi Aug4    = aug4
-name→upi Per5    = per5
-name→upi Min6    = min6
-name→upi Maj6    = maj6
-name→upi Min7    = min7
-name→upi Maj7    = maj7
-name→upi Per8    = per8
-name→upi Min9    = min9
-name→upi Maj9    = maj9
-name→upi Min10   = min10
-name→upi Maj10   = maj10
-name→upi Per11   = per11
-name→upi Aug11   = aug11
-name→upi Per12   = per12
-name→upi Min13   = min13
-name→upi Maj13   = maj13
-name→upi Min14   = min14
-name→upi Maj14   = maj14
-name→upi Per15   = per15
-name→upi (Int n) = n
+-- Symbolic Interval
+data SInt : Type where
+  Per1  : SInt
+  Min2  : SInt
+  Maj2  : SInt
+  Min3  : SInt
+  Maj3  : SInt
+  Per4  : SInt
+  Aug4  : SInt
+  Per5  : SInt
+  Min6  : SInt
+  Maj6  : SInt
+  Min7  : SInt
+  Maj7  : SInt
+  Per8  : SInt
+  Min9  : SInt
+  Maj9  : SInt
+  Min10 : SInt
+  Maj10 : SInt
+  Per11 : SInt
+  Aug11 : SInt
+  Per12 : SInt
+  Min13 : SInt
+  Maj13 : SInt
+  Min14 : SInt
+  Maj14 : SInt
+  Per15 : SInt
+  Int   : Upi → SInt
 
-upi→name : Upi → NInt
-upi→name zero = Per1
-upi→name (suc zero) = Min2
-upi→name (suc (suc zero)) = Maj2
-upi→name (suc (suc (suc zero))) = Min3
-upi→name (suc (suc (suc (suc zero)))) = Maj3
-upi→name (suc (suc (suc (suc (suc zero))))) = Per4
-upi→name (suc (suc (suc (suc (suc (suc zero)))))) = Aug4
-upi→name (suc (suc (suc (suc (suc (suc (suc zero))))))) = Per5
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) = Min6
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) = Maj6
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))) = Min7
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))) = Maj7
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))) = Per8
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))) = Min9
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = Maj9
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = Min10
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = Maj10
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = Per11
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = Aug11
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))) = Per12
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))) = Min13
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = Maj13
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = Min14
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = Maj14
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))))) = Per15
-upi→name (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
+showSInt : SInt → String
+showSInt Per1    = "Per1"
+showSInt Min2    = "Min2"
+showSInt Maj2    = "Maj2"
+showSInt Min3    = "Min3"
+showSInt Maj3    = "Maj3"
+showSInt Per4    = "Per4"
+showSInt Aug4    = "Aug4"
+showSInt Per5    = "Per5"
+showSInt Min6    = "Min6"
+showSInt Maj6    = "Maj6"
+showSInt Min7    = "Min7"
+showSInt Maj7    = "Maj7"
+showSInt Per8    = "Per8"
+showSInt Min9    = "Min9"
+showSInt Maj9    = "Maj9"
+showSInt Min10   = "Min10"
+showSInt Maj10   = "Maj10"
+showSInt Per11   = "Per11"
+showSInt Aug11   = "Aug11"
+showSInt Per12   = "Per12"
+showSInt Min13   = "Min13"
+showSInt Maj13   = "Maj13"
+showSInt Min14   = "Min14"
+showSInt Maj14   = "Maj14"
+showSInt Per15   = "Per15"
+showSInt (Int n) = "Int" ++s showℕ n
 
-nint : Dict → MPitch → MPitch → NInt
-nint d a b = upi→name (upi (mp→pitch d a) (mp→pitch d b))
+sint→upi : SInt → Upi
+sint→upi Per1    = per1
+sint→upi Min2    = min2
+sint→upi Maj2    = maj2
+sint→upi Min3    = min3
+sint→upi Maj3    = maj3
+sint→upi Per4    = per4
+sint→upi Aug4    = aug4
+sint→upi Per5    = per5
+sint→upi Min6    = min6
+sint→upi Maj6    = maj6
+sint→upi Min7    = min7
+sint→upi Maj7    = maj7
+sint→upi Per8    = per8
+sint→upi Min9    = min9
+sint→upi Maj9    = maj9
+sint→upi Min10   = min10
+sint→upi Maj10   = maj10
+sint→upi Per11   = per11
+sint→upi Aug11   = aug11
+sint→upi Per12   = per12
+sint→upi Min13   = min13
+sint→upi Maj13   = maj13
+sint→upi Min14   = min14
+sint→upi Maj14   = maj14
+sint→upi Per15   = per15
+sint→upi (Int n) = n
+
+upi→sint : Upi → SInt
+upi→sint zero = Per1
+upi→sint (suc zero) = Min2
+upi→sint (suc (suc zero)) = Maj2
+upi→sint (suc (suc (suc zero))) = Min3
+upi→sint (suc (suc (suc (suc zero)))) = Maj3
+upi→sint (suc (suc (suc (suc (suc zero))))) = Per4
+upi→sint (suc (suc (suc (suc (suc (suc zero)))))) = Aug4
+upi→sint (suc (suc (suc (suc (suc (suc (suc zero))))))) = Per5
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) = Min6
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) = Maj6
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))) = Min7
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))) = Maj7
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))) = Per8
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))) = Min9
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = Maj9
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = Min10
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = Maj10
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = Per11
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = Aug11
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))) = Per12
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))) = Min13
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = Maj13
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = Min14
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = Maj14
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))))) = Per15
+upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n))))))))))))))))))))))))) = Int (25 + n)
+
+sint : Dict → MPitch → MPitch → SInt
+sint d a b = upi→sint (upi (mp→pitch d a) (mp→pitch d b))
+
+steps : List SInt
+steps = Min2 ∷ Maj2 ∷ []
 
 -- Keys (just a few for now)
 data KeyRoot : Type where
@@ -284,13 +298,13 @@ chromaticScale = C♮ ∷ C♯ ∷ D♮ ∷ E♭ ∷ E♮ ∷ F♮ ∷ F♯ ∷ 
 toScale : {n : ℕ} → Vec NoteName n → Scale n
 toScale = vmap noteName→PC
 
-pitch→np : Pitch → NPitch
+pitch→np : Pitch → SPitch
 pitch→np n =
   let (p , o) = absoluteToRelative n
-  in np (lookup chromaticScale p) o
+  in sp (lookup chromaticScale p) o
 
 -- Map unknown pitches to C♮0 for now.
-mp→np : Dict → MPitch → NPitch
+mp→np : Dict → MPitch → SPitch
 mp→np d (!! n) = n
 mp→np d (?? s) with lookupE d s
 ... | +_ p     = pitch→np p
@@ -306,6 +320,9 @@ LPLP  = LP × LP
 [[M]] = List [M]
 [L]   = List (Located MPitch)
 [[L]] = List [L]
+
+-- Triplets of MPitch
+M3 = MPitch × MPitch × MPitch
 
 {-
 [n]→[p] : [N] → [P]

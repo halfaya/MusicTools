@@ -7,6 +7,7 @@
 
 module Xml where
 
+import Data.Char (digitToInt)
 import Data.List (transpose, intercalate, intersperse, groupBy)
 import Data.List.Split (splitOn, chunksOf)
 import Text.XML.Light
@@ -124,10 +125,11 @@ xnote Note{..} = unode "note"
    unode "staff" (noteStaff nVoice)]
 
 showNote :: Note -> String
-showNote (Note _ d p) = showPitch p ++ "." ++ show d
+showNote (Note _ d p) = showPitch p ++ show d
 
 parseNote :: Voice -> String -> Note
-parseNote v s = let (p : d : []) = splitOn "." s in Note v (read d) (parsePitch p)
+parseNote v (s : o : d : [])     = Note v (digitToInt d) (Pitch (s : []) (o : []) "0")
+parseNote v (s : a : o : d : []) = Note v (digitToInt d) (Pitch (s : []) (o : []) (a : []))
 
 -- List of space-separated notes.
 parseNotesV :: Voice -> String -> [Note]
@@ -219,9 +221,9 @@ ppScore e = header ++ ppElement e
 -----
 
 test =
-  "C5.8 E5.8 G5.8 F5.8 E5.8 C5.8 A5.8 F5.8 G5.8 E5.8 D5.8 C5.8" :
-  "G4.8 C5.8 B4.8 A4.8 C5.8 A4.8 F4.8 A4.8 E5.8 G4.8 G4.8 G4.8" :
-  "E4.8 E4.8 E4.8 F4.8 G3.8 C4.8 A3.8 F4.8 E4.8 E4.8 B3.8 C4.8" : []
+  "C58 E58 G58 F58 E58 C58 A58 F58 G58 E58 D58 C58" :
+  "G48 C58 B48 A48 C58 A48 F48 A48 E58 G48 G48 G48" :
+  "E48 E48 E48 F48 G38 C48 A38 F48 E48 E48 B38 C48" : []
 
 test1 = parseNotes test
 test2 = deorg 2 test1

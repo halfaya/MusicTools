@@ -1,4 +1,4 @@
-{-# OPTIONS --without-K  --allow-exec #-}
+{-# OPTIONS --without-K --allow-exec #-}
 
 module Test where
 
@@ -28,8 +28,8 @@ t1 : String
 t1 = readFile fileName
 
 t1n = parseMusic t1
-t1m = map (map !!) t1n
-t1p = ppList (ppList showNPitch) t1n
+t1p = ppList (ppList showSNote) t1n
+t1m = map (map SNote.pit) t1n
 
 test : List (Ranged MConstraint)
 test = firstSpeciesConstraints (key C major) (indexVoiceBeat t1m)
@@ -68,4 +68,5 @@ x2 = map bserial cons
 
 b1 = solve vars cons
 b2 = instantiatePitchesL (makeDict vars b1) source
-b3 = map (intersperse " " ∘ map showNPitch) b2
+b3 = map (intersperse " " ∘ map showSPitch) b2
+

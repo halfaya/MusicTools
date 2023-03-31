@@ -76,15 +76,32 @@ compileNumericConstraint (numLeaps≤ max n ps) =
   let is = map toUpi (pairs ps)
   in foldr (λ upi x → χ (upi > # max) + x) (N 0) is ≤ (# n)
 
-data Constraint : Type where
+data BooleanConstraint : Type
+data Constraint        : Type
+
+data BooleanConstraint where
+  andConstraint : Constraint → Constraint → BooleanConstraint
+  orConstraint  : Constraint → Constraint → BooleanConstraint
+  notConstraint : Constraint →              BooleanConstraint
+
+compileConstraint : Constraint → BExpr
+
+compileBooleanConstraint : BooleanConstraint → BExpr
+compileBooleanConstraint (andConstraint a b) = compileConstraint a ∧ compileConstraint b
+compileBooleanConstraint (orConstraint  a b) = compileConstraint a ∨ compileConstraint b
+compileBooleanConstraint (notConstraint a)   = ¬ (compileConstraint a)
+
+data Constraint where
   setConstraint     : SetConstraint → Constraint
   motionConstraint  : MotionConstraint → Constraint
   numericConstraint : NumericConstraint → Constraint
+  booleanConstraint : BooleanConstraint → Constraint
 
-compileConstraint : Constraint → BExpr
+-- compileConstraint : Constraint → BExpr
 compileConstraint (setConstraint x)     = compileSetConstraint x
 compileConstraint (motionConstraint x)  = compileMotionConstraint x
 compileConstraint (numericConstraint x) = compileNumericConstraint x
+compileConstraint (booleanConstraint x) = compileBooleanConstraint x
 
 inScaleConstraint : {n : ℕ} → Scale n → IExpr → Constraint
 inScaleConstraint scale pitch =

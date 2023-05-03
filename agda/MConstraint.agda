@@ -89,6 +89,7 @@ mbc→c (orConstraint  a b) = booleanConstraint (orConstraint  (mc→c a) (mc→
 mbc→c (notConstraint a)   = booleanConstraint (notConstraint (mc→c a))
 -}
 
+{-
 data MMelodyConstraint : Type where
   passingTone : M3 → MMelodyConstraint
 
@@ -96,13 +97,14 @@ mmelc→c : MMelodyConstraint → Constraint
 mmelc→c (passingTone (a , b , c)) =
   booleanConstraint (andConstraint (ic→c (intervalType steps (a , b)))
                                    (ic→c (intervalType steps (b , c))))
+-}                                   
 
 data MConstraint : Type where
   scaleConstraint    : MScaleConstraint    → MConstraint
   intervalConstraint : MIntervalConstraint → MConstraint
   motionConstraint   : MMotionConstraint   → MConstraint
 --  booleanConstraint  : MBooleanConstraint  → MConstraint
-  melodyConstraint   : MMelodyConstraint   → MConstraint
+--  melodyConstraint   : MMelodyConstraint   → MConstraint
   constraint         : Constraint          → MConstraint -- allows embedding arbitary lower-level constraints
 
 mc→c : MConstraint → Constraint
@@ -110,7 +112,7 @@ mc→c (scaleConstraint    x) = msc→c x
 mc→c (intervalConstraint x) = ic→c x
 mc→c (motionConstraint   x) = motionConstraint (mmc→mc x)
 --mc→c (booleanConstraint  x) = mbc→c x
-mc→c (melodyConstraint   x) = mmelc→c x
+--mc→c (melodyConstraint   x) = mmelc→c x
 mc→c (constraint         x) = x
 
 

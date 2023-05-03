@@ -257,9 +257,6 @@ upi→sint (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc
 sint : Dict → MPitch → MPitch → SInt
 sint d a b = upi→sint (upi (mp→pitch d a) (mp→pitch d b))
 
-steps : List SInt
-steps = Min2 ∷ Maj2 ∷ []
-
 -- Keys (just a few for now)
 data KeyRoot : Type where
   C : KeyRoot

@@ -29,11 +29,6 @@ data SetConstraint : Type where
 compileSetConstraint : SetConstraint → BExpr
 compileSetConstraint (inSet ns i) = foldr (λ n x → (# n == i) ∨ x) false ns
 
--- Perfect union, fifth, octave only.
-perInts perInts4 : List Opi
-perInts  = map +_ (per1 ∷ per5 ∷ per8 ∷ [])
-perInts4 = perInts ++ map +_ (per4 ∷ []) -- inclues 4th also
-
 -- Assumes a ≥ b
 perfectInterval perfectInterval4 : IExpr → IExpr → BExpr
 perfectInterval a b  = compileSetConstraint (inSet perInts  ((a - b) mod 12))

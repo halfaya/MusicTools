@@ -73,10 +73,10 @@ ppMBooleanConstraint : Dict → MBooleanConstraint → String
 ppMBooleanConstraint d (andConstraint a b) = ppParen (ppMConstraint d a) ++s " and " ++s ppParen (ppMConstraint d b)
 ppMBooleanConstraint d (orConstraint  a b) = ppParen (ppMConstraint d a) ++s " or "  ++s ppParen (ppMConstraint d b)
 ppMBooleanConstraint d (notConstraint a)   = "not " ++s ppParen (ppMConstraint d a)
--}
 
 ppMMelodyConstraint : Dict → MMelodyConstraint → String
 ppMMelodyConstraint d (passingTone (a , b , c)) = "passing tone " ++s (ppSInt d (a , b)) ++s " " ++s (ppSInt d (b , c))
+-}
 
 ppConstraint : Constraint → String
 ppConstraint (setConstraint x)     = "set constraint"
@@ -89,6 +89,6 @@ ppMConstraint _ (scaleConstraint    x) = ppMScaleConstraint x
 ppMConstraint d (intervalConstraint x) = ppMIntervalConstraint d x
 ppMConstraint d (motionConstraint   x) = ppMMotionConstraint d x
 --ppMConstraint d (booleanConstraint  x) = ppMBooleanConstraint d x
-ppMConstraint d (melodyConstraint  x)  = ppMMelodyConstraint d x
+--ppMConstraint d (melodyConstraint  x)  = ppMMelodyConstraint d x
 ppMConstraint _ (constraint         x) = ppConstraint x
 

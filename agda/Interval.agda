@@ -191,7 +191,7 @@ stepDown p q with pitchPairToOpi (q , p)
 -- The interval between end points need to be a 3rd
 isPassingTone : Pitch → Pitch → Pitch → Bool
 isPassingTone p q r =
-  (stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r) ∨
+  ((stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)) ∧
   (isThird (absoluteInterval (pitchPairToOpi (p , r))))
 
 moveUp : Pitch → Pitch → Bool
@@ -212,6 +212,11 @@ transposePitchInterval z p = transposePitch z p
 -- transpose pitch class by pci
 Tpci : PCI → PC → PC
 Tpci n = Tp (toℕ n)
+
+steps perInts perInts4 : List Opi
+steps    = map +_ (min2 ∷ maj2 ∷ [])
+perInts  = map +_ (per1 ∷ per5 ∷ per8 ∷ []) -- perfect union, fifth, octave only
+perInts4 = perInts ++ map +_ (per4 ∷ [])    -- inclues 4th also
 
 ----------
 

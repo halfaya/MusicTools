@@ -16,9 +16,16 @@ postulate
 
 -- You must add the full path to the compiled HMusicTools to ~/.agda/executables to run these macros.
 macro
-  readFile : String → Term → TC ⊤ -- returns the contents of the file as a String
-  readFile file hole = do
+  -- returns the contents of a MusicXML file as serialized music
+  readXML : String → Term → TC ⊤
+  readXML file hole = do
     (exitCode , (stdOut , stdErr)) ← execTC "HMusicTools" ("readXML" ∷ file ∷ []) ""
+    unify hole (lit (string stdOut))
+
+  -- converts serialized music (list of voices) to MusicXML and writes the result to a file
+  writeXML : String → List String → Term → TC ⊤
+  writeXML file voices hole = do
+    (exitCode , (stdOut , stdErr)) ← execTC "HMusicTools" ("writeXML" ∷ file ∷ voices) ""
     unify hole (lit (string stdOut))
 
   -- vars is a list of variable names

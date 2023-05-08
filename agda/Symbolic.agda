@@ -39,7 +39,7 @@ data Acc : Type where
 showAcc : Acc → String
 showAcc 𝄫 = "𝄫"
 showAcc ♭ = "♭"
-showAcc ♮ = ""
+showAcc ♮ = "♮"
 showAcc ♯ = "♯"
 showAcc 𝄪 = "𝄪"
 
@@ -295,17 +295,19 @@ chromaticScale = C♮ ∷ C♯ ∷ D♮ ∷ E♭ ∷ E♮ ∷ F♮ ∷ F♯ ∷ 
 toScale : {n : ℕ} → Vec NoteName n → Scale n
 toScale = vmap noteName→PC
 
-pitch→np : Pitch → SPitch
-pitch→np n =
+pitch→sp : Pitch → SPitch
+pitch→sp n =
   let (p , o) = absoluteToRelative n
   in sp (lookup chromaticScale p) o
 
--- Map unknown pitches to C♮0 for now.
-mp→np : Dict → MPitch → SPitch
-mp→np d (!! n) = n
-mp→np d (?? s) with lookupE d s
-... | +_ p     = pitch→np p
-... | -[1+_] _ = pitch→np 0
+-- replace unknown pitches whose variable names are in the given dictionary
+-- with the pitch in that dictionary
+lookupPitch : Dict → MPitch → MPitch
+lookupPitch d (!! n) = !! n
+lookupPitch d (?? s) with lookupM d s
+... | just (+_ p)     = !! (pitch→sp p)
+... | just (-[1+_] _) = !! (sp C♮ 0) -- convert negative pitches to 0
+... | nothing         = ?? s         -- not found, so leave as is
 
 -- Pairs and pairs of pairs of MPitch
 MP MPMP LP LPLP [M] [[M]] [L] [[L]] : Type

@@ -21,19 +21,28 @@ open import Variable
 
 open import Util
 
-fileName : String
-fileName = "/Users/leo/Music/XML/Test 1.xml"
+inFile : String
+inFile = "/Users/leo/Music/XML/Test1.xml"
+
+outFile : String
+outFile = "/Users/leo/Music/XML/Test1out.xml"
 
 t1 : String
-t1 = readFile fileName
+t1 = readXML inFile
 
+t1n : List (List SNote)
 t1n = parseMusic t1
-t1p = ppList (ppList showSNote) t1n
+
+t1p : String
+t1p = ppList (ppList showSNote) t1n  -- pretty-printed input
+
+t1m : List (List MPitch)
 t1m = map (map SNote.pit) t1n
 
 test : List (Ranged MConstraint)
 test = firstSpeciesConstraints (key C major) (indexVoiceBeat t1m)
 
+-- pretty-printed constraints
 test1 : List String
 test1 = map (showRanged (ppMConstraint [])) test
 
@@ -49,24 +58,52 @@ test3 = filter (not ∘ evalB [] ∘ compileConstraint ∘ mc→c ∘ unrange) t
 test4 : List String
 test4 = map (showRanged (ppMConstraint [])) test3
 
+-- pretty-printed constraints failing first-species rules
 test5 : List String
 test5 = map (showVBBRanged 2 (ppMConstraint [])) test3
 
-test6 : List (List (Located MPitch))
-test6 = makeVars (rectangle (location 2 2) (location 4 11))
-                 (indexVoiceBeat beethoven146)
-
 ---
 
-range   = rectangle (location 2 2) (location 4 11)
-source  = makeVars range (indexVoiceBeat (take 3 beethoven146))
-vars    = varNames (map (map unlocate) source)
-cons    = map (compileConstraint ∘ mc→c ∘ unrange) (defaultConstraints source)
+range : Range
+range = rectangle (location 2 2) (location 4 15)
 
+source : List (List (Located MPitch))
+source = makeVars range (indexVoiceBeat t1m)
+
+vars : List String
+vars = varNames (map (map unlocate) source)
+
+constr : List BExpr
+constr = map (compileConstraint ∘ mc→c ∘ unrange) (firstSpeciesConstraints (key C major) source)
+
+x1 : String
 x1 = intersperse "\n" vars
-x2 = map bserial cons
 
-b1 = solve vars cons
-b2 = instantiatePitchesL (makeDict vars b1) source
-b3 = map (intersperse " " ∘ map showSPitch) b2
+x2 : List String
+x2 = map bserial constr
 
+-- SMT solution for missing pitches
+x3 : String
+x3 = solve vars constr
+
+-- solution instantiated into list of all pitches
+out : List (List MPitch)
+out = instantiatePitchesL (makeDict vars x3) source
+
+outC : List (Ranged MConstraint)
+outC = firstSpeciesConstraints (key C major) (indexVoiceBeat out)
+
+-- failed constraints of solution (none)
+outF : List (Ranged MConstraint)
+outF = filter (not ∘ evalB [] ∘ compileConstraint ∘ mc→c ∘ unrange) outC
+
+-- convert to notes
+outN : List (List SNote)
+outN = map (map λ p → sn p 8) out
+
+-- list of voices as serialized strings
+outS : List String
+outS = map (intersperse " " ∘ map showSNote) outN
+
+--outW : String
+--outW = writeXML outFile outS

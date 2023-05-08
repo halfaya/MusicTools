@@ -23,6 +23,10 @@ lookup : Dict → String → ℤ
 lookup []             s = + 0
 lookup ((x , n) ∷ xs) s = i x ==s s t n e lookup xs s
 
+lookupM : Dict → String → Maybe ℤ
+lookupM []             s = nothing
+lookupM ((x , n) ∷ xs) s = i x ==s s t (just n) e lookupM xs s
+
 data BExpr : Type
 evalB : Dict → BExpr → Bool
 

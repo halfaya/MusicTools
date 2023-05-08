@@ -7,7 +7,6 @@
 
 module Xml where
 
-import Data.Char (digitToInt)
 import Data.List (transpose, intercalate, intersperse, groupBy)
 import Data.List.Split (splitOn, chunksOf)
 import Text.XML.Light
@@ -64,8 +63,8 @@ type MNum     = String
 
 data Pitch = Pitch {
   pStep   :: Step,
-  pOctave :: Octave,
-  pAlter  :: Alter }
+  pAlter  :: Alter,
+  pOctave :: Octave }
   deriving Show
   
 data Note = Note {
@@ -92,19 +91,18 @@ readAlter "♯" = "1"
 readAlter s   = s
 
 pitch :: Element -> Pitch
-pitch e = Pitch (cval "step" e) (cval "octave" e) (cvald "0" "alter" e)
+pitch e = Pitch (cval "step" e) (cvald "0" "alter" e) (cval "octave" e) 
 
 xpitch :: Pitch -> Element
 xpitch Pitch{..} = unode "pitch" [unode "step" pStep,
-                                  unode "octave" pOctave,
-                                  unode "alter" pAlter]
+                                  unode "alter" pAlter,
+                                  unode "octave" pOctave]
 
 showPitch :: Pitch -> String
 showPitch Pitch{..} = pStep ++ showAlter pAlter ++ pOctave
 
 parsePitch :: String -> Pitch
-parsePitch (s : o : [])     = Pitch (s : []) (o : []) "0"
-parsePitch (s : a : o : []) = Pitch (s : []) (o : []) (a : [])
+parsePitch (s : a : o : []) = Pitch (s : []) (readAlter (a : [])) (o : [])
 
 note :: Element -> Note
 note e = Note (cval "voice" e) (read (cval "duration" e)) (pitch (childX "pitch" e))
@@ -128,8 +126,7 @@ showNote :: Note -> String
 showNote (Note _ d p) = showPitch p ++ show d
 
 parseNote :: Voice -> String -> Note
-parseNote v (s : o : d : [])     = Note v (digitToInt d) (Pitch (s : []) (o : []) "0")
-parseNote v (s : a : o : d : []) = Note v (digitToInt d) (Pitch (s : []) (o : []) (a : []))
+parseNote v (s : a : o : d) = Note v (read d) (parsePitch (s : a : o : []))
 
 -- List of space-separated notes.
 parseNotesV :: Voice -> String -> [Note]
@@ -217,18 +214,3 @@ header =
 
 ppScore :: Element -> String
 ppScore e = header ++ ppElement e
-
------
-
-test =
-  "C58 E58 G58 F58 E58 C58 A58 F58 G58 E58 D58 C58" :
-  "G48 C58 B48 A48 C58 A48 F48 A48 E58 G48 G48 G48" :
-  "E48 E48 E48 F48 G38 C48 A38 F48 E48 E48 B38 C48" : []
-
-test1 = parseNotes test
-test2 = deorg 2 test1
-test3 = measuresToXml test2
-
-test4 = ppScore test3
-test5 = xmlToMeasures test4
-test6 = showMeasures test5

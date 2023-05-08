@@ -10,18 +10,18 @@ open import Pitch    using (Pitch)
 open import Symbolic
 
 -- Change pitches in the given range to be a varible, named by its location.
-makeVar : Range → Located SPitch → Located MPitch
+makeVar : Range → Located MPitch → Located MPitch
 makeVar r (located l x) =
   if l ∈range r
   then located l (?? (showLocation l))
-  else located l (!! x)
+  else located l x
 
 -- Change all pitches in the given range to be varibles, named by their location.
-makeVars1 : Range → List (Located SPitch) → [L]
+makeVars1 : Range → List (Located MPitch) → [L]
 makeVars1 r xs = map (makeVar r) xs
 
--- Change all pitches in the given range to be varibles, named by their location.
-makeVars : Range → List (List (Located SPitch)) → [[L]]
+-- Change all pitches in the given range to be variables, named by their location.
+makeVars : Range → List (List (Located MPitch)) → [[L]]
 makeVars r xss = map (makeVars1 r) xss
 
 varNames1 : [M] → List String
@@ -38,11 +38,11 @@ varNames2 ((a , b) ∷ xs) = varNames1 (a ∷ []) ++ varNames1 (b ∷ []) ++ var
 
 --------
 
-instantiatePitches : Dict → [[M]] → List (List SPitch)
-instantiatePitches d = map (map (mp→np d))
+instantiatePitches : Dict → [[M]] → [[M]]
+instantiatePitches d = map (map (lookupPitch d))
 
-instantiatePitchesL : Dict → [[L]] → List (List SPitch)
-instantiatePitchesL d = map (map (mp→np d ∘ unlocate))
+instantiatePitchesL : Dict → [[L]] → [[M]]
+instantiatePitchesL d = map (map (lookupPitch d ∘ unlocate))
 
 --------
 

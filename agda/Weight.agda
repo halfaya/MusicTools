@@ -1,15 +1,17 @@
-{-# OPTIONS --without-K --safe #-}
+{-# OPTIONS --without-K --allow-exec #-}
 
 module Weight where
 
-open import Prelude
+open import Prelude hiding (#_)
 
-open import Data.Integer renaming (_≤ᵇ_ to _≤ℤ_)
+open import Data.Integer using () renaming (_≤ᵇ_ to _≤ℤ_)
+open import Data.Nat  using (_>_)
 open import Relation.Binary.PropositionalEquality using (_≡_; refl)
 
 open import Constraint
 open import Counterpoint
-open import Expr using (evalB)
+open import Exec using (solve)
+open import Expr using (evalB; BExpr; IExpr; #_; true) renaming (if_then_else_ to ite)
 open import Location
 open import MConstraint
 open import Music
@@ -18,6 +20,7 @@ open import Pitch
 open import PrettyPrint
 open import Symbolic hiding (C; D; E; F; G; A; B)
 open import Util using (pairs; filter)
+open import Variable
 
 -----------------------------------------------------------
 -- Implementation of the functionality of
@@ -46,7 +49,7 @@ totalWeight : List (Weighted MConstraint) → Weight
 totalWeight = foldl (λ w c → w +ℤ (calcWeight c)) (+ 0)
 
 -∞ : Weight
--∞ = -[1+ 99 ]
+-∞ = -[1+ 9999 ]
 
 chromaticWeight imperfectWeight contraryWeight repeatedWeight : Weight
 chromaticWeight = -[1+ 39 ]
@@ -64,7 +67,8 @@ fsConstraintsVoice k v =
 -- Expects higher voice first in each pair.
 fsConstraints2 : List MP → List (Weighted MConstraint)
 fsConstraints2 mp =
-  map (weighted -∞ ∘ intervalConstraint ∘  intervalType firstSpeciesIntervals) mp ++
+  map (weighted -∞ ∘ intervalConstraint ∘ intervalType firstSpeciesIntervals) mp ++
+  map (weighted -∞ ∘ intervalConstraint ∘ maxInterval (Int 12)) mp ++
   map (weighted imperfectWeight ∘ intervalConstraint ∘  intervalType imperfectIntervals) mp ++
   map (weighted -∞ ∘ MConstraint.motionConstraint ∘ notDirectIntoPerfect) (pairs mp) ++
   map (weighted contraryWeight ∘ MConstraint.motionConstraint ∘ contrary) (pairs mp)
@@ -75,8 +79,8 @@ fsConstraints k xss =
       pairConstraints  = concat (map fsConstraints2 (allPairsPairs xss))
   in voiceConstraints ++ pairConstraints
 
-data HasWeight (f : [[M]] → List (Weighted MConstraint)) (xss : [[M]]) (w : Weight) : Type where
-  hasWeight : totalWeight (f xss) ≡ w → HasWeight f xss w
+data HasWeight (f : [[M]] → List (Weighted MConstraint)) (w : Weight) : [[M]] → Type where
+  hasWeight : (xss : [[M]]) → totalWeight (f xss) ≡ w → HasWeight f w xss
 
 --------------------------------------------------
 
@@ -128,15 +132,74 @@ f1w = totalWeight f1c
 f2w = totalWeight f2c
 f3w = totalWeight f3c
 
-f1w=270 : HasWeight (fsConstraints Cmaj) f1 (+ 270)
-f1w=270 = hasWeight refl
+-- Refinement types are Σ types
 
--- fix the contraints
-W : [[M]] → Weight → Type
-W = HasWeight (fsConstraints Cmaj)
+{-
+f1w=270 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 270))
+f1w=270 = f1 , hasWeight f1 refl
 
-f2w=-60 : W f2 (-[1+ 59 ])
-f2w=-60 = hasWeight refl
+f2w=-60 : Σ [[M]] (HasWeight (fsConstraints Cmaj) -[1+ 59 ])
+f2w=-60 = f2 , hasWeight f2 refl
 
-f1w=230 : W f3 (+ 230)
-f1w=230 = hasWeight refl
+f1w=230 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 230))
+f1w=230 = f3 , hasWeight f3 refl
+-}
+
+--------------------------------------------------
+
+-- Synthesis
+
+compileWeightedConstraint : Weighted MConstraint → IExpr
+compileWeightedConstraint (weighted w c) =
+  let cond = (compileConstraint ∘ mc→c) c
+  in if w ≤ℤ (+ 0)
+     then ite cond (# (+ 0)) (# w)
+     else ite cond (# w) (# (+ 0))
+
+compileWeightedConstraints : ℤ → List (Weighted MConstraint) → BExpr
+compileWeightedConstraints target cs =
+  let sum : IExpr
+      sum = foldl (λ m n → IExpr._+_ m (compileWeightedConstraint n)) (# (+ 0)) cs
+  in BExpr._≥_ sum (# target)
+
+figure1? : [[M]]
+figure1? =
+  (!! (C 5) ∷ ?? "?1"  ∷ ?? "?2"  ∷ ?? "?3"  ∷ !! (C 5) ∷ []) ∷
+  (!! (C 4) ∷ !! (E 4) ∷ !! (F 4) ∷ !! (D 4) ∷ !! (C 4) ∷ []) ∷  []
+
+vars : List String
+vars = varNames figure1?
+
+constr : ℤ → BExpr
+constr target = compileWeightedConstraints target (fsConstraints Cmaj figure1?)
+
+target : ℤ
+target = + 100
+
+-- SMT solution for missing pitches
+soln : String
+soln = solve vars (constr target ∷ [])
+
+-- solution instantiated into list of all pitches
+out : List (List MPitch)
+out = instantiatePitches (makeDict vars soln) figure1?
+
+-- pretty printed solution
+outp : List String
+outp = map (intersperse " " ∘ map showMPitch) out
+
+--------------------------------------------------
+
+-- Two definitions of ℤ⁺
+
+-- not a refinement type
+data Pos : Type where
+  one  : Pos
+  succ : Pos → Pos
+
+-- a refinement of ℕ
+ℕ⁺ : Type
+ℕ⁺ = Σ ℕ (_> 0)
+
+x1 : ℕ⁺
+x1 = 1 , s≤s z≤n

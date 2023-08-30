@@ -7,7 +7,7 @@ open import Prelude
 open import Expr hiding (_+_; #_; _mod_) renaming (lookup to lookupE)
 open import Note using (Duration)
 open import Pitch
-open import Interval
+open import Interval hiding (steps)
 open import Location
 
 data Letter : Type where
@@ -295,6 +295,9 @@ chromaticScale = C♮ ∷ C♯ ∷ D♮ ∷ E♭ ∷ E♮ ∷ F♮ ∷ F♯ ∷ 
 toScale : {n : ℕ} → Vec NoteName n → Scale n
 toScale = vmap noteName→PC
 
+steps : List SInt
+steps = Min2 ∷ Maj2 ∷ []
+
 pitch→sp : Pitch → SPitch
 pitch→sp n =
   let (p , o) = absoluteToRelative n
@@ -310,18 +313,18 @@ lookupPitch d (?? s) with lookupM d s
 ... | nothing         = ?? s         -- not found, so leave as is
 
 -- Pairs and pairs of pairs of MPitch
-MP MPMP LP LPLP [M] [[M]] [L] [[L]] : Type
+MP M3 MP2 MP3 LP LP2 LP3 [M] [[M]] [L] [[L]] : Type
 MP    = MPitch × MPitch
-MPMP  = MP × MP
+M3    = MPitch × MPitch × MPitch
+MP2   = MP × MP
+MP3   = MP × MP × MP
 LP    = Located MPitch × Located MPitch
-LPLP  = LP × LP
+LP2   = LP × LP
+LP3   = LP × LP × LP
 [M]   = List MPitch
 [[M]] = List [M]
 [L]   = List (Located MPitch)
 [[L]] = List [L]
-
--- Triplets of MPitch
-M3 = MPitch × MPitch × MPitch
 
 {-
 [n]→[p] : [N] → [P]
@@ -334,14 +337,14 @@ M3 = MPitch × MPitch × MPitch
 lp→mp : LP → MP
 lp→mp (located _ a , located _ b) = a , b
 
-lplp→mpmp : LPLP → MPMP
-lplp→mpmp (a , b) = lp→mp a , lp→mp b
+lp2→mp2 : LP2 → MP2
+lp2→mp2 (a , b) = lp→mp a , lp→mp b
 
 mp→p : MP → (IExpr × IExpr)
 mp→p (a , b) = name→iexpr a , name→iexpr b
 
-mpmp→pp : MPMP → PP
-mpmp→pp (a , b) = mp→p a , mp→p b
+mp2→pp : MP2 → PP
+mp2→pp (a , b) = mp→p a , mp→p b
 
 [l]→[m] : [L] → [M]
 [l]→[m] = map unlocate
@@ -354,5 +357,5 @@ lpRange : LP → Range
 lpRange (located l1 _ , located l2 _) = rectangle l1 l2
 
 -- Assumes higher voice is first; range starts with higher voice
-lplpRange : LPLP → Range
-lplpRange ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = rectangle l1 l4
+lp2Range : LP2 → Range
+lp2Range ((located l1 _ , located l2 _) , (located l3 _ , located l4 _)) = rectangle l1 l4

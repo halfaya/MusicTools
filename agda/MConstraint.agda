@@ -26,29 +26,29 @@ data Motion : Type where
   notDirectIntoPerfect  : Motion
 
 data MMotionConstraint : Type where
-  contrary              : MPMP → MMotionConstraint
-  oblique               : MPMP → MMotionConstraint
-  parallel              : MPMP → MMotionConstraint
-  similar               : MPMP → MMotionConstraint
-  direct                : MPMP → MMotionConstraint
-  notDirectIntoPerfect  : MPMP → MMotionConstraint
+  contrary              : MP2 → MMotionConstraint
+  oblique               : MP2 → MMotionConstraint
+  parallel              : MP2 → MMotionConstraint
+  similar               : MP2 → MMotionConstraint
+  direct                : MP2 → MMotionConstraint
+  notDirectIntoPerfect  : MP2 → MMotionConstraint
 
 mmc→mc : MMotionConstraint → MotionConstraint
-mmc→mc (contrary              x) = contrary              (mpmp→pp x)
-mmc→mc (oblique               x) = oblique               (mpmp→pp x)
-mmc→mc (parallel              x) = parallel              (mpmp→pp x)
-mmc→mc (similar               x) = similar               (mpmp→pp x)
-mmc→mc (direct                x) = direct                (mpmp→pp x)
-mmc→mc (notDirectIntoPerfect  x) = notDirectIntoPerfect  (mpmp→pp x)
+mmc→mc (contrary              x) = contrary              (mp2→pp x)
+mmc→mc (oblique               x) = oblique               (mp2→pp x)
+mmc→mc (parallel              x) = parallel              (mp2→pp x)
+mmc→mc (similar               x) = similar               (mp2→pp x)
+mmc→mc (direct                x) = direct                (mp2→pp x)
+mmc→mc (notDirectIntoPerfect  x) = notDirectIntoPerfect  (mp2→pp x)
 
 -- motion constraint indexed with range
-locMotionConstraint : Motion → LPLP → Ranged MMotionConstraint
-locMotionConstraint contrary              x = ranged (lplpRange x) (contrary              (lplp→mpmp x))
-locMotionConstraint oblique               x = ranged (lplpRange x) (oblique               (lplp→mpmp x))
-locMotionConstraint parallel              x = ranged (lplpRange x) (parallel              (lplp→mpmp x))
-locMotionConstraint similar               x = ranged (lplpRange x) (similar               (lplp→mpmp x))
-locMotionConstraint direct                x = ranged (lplpRange x) (direct                (lplp→mpmp x))
-locMotionConstraint notDirectIntoPerfect  x = ranged (lplpRange x) (notDirectIntoPerfect  (lplp→mpmp x))
+locMotionConstraint : Motion → LP2 → Ranged MMotionConstraint
+locMotionConstraint contrary              x = ranged (lp2Range x) (contrary              (lp2→mp2 x))
+locMotionConstraint oblique               x = ranged (lp2Range x) (oblique               (lp2→mp2 x))
+locMotionConstraint parallel              x = ranged (lp2Range x) (parallel              (lp2→mp2 x))
+locMotionConstraint similar               x = ranged (lp2Range x) (similar               (lp2→mp2 x))
+locMotionConstraint direct                x = ranged (lp2Range x) (direct                (lp2→mp2 x))
+locMotionConstraint notDirectIntoPerfect  x = ranged (lp2Range x) (notDirectIntoPerfect  (lp2→mp2 x))
 
 data MIntervalConstraint : Type where
   intervalType : List SInt → MP → MIntervalConstraint
@@ -76,43 +76,41 @@ msc→c (inScale k x) = inScaleConstraint (toScale (scale k)) (name→iexpr x)
 locScaleConstraint : Key → Located MPitch → Ranged MScaleConstraint
 locScaleConstraint k (located loc x) = ranged (point loc) (inScale k x)
 
-{-
-data MBooleanConstraint : Type where
-  andConstraint : MConstraint → MConstraint → MBooleanConstraint
-  orConstraint  : MConstraint → MConstraint → MBooleanConstraint
-  notConstraint : MConstraint →               MBooleanConstraint
-
-
-mbc→c : MBooleanConstraint → Constraint
-mbc→c (andConstraint a b) = booleanConstraint (andConstraint (mc→c a) (mc→c b))
-mbc→c (orConstraint  a b) = booleanConstraint (orConstraint  (mc→c a) (mc→c b))
-mbc→c (notConstraint a)   = booleanConstraint (notConstraint (mc→c a))
--}
-
-{-
 data MMelodyConstraint : Type where
   passingTone : M3 → MMelodyConstraint
 
 mmelc→c : MMelodyConstraint → Constraint
 mmelc→c (passingTone (a , b , c)) =
-  booleanConstraint (andConstraint (ic→c (intervalType steps (a , b)))
-                                   (ic→c (intervalType steps (b , c))))
--}                                   
+  booleanConstraint (orConstraint
+    (booleanConstraint (andConstraint (ic→c (intervalType steps (a , b)))
+                                      (ic→c (intervalType steps (b , c)))))
+    (booleanConstraint (andConstraint (ic→c (intervalType steps (c , b)))
+                                      (ic→c (intervalType steps (b , a))))))
+
+data MWeakBeatConstraint : Type where
+  -- first argument is false if counterpoint is in first voice; true if in second voice
+  consonantOrPassing : Bool → List SInt → MP3 → MWeakBeatConstraint
+
+mwbc→c : MWeakBeatConstraint → Constraint
+mwbc→c (consonantOrPassing false ints ((a , b) , (c , d) , e , f)) =
+  booleanConstraint (orConstraint (ic→c (intervalType ints (c , d)))
+                                  (mmelc→c (passingTone (a , c , e))))
+mwbc→c (consonantOrPassing true  ints ((a , b) , (c , d) , e , f)) =
+  booleanConstraint (orConstraint (ic→c (intervalType ints (c , d)))
+                                  (mmelc→c (passingTone (b , d , f))))
 
 data MConstraint : Type where
   scaleConstraint    : MScaleConstraint    → MConstraint
   intervalConstraint : MIntervalConstraint → MConstraint
   motionConstraint   : MMotionConstraint   → MConstraint
---  booleanConstraint  : MBooleanConstraint  → MConstraint
---  melodyConstraint   : MMelodyConstraint   → MConstraint
+  melodyConstraint   : MMelodyConstraint   → MConstraint
+  weakBeatConstraint : MWeakBeatConstraint → MConstraint
   constraint         : Constraint          → MConstraint -- allows embedding arbitary lower-level constraints
 
 mc→c : MConstraint → Constraint
 mc→c (scaleConstraint    x) = msc→c x
 mc→c (intervalConstraint x) = ic→c x
 mc→c (motionConstraint   x) = motionConstraint (mmc→mc x)
---mc→c (booleanConstraint  x) = mbc→c x
---mc→c (melodyConstraint   x) = mmelc→c x
+mc→c (melodyConstraint   x) = mmelc→c x
+mc→c (weakBeatConstraint x) = mwbc→c x
 mc→c (constraint         x) = x
-
-

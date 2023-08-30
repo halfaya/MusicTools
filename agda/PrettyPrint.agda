@@ -2,7 +2,7 @@
 
 module PrettyPrint where
 
-open import Prelude renaming (_-_ to _-ℤ_)
+open import Prelude renaming (_-_ to _-ℤ_; if_then_else_ to i_t_e_)
 
 open import Constraint
 open import MConstraint
@@ -37,8 +37,8 @@ ppPP : Dict → PP → String
 ppPP d ((a , b) , c , e) =
   ppInterval (evalI d a) (evalI d b) ++s " , " ++s ppInterval (evalI d c) (evalI d e)
 
-ppMPMP : Dict → MPMP → String
-ppMPMP d (a , b) =
+ppmp2 : Dict → MP2 → String
+ppmp2 d (a , b) =
   ppSInt d a ++s " , " ++s ppSInt d b
 
 ppMotionConstraint : Dict → MotionConstraint → String
@@ -50,12 +50,12 @@ ppMotionConstraint d (direct x)                = "Direct "                      
 ppMotionConstraint d (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppPP d x
 
 ppMMotionConstraint : Dict → MMotionConstraint → String
-ppMMotionConstraint d (contrary x)              = "Contrary "                        ++s ppMPMP d x
-ppMMotionConstraint d (oblique x)               = "Oblique "                         ++s ppMPMP d x
-ppMMotionConstraint d (parallel x)              = "Parallel "                        ++s ppMPMP d x
-ppMMotionConstraint d (similar x)               = "Similar "                         ++s ppMPMP d x
-ppMMotionConstraint d (direct x)                = "Direct "                          ++s ppMPMP d x
-ppMMotionConstraint d (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppMPMP d x
+ppMMotionConstraint d (contrary x)              = "Contrary "                        ++s ppmp2 d x
+ppMMotionConstraint d (oblique x)               = "Oblique "                         ++s ppmp2 d x
+ppMMotionConstraint d (parallel x)              = "Parallel "                        ++s ppmp2 d x
+ppMMotionConstraint d (similar x)               = "Similar "                         ++s ppmp2 d x
+ppMMotionConstraint d (direct x)                = "Direct "                          ++s ppmp2 d x
+ppMMotionConstraint d (notDirectIntoPerfect x)  = "NotDirectIntoPerfect "            ++s ppmp2 d x
 
 ppMIntervalConstraint : Dict → MIntervalConstraint → String
 ppMIntervalConstraint d (intervalType xs x) =
@@ -66,17 +66,14 @@ ppMIntervalConstraint d (maxInterval m x) =
 ppMScaleConstraint : MScaleConstraint → String
 ppMScaleConstraint (inScale k x) = "InScaleOfKey " ++s showKey k ++s " " ++s showMPitch x
 
-ppMConstraint : Dict → MConstraint → String
-
-{-
-ppMBooleanConstraint : Dict → MBooleanConstraint → String
-ppMBooleanConstraint d (andConstraint a b) = ppParen (ppMConstraint d a) ++s " and " ++s ppParen (ppMConstraint d b)
-ppMBooleanConstraint d (orConstraint  a b) = ppParen (ppMConstraint d a) ++s " or "  ++s ppParen (ppMConstraint d b)
-ppMBooleanConstraint d (notConstraint a)   = "not " ++s ppParen (ppMConstraint d a)
-
 ppMMelodyConstraint : Dict → MMelodyConstraint → String
 ppMMelodyConstraint d (passingTone (a , b , c)) = "passing tone " ++s (ppSInt d (a , b)) ++s " " ++s (ppSInt d (b , c))
--}
+
+ppMWeakBeatConstraint : Dict → MWeakBeatConstraint → String
+ppMWeakBeatConstraint dict (consonantOrPassing secondVoice ints ((a , b) , (c , d) , e , f)) =
+  "weak beat consanant or passing " ++s
+  (i secondVoice t "(second voice) " e "(first voice) ") ++s
+  (ppSInt dict (a , b)) ++s " " ++s (ppSInt dict (c , d)) ++s " " ++s (ppSInt dict (e , f))
 
 ppConstraint : Constraint → String
 ppConstraint (setConstraint x)     = "set constraint"
@@ -84,11 +81,10 @@ ppConstraint (motionConstraint x)  = "motion constraint"
 ppConstraint (numericConstraint x) = "numeric constraint"
 ppConstraint (booleanConstraint x) = "boolean constraint"
 
--- ppMConstraint : Dict → MConstraint → String
+ppMConstraint : Dict → MConstraint → String
 ppMConstraint _ (scaleConstraint    x) = ppMScaleConstraint x
 ppMConstraint d (intervalConstraint x) = ppMIntervalConstraint d x
 ppMConstraint d (motionConstraint   x) = ppMMotionConstraint d x
---ppMConstraint d (booleanConstraint  x) = ppMBooleanConstraint d x
---ppMConstraint d (melodyConstraint  x)  = ppMMelodyConstraint d x
+ppMConstraint d (melodyConstraint   x) = ppMMelodyConstraint d x
+ppMConstraint d (weakBeatConstraint x) = ppMWeakBeatConstraint d x
 ppMConstraint _ (constraint         x) = ppConstraint x
-

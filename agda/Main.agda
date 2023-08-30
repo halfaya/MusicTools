@@ -19,7 +19,7 @@ main = do
   let ticksPerBeat = 4 -- (1 = quarter notes; 4 = 16th notes)
       file         = "/Users/leo/Music/MusicTools/test.mid"
       range        = rectangle (location 2 2) (location 4 11)
-      source       = makeVars range (indexVoiceBeat (take 3 beethoven146))
+      source       = makeVars range (indexVoiceBeat (take 3 beethoven146m))
 --      range        = rectangle (location 1 2) (location 1 9)
 --      source       = makeVars range (indexVoiceBeat tanaka)
   song             ← solveToMidi half defaultConstraints source

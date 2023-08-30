@@ -49,7 +49,7 @@ totalWeight : List (Weighted MConstraint) → Weight
 totalWeight = foldl (λ w c → w +ℤ (calcWeight c)) (+ 0)
 
 -∞ : Weight
--∞ = -[1+ 9999 ]
+-∞ = -[1+ 99 ]
 
 chromaticWeight imperfectWeight contraryWeight repeatedWeight : Weight
 chromaticWeight = -[1+ 39 ]
@@ -134,7 +134,6 @@ f3w = totalWeight f3c
 
 -- Refinement types are Σ types
 
-{-
 f1w=270 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 270))
 f1w=270 = f1 , hasWeight f1 refl
 
@@ -143,7 +142,6 @@ f2w=-60 = f2 , hasWeight f2 refl
 
 f1w=230 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 230))
 f1w=230 = f3 , hasWeight f3 refl
--}
 
 --------------------------------------------------
 

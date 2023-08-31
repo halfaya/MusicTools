@@ -31,14 +31,25 @@ open import Variable
 Weight : Type
 Weight = ℤ
 
--- If weight > 0, it is assigned if the constraint is satified; otherwise 0 is assigned
--- If weight < 0, it is assigned if the constraint is not satified; otherwise 0 is assigned
 data Weighted (A : Type) : Type where
   weighted : Weight → A → Weighted A
+
+weight : {A : Type} → Weighted A → Weight
+weight (weighted w _) = w
 
 unweight : {A : Type} → Weighted A → A
 unweight (weighted _ x) = x
 
+foldWeight : {A : Type} → (Weighted A → Weight) → List (Weighted A) → Weight
+foldWeight f = foldl (λ w x → w +ℤ (f x)) (+ 0)
+
+sumWeight : {A : Type} → List (Weighted A) → Weight
+sumWeight = foldWeight weight
+
+-- Counterpoint example
+
+-- If weight > 0, it is assigned if the constraint is satified; otherwise 0 is assigned
+-- If weight < 0, it is assigned if the constraint is not satified; otherwise 0 is assigned
 calcWeight : Weighted MConstraint → Weight
 calcWeight (weighted n c) =
   if (evalB [] ∘ compileConstraint ∘ mc→c) c
@@ -46,7 +57,7 @@ calcWeight (weighted n c) =
     else (if n ≤ℤ + 0 then n else + 0)
 
 totalWeight : List (Weighted MConstraint) → Weight
-totalWeight = foldl (λ w c → w +ℤ (calcWeight c)) (+ 0)
+totalWeight = foldWeight calcWeight
 
 -∞ : Weight
 -∞ = -[1+ 99 ]
@@ -78,9 +89,6 @@ fsConstraints k xss =
   let voiceConstraints = concat (map (fsConstraintsVoice k) xss)
       pairConstraints  = concat (map fsConstraints2 (allPairsPairs xss))
   in voiceConstraints ++ pairConstraints
-
-data HasWeight (f : [[M]] → List (Weighted MConstraint)) (w : Weight) : [[M]] → Type where
-  hasWeight : (xss : [[M]]) → totalWeight (f xss) ≡ w → HasWeight f w xss
 
 --------------------------------------------------
 
@@ -134,6 +142,9 @@ f3w = totalWeight f3c
 
 -- Refinement types are Σ types
 
+data HasWeight (f : [[M]] → List (Weighted MConstraint)) (w : Weight) : [[M]] → Type where
+  hasWeight : (xss : [[M]]) → totalWeight (f xss) ≡ w → HasWeight f w xss
+
 f1w=270 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 270))
 f1w=270 = f1 , hasWeight f1 refl
 
@@ -142,6 +153,17 @@ f2w=-60 = f2 , hasWeight f2 refl
 
 f1w=230 : Σ [[M]] (HasWeight (fsConstraints Cmaj) (+ 230))
 f1w=230 = f3 , hasWeight f3 refl
+
+-- An alternative refinement type, probably better
+
+f1w=270' : Σ [[M]] (λ x → totalWeight ((fsConstraints Cmaj) x) ≡ (+ 270))
+f1w=270' = f1 , refl
+
+f2w=-60' : Σ [[M]] (λ x → totalWeight ((fsConstraints Cmaj) x) ≡ -[1+ 59 ])
+f2w=-60' = f2 , refl
+
+f2w=230' : Σ [[M]] (λ x → totalWeight ((fsConstraints Cmaj) x) ≡ (+ 230))
+f2w=230' = f3 , refl
 
 --------------------------------------------------
 

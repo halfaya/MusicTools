@@ -21,3 +21,7 @@ MAlonzo
 Main
 dist-newstyle
 newdist
+/build
+/lake-packages/*
+.lake
+

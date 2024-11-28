@@ -8,7 +8,7 @@ def add : ℕ → ℕ → ℕ
 
 theorem add_zero (m : Nat) : m + 0 = m := rfl
 
-theorem zero_add_bad (m : Nat) : 0 + m = m := rfl
+--theorem zero_add_bad (m : Nat) : 0 + m = m := rfl
 
 theorem zero_add (m : Nat) : 0 + m = m := by
   induction m with

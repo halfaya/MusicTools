@@ -2,9 +2,6 @@ abbrev Pitch  := Int
 abbrev Octave := Int
 def PC := {n : Int // 0 ≤ n ∧ n < 12}
 
-instance : Coe Pitch Int where
-  coe p := p
-
 def PCOctave : Type := PC × Octave
 
 def absoluteToRelative (p : Pitch) : PCOctave :=
@@ -36,3 +33,9 @@ theorem PCOctaveToPitchToPCOctave : (pco: PCOctave) →
   rw [Int.mul_ediv_cancel pco.snd (by simp)]
   rw [Int.ediv_eq_zero_of_lt pco.fst.property.1 pco.fst.property.2]
   simp
+
+instance : Coe Pitch PCOctave where
+  coe := absoluteToRelative
+
+def pitchClass : PCOctave → PC
+  | (p, _) => p

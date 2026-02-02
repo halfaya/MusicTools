@@ -14,5 +14,3 @@ theorem zero_add (m : Nat) : 0 + m = m := by
   induction m with
   | zero => rfl
   | succ m ih => rewrite [Nat.add_succ, ih]; rfl
-
-  #eval Lean.versionString

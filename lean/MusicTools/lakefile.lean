@@ -5,6 +5,8 @@ package «MusicTools» {
   -- add any package configuration options here
 }
 
+lean_lib «Xml»
+
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4.git"
 

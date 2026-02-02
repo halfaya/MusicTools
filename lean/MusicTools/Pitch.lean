@@ -11,11 +11,11 @@ def absoluteToRelative (p : Pitch) : PCOctave :=
    p / 12⟩
 
 def relativeToAbsolute : PCOctave → Pitch
-  | ⟨p , o⟩ => o * 12 + p.1
+| ⟨p , o⟩ => o * 12 + p.1
 
 theorem PitchToPCOctaveToPitch (p: Pitch) :
      relativeToAbsolute (absoluteToRelative p) = p :=
-   Int.ediv_add_emod' p 12
+   Int.ediv_mul_add_emod p 12
 
 theorem PCOctaveToPitchToPCOctave : (pco: PCOctave) →
     absoluteToRelative (relativeToAbsolute pco) = pco := by
@@ -26,7 +26,6 @@ theorem PCOctaveToPitchToPCOctave : (pco: PCOctave) →
   constructor
 
   apply Subtype.ext; simp
-  rw [Int.add_emod, Int.mul_emod_left]; simp
   rw [Int.emod_eq_of_lt pco.fst.property.1 pco.fst.property.2]
 
   rw [Int.add_ediv_of_dvd_left (Int.dvd_mul_left pco.snd 12)]
@@ -38,4 +37,4 @@ instance : Coe Pitch PCOctave where
   coe := absoluteToRelative
 
 def pitchClass : PCOctave → PC
-  | (p, _) => p
+| (p, _) => p

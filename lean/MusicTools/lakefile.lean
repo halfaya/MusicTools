@@ -5,6 +5,8 @@ package «MusicTools» {
   -- add any package configuration options here
 }
 
+lean_lib «Pitch»
+lean_lib «Interval»
 lean_lib «Xml»
 
 require mathlib from git

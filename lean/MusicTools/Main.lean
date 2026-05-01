@@ -1,6 +1,9 @@
-import Xml
+--import Xml
+--open Xml
 
 #eval Lean.versionString
+
+/-
 
 def fileStream (filename : System.FilePath) : IO (Option IO.FS.Stream) := do
   let fileExists ← filename.pathExists
@@ -30,3 +33,5 @@ def mymain : IO String := do
     | some s => discardHeader s >>= readString
 
 #eval (List.map measures ∘ children "part" ∘ parseXml) <$> mymain
+
+-/

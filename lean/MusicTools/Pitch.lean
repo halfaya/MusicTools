@@ -1,3 +1,5 @@
+namespace Pitch
+
 abbrev Pitch  := Int
 abbrev Octave := Int
 def PC := {n : Int // 0 ≤ n ∧ n < 12}

@@ -1,0 +1,284 @@
+import Pitch
+open Pitch
+
+namespace Interval
+
+-- Maximum number of interval classes (0 to 6).
+def ic7 : Nat := 7
+
+def PitchPair := {pp : Pitch × Pitch // pp.1 ≥ pp.2}
+
+def PCPair := PC × PC
+
+-- Unordered pitch interval
+-- Absolute distance in semitones between two pitches.
+abbrev Upi := Nat
+
+-- Ordered pitch interval
+-- Relative distance in semitones between two pitches.
+abbrev Opi := Int
+
+-- Interval Class
+-- Also known as unodered pitch-class interval (upci).
+def IC := {n : Int // 0 ≤ n ∧ n < ic7}
+
+-- (Ordered) pitch-class interval (also abbreviated opci)
+def PCI := {n : Int // 0 ≤ n ∧ n < 12}
+
+/-
+
+intervalWithinOctave : Upi → Upi
+intervalWithinOctave i = toℕ (i mod s12)
+
+absoluteInterval : Opi → Upi
+absoluteInterval i = ∣ i ∣
+
+opi : Pitch → Pitch → Opi
+opi p q = (+ q) - (+ p)
+
+upi : Pitch → Pitch → Upi
+upi p q = absoluteInterval (opi p q)
+
+makeSigned : Sign → Upi → Opi
+makeSigned Sign.- zero    = + 0
+makeSigned Sign.- (suc i) = -[1+ i ]
+makeSigned Sign.+ i       = + i
+
+-- Names for intervals
+per1  = 0
+min2  = 1
+maj2  = 2
+min3  = 3
+maj3  = 4
+per4  = 5
+aug4  = 6
+per5  = 7
+min6  = 8
+maj6  = 9
+min7  = 10
+maj7  = 11
+per8  = 12
+min9  = 13
+maj9  = 14
+min10 = 15
+maj10 = 16
+per11 = 17
+aug11 = 18
+per12 = 19
+min13 = 20
+maj13 = 21
+min14 = 22
+maj14 = 23
+per15 = 24
+
+showInterval : Upi → String
+showInterval zero = "per1"
+showInterval (suc zero) = "min2"
+showInterval (suc (suc zero)) = "maj2"
+showInterval (suc (suc (suc zero))) = "min3"
+showInterval (suc (suc (suc (suc zero)))) = "maj3"
+showInterval (suc (suc (suc (suc (suc zero))))) = "per4"
+showInterval (suc (suc (suc (suc (suc (suc zero)))))) = "aug4"
+showInterval (suc (suc (suc (suc (suc (suc (suc zero))))))) = "per5"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))) = "min6"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))) = "maj6"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))) = "min7"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))) = "maj7"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))) = "per8"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))) = "min9"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))) = "min10"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))) = "maj10"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))) = "per11"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))) = "aug11"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))) = "per12"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))) = "min13"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))) = "maj13"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))) = "min14"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero)))))))))))))))))))))) = "maj14"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc zero))))))))))))))))))))))) = "per15"
+showInterval (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc (suc n)))))))))))))))))))))))) = "interval " ++s showℕ (25 + n)
+
+isConsonant : Upi → Bool
+isConsonant iv =
+  (i == per1)  ∨
+  (i == min3)  ∨
+  (i == maj3)  ∨
+  (i == per5)  ∨
+  (i == min6)  ∨
+  (i == maj6)  ∨
+  (i == per8)
+  where i = intervalWithinOctave iv
+
+isDissonant : Upi → Bool
+isDissonant = not ∘ isConsonant
+
+isPerfect : Upi → Bool
+isPerfect iv =
+  (i == per1)  ∨
+  (i == per4)  ∨
+  (i == per5)  ∨
+  (i == per8)
+  where i = intervalWithinOctave iv
+
+isUnison : Upi → Bool
+isUnison i = i == per1
+
+isThird : Upi → Bool
+isThird i = (i == min3) ∨ (i == maj3)
+
+-- Half or whole step.
+isStep : Upi → Bool
+isStep i =
+  (i == min2)  ∨
+  (i == maj2)
+
+PitchInterval : Type
+PitchInterval = Pitch × Upi
+
+pitchIntervalToPitchPair : PitchInterval → PitchPair
+pitchIntervalToPitchPair (p , n) = (transposePitch (+ n)  p , p)
+
+secondPitch : PitchInterval → Pitch
+secondPitch = snd ∘ pitchIntervalToPitchPair
+
+pitchPairToOpi : PitchPair → Opi
+pitchPairToOpi (p , q) = (+ p) - (+ q)
+
+toIC : PCPair → IC
+toIC (p , q) =
+  let x = toℕ (∣ (+ (toℕ p)) - (+ (toℕ q)) ∣ mod s12)
+  in x ⊓ (s12 ∸ x) mod ic7
+
+toPCI : PCPair → PCI
+toPCI (p , q) =
+ (((+ (toℕ p)) - (+ (toℕ q))) %ℕ s12) mod s12
+
+-- Assumes p ≥ q
+toPitchInterval : PitchPair → PitchInterval
+toPitchInterval pq = snd pq , absoluteInterval (pitchPairToOpi pq)
+
+-- DEPRECATED? Note that the first and last pitches are compared in normal order, not circular order.
+◯pcIntervals : List PC → List PCI
+◯pcIntervals = map toPCI ∘ ◯pairs
+
+-- Note that the first and last pitches are compared in normal order, not circular order.
+pcIntervals : List PC → List PCI
+pcIntervals = map toPCI ∘ reverse ∘ firstPairs
+
+stepUp : Pitch → Pitch → Bool
+stepUp p q with pitchPairToOpi (q , p)
+... | +_     n = isStep n
+... | -[1+_] n = false
+
+stepDown : Pitch → Pitch → Bool
+stepDown p q with pitchPairToOpi (q , p)
+... | +_     n = false
+... | -[1+_] n = isStep n
+
+-- Check if q is a passing tone between p and r
+-- The interval between end points need to be a 3rd
+isPassingTone : Pitch → Pitch → Pitch → Bool
+isPassingTone p q r =
+  ((stepUp p q ∧ stepUp q r) ∨ (stepDown p q ∧ stepDown q r)) ∧
+  (isThird (absoluteInterval (pitchPairToOpi (p , r))))
+
+moveUp : Pitch → Pitch → Bool
+moveUp p q with pitchPairToOpi (q , p)
+... | +_     _ = true
+... | -[1+_] _ = false
+
+moveDown : Pitch → Pitch → Bool
+moveDown p q = not (moveUp p q)
+
+-- Check if q is left by step in the opposite direction from its approach
+isOppositeStep : Pitch → Pitch → Pitch → Bool
+isOppositeStep p q r = (moveUp p q ∧ stepDown q r) ∨ (moveDown p q ∧ stepUp q r)
+
+transposePitchInterval : Opi → Pitch → Pitch
+transposePitchInterval z p = transposePitch z p
+
+-- transpose pitch class by pci
+Tpci : PCI → PC → PC
+Tpci n = Tp (toℕ n)
+
+steps perInts perInts4 : List Opi
+steps    = map +_ (min2 ∷ maj2 ∷ [])
+perInts  = map +_ (per1 ∷ per5 ∷ per8 ∷ []) -- perfect union, fifth, octave only
+perInts4 = perInts ++ map +_ (per4 ∷ [])    -- inclues 4th also
+
+----------
+
+-- Interval Class Vector
+ICV : Type
+ICV = Vec ℕ ic7
+
+emptyICV : ICV
+emptyICV = 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ 0 ∷ []
+
+icVector : List PC → ICV
+icVector pcs =
+  foldl
+    (λ icv pc → updateAt (toIC pc) suc icv)
+    (updateAt (# 0) (λ _ → length pcs) emptyICV)
+    (allPairs pcs)
+
+----------
+
+--Construct matrix out of PC row
+matrix : List PC → List (List PC)
+matrix [] = []
+matrix pcs@(pc ∷ _) =
+  let r0 = map ((Tpci ∘ Ip) pc) pcs -- start first row at 0
+  in map (λ p → map ((Tpci ∘ Ip) p) r0) r0
+
+showMatrix : List (List PC) → String
+showMatrix m = intersperse "\n" (map showPCs m)
+
+{-
+rr : List PC
+rr = # 10 ∷ # 9 ∷ # 7 ∷ # 0 ∷ []
+rp = rr ++ map (Tp 4) rr ++ map (Tp 8) rr
+
+-- Belle's matrix
+aa = showMatrix (matrix rp)
+
+
+0 b 9 2 4 3 1 6 8 7 5 a
+1 0 a 3 5 4 2 7 9 8 6 b
+3 2 0 5 7 6 4 9 b a 8 1
+a 9 7 0 2 1 b 4 6 5 3 8
+8 7 5 a 0 b 9 2 4 3 1 6
+9 8 6 b 1 0 a 3 5 4 2 7
+b a 8 1 3 2 0 5 7 6 4 9
+6 5 3 8 a 9 7 0 2 1 b 4
+4 3 1 6 8 7 5 a 0 b 9 2
+5 4 2 7 9 8 6 b 1 0 a 3
+7 6 4 9 b a 8 1 3 2 0 5
+2 1 b 4 6 5 3 8 a 9 7 0
+
+
+rd : List PC
+rd2 = reverse (map (Tp 4) rr)
+rd3' = reverse (map (Tp 8) rr)
+rd3 = reverse (take 2 rd3') ++ reverse (drop 2 rd3')
+rd = rr ++ rd2 ++ rd3
+
+-- Dan's matrix
+ad = showMatrix (matrix rd)
+
+
+0 b 9 2 6 1 3 4 5 a 8 7
+1 0 a 3 7 2 4 5 6 b 9 8
+3 2 0 5 9 4 6 7 8 1 b a
+a 9 7 0 4 b 1 2 3 8 6 5
+6 5 3 8 0 7 9 a b 4 2 1
+b a 8 1 5 0 2 3 4 9 7 6
+9 8 6 b 3 a 0 1 2 7 5 4
+8 7 5 a 2 9 b 0 1 6 4 3
+7 6 4 9 1 8 a b 0 5 3 2
+2 1 b 4 8 3 5 6 7 0 a 9
+4 3 1 6 a 5 7 8 9 2 0 b
+5 4 2 7 b 6 8 9 a 3 1 0
+-}
+
+-/
